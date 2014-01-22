@@ -16,7 +16,12 @@ scrivepdftools.jar : Manifest.txt classes/PDFSeal.class assets/sealmarker.pdf as
 
 test : test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
-       test/seal-many-people.pdf
+       test/seal-many-people.pdf \
+       test/seal-images.pdf \
+       test/seal-images-preseal.pdf \
+       test/seal-fields.pdf \
+       test/seal-fields-preseal.pdf
+
 
 test/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
@@ -35,5 +40,26 @@ test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
         -e s!grayscale-8bit.png!`base64 -i test/grayscale-8bit.png`!g \
         -e s!jpeg-image.jpg!`base64 -i test/jpeg-image.jpg`!g \
           $< > $<.ext
+	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	open $@
+
+test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
+	sed -e s!16bit-gray-alpha.png!`base64 -i test/16bit-gray-alpha.png`!g \
+        -e s!grayscale-8bit.png!`base64 -i test/grayscale-8bit.png`!g \
+        -e s!jpeg-image.jpg!`base64 -i test/jpeg-image.jpg`!g \
+        -e 's!"preseal": false!"preseal": true!g' \
+        -e 's!"test/seal-images.pdf"!"test/seal-images-preseal.pdf"!g' \
+          $< > $<.ext
+	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	open $@
+
+test/seal-fields.pdf : test/seal-fields.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+	open $@
+
+test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
+	sed -e 's!"preseal": false!"preseal": true!g' \
+        -e 's!"test/seal-fields.pdf"!"test/seal-fields-preseal.pdf"!g' \
+         $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 	open $@
