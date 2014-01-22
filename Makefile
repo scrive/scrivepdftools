@@ -29,3 +29,11 @@ test/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftool
 test/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 	open $@
+
+test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
+	sed -e s!16bit-gray-alpha.png!`base64 -i test/16bit-gray-alpha.png`!g \
+        -e s!grayscale-8bit.png!`base64 -i test/grayscale-8bit.png`!g \
+        -e s!jpeg-image.jpg!`base64 -i test/jpeg-image.jpg`!g \
+          $< > $<.ext
+	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	open $@
