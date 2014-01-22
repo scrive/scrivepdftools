@@ -7,14 +7,14 @@ jar : scrivepdftools.jar
 
 classes/%.class : src/%.java
 	@-mkdir classes
-	javac -target 1.5 -cp $(CLASSPATH) $< -d classes
+	javac -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
-classes/PDFSeal.class : src/PDFSeal.java
-
-scrivepdftools.jar : Manifest.txt classes/PDFSeal.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
+scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
 
-test : test/seal-simplest.pdf \
+test : test-add-verification-pages test-find-texts
+
+test-add-verification-pages : test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
        test/seal-many-people.pdf \
        test/seal-images.pdf \
@@ -62,4 +62,10 @@ test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
         -e 's!"test/seal-fields.pdf"!"test/seal-fields-preseal.pdf"!g' \
          $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	open $@
+
+test-find-texts : test-find-texts.json.txt
+
+test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
+	java -jar scrivepdftools.jar find-texts $< > $@
 	open $@

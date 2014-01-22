@@ -1,0 +1,9 @@
+{ "input": "test/three-page-a4.pdf"
+, "matches": [ { "text": "Page 1", "index": 1, "pages": [1] }
+             , { "text": "Page 1", "index": 2, "pages": [1] }
+             , { "text": "Page", "index": 2, "pages": [1] }
+             , { "text": "Page", "index": 2, "pages": [1,2] }
+             , { "text": "Page", "index": 3, "pages": [1,2,3] }
+             , { "text": "", "index": 233, "pages": [1,2,3] }
+             ]
+}

@@ -197,7 +197,7 @@ class PdfPTableDrawFrameAroundTable implements PdfPTableEvent
                                         heights[0],
                                         widths[0][widths[0].length-1],
                                         heights[heights.length-1]);
-        frame.setBorderColor(PDFSeal.frameColor);
+        frame.setBorderColor(AddVerificationPages.frameColor);
         frame.setBorder(15);
         frame.setBorderWidth(1);
         lineCanvas.rectangle(frame);
@@ -205,7 +205,7 @@ class PdfPTableDrawFrameAroundTable implements PdfPTableEvent
 }
 
 
-class Base64DecodeException extends Exception
+class Base64DecodeException extends IOException
 {
 }
 
@@ -224,7 +224,7 @@ Sealing works like this:
 */
 
 
-public class PDFSeal {
+public class AddVerificationPages {
 
 
     /*
@@ -803,14 +803,23 @@ public class PDFSeal {
         stamper.close();
         reader.close();
     }
-    /**
-     * Manipulates a PDF file src with the file dest as result
-     * @param src the original PDF
-     * @param dest the resulting PDF
-     * @throws IOException
-     * @throws DocumentException
-     */
-    public static void manipulatePdf(SealSpec spec)
+
+    public static void execute(String specFile)
+        throws IOException, DocumentException, Base64DecodeException
+    {
+        SealSpec spec = SealSpec.loadFromFile(specFile);
+
+        /*
+          DumperOptions options = new DumperOptions();
+          Yaml yaml = new Yaml(options);
+          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+          System.out.println(yaml.dump(spec));
+        */
+        execute(spec);
+
+    }
+
+    public static void execute(SealSpec spec)
         throws IOException, DocumentException, Base64DecodeException
     {
         if( spec.preseal==null || !spec.preseal ) {
@@ -912,7 +921,7 @@ public class PDFSeal {
             if(baseFontHelvetica==null ) {
 
                 /* Investigate using FontFactory */
-                baseFontHelvetica = BaseFont.createFont( PDFSeal.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
+                baseFontHelvetica = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
                                                          BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
                 baseFontHelvetica.setSubset(true);
             }
@@ -933,37 +942,10 @@ public class PDFSeal {
         throws DocumentException, IOException
     {
         if( sealMarkerCached==null ) {
-            sealMarkerCached = new PdfReader(PDFSeal.class.getResource("assets/sealmarker.pdf"));
+            sealMarkerCached = new PdfReader(AddVerificationPages.class.getResource("assets/sealmarker.pdf"));
         }
         return sealMarkerCached;
     }
 
 
-    /**
-     * Main method.
-     *
-     * @param    args    single argument, json config to open
-     * @throws DocumentException
-     * @throws IOException
-     */
-    public static void main(String[] args)
-        throws IOException, DocumentException, Base64DecodeException
-    {
-        if( args.length!=2) {
-            System.err.println("Usage:");
-            System.err.println("    java -jar pdfseal.jar config.json");
-        }
-        else {
-            SealSpec spec = SealSpec.loadFromFile(args[1]);
-
-            /*
-            DumperOptions options = new DumperOptions();
-            Yaml yaml = new Yaml(options);
-            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-            System.out.println(yaml.dump(spec));
-            */
-
-            manipulatePdf(spec);
-        }
-    }
 }
