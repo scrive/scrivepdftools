@@ -1,0 +1,7 @@
+{ "input": "test/three-page-a4.pdf"
+, "rects": [ { "rect": [0,0,1,1], "page": 1 }
+           , { "rect": [0,0,1,1], "page": 2 }
+           , { "rect": [0,0,1,1], "page": 7 }
+           , { "rect": [0.4,0,4,0.6,0.6], "page": 1 }
+           ]
+}

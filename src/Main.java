@@ -19,6 +19,9 @@ class Main
             else if( args[0].equals("find-texts")) {
                 FindTexts.execute(args[1]);
             }
+            else if( args[0].equals("extract-texts")) {
+                ExtractTexts.execute(args[1]);
+            }
             else {
                 System.err.println("Uknown verb " + args[0]);
             }

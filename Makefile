@@ -9,7 +9,7 @@ classes/%.class : src/%.java
 	@-mkdir classes
 	javac -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
-scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
+scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class classes/ExtractTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
 
 test : test-add-verification-pages test-find-texts
@@ -68,4 +68,10 @@ test-find-texts : test-find-texts.json.txt
 
 test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
+	open $@
+
+test-extract-texts : test-extract-texts.json.txt
+
+test-extract-texts.json.txt : test/extract-texts.json scrivepdftools.jar
+	java -jar scrivepdftools.jar extract-texts $< > $@
 	open $@
