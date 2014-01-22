@@ -180,7 +180,6 @@ class MyRenderListener implements RenderListener
             if( !text.equals(" ") && !text.equals("\t") &&
                 !text.equals("\n")  && !text.equals("\r") &&
                 !text.equals("\u00A0")) {
-                System.out.println(text + " charcode " + text.codePointAt(0));
                 CharPos cp = new CharPos();
                 cp.c = text;
                 LineSegment line = tri.getBaseline();
@@ -306,7 +305,7 @@ public class FindTexts {
             if( match.pages!= null ) {
                 String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
                     replace("\r","").replace("\u00A0","");
-                System.out.println("Looking for '" + textNoSpaces + "'");
+
                 for (Integer i : match.pages) {
                     if( i>=1 && i<=charsForPages.size() && match.text!=null && !match.text.equals("")) {
                         MyRenderListener rl = charsForPages.get(i-1);
