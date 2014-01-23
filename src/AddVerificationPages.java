@@ -271,6 +271,9 @@ public class AddVerificationPages {
     {
         PdfStamper stamper = new PdfStamper(reader, os);
 
+        stamper.setFormFlattening(true);
+        stamper.setFreeTextFlattening(true);
+
         PdfReader sealMarker = getSealMarker();
         PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
