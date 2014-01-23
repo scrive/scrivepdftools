@@ -28,6 +28,12 @@ class Main
             System.err.println("Usage:");
             System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json");
             System.err.println("    java -jar scrivepdftools.jar find-texts config.json");
+            System.err.println("    java -jar scrivepdftools.jar extract-texts config.json");
+            System.err.println("");
+            System.err.println("scrivepdftools uses the following products:");
+            System.err.println("   iText by Bruno Lowagie, iText Group NV ");
+            System.err.println("   snakeyaml");
+
         }
         else {
             if( args[0].equals("add-verification-pages")) {
