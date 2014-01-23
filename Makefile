@@ -16,7 +16,7 @@ endif
 jar : scrivepdftools.jar
 
 classes/%.class : src/%.java
-	@-mkdir classes
+	if [ ! -d classes ]; then mkdir classes; fi
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
 scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class classes/ExtractTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
