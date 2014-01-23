@@ -2,6 +2,16 @@
 CLASSPATH1=itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar
 CLASSPATH=.:itextpdf-5.4.5.jar:$(CLASSPATH1)
 
+ifeq ($(OS),Windows_NT)
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        BASE64=base64 -w 0 -i
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        BASE64=base64 -b 0 -i
+    endif
+endif
 
 jar : scrivepdftools.jar
 
@@ -36,17 +46,17 @@ test/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
 	open $@
 
 test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
-	sed -e s!16bit-gray-alpha.png!`base64 -i test/16bit-gray-alpha.png`!g \
-        -e s!grayscale-8bit.png!`base64 -i test/grayscale-8bit.png`!g \
-        -e s!jpeg-image.jpg!`base64 -i test/jpeg-image.jpg`!g \
+	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
+        -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
+        -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 	open $@
 
 test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
-	sed -e s!16bit-gray-alpha.png!`base64 -i test/16bit-gray-alpha.png`!g \
-        -e s!grayscale-8bit.png!`base64 -i test/grayscale-8bit.png`!g \
-        -e s!jpeg-image.jpg!`base64 -i test/jpeg-image.jpg`!g \
+	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
+        -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
+        -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
         -e 's!"preseal": false!"preseal": true!g' \
         -e 's!"test/seal-images.pdf"!"test/seal-images-preseal.pdf"!g' \
           $< > $<.ext
