@@ -231,10 +231,13 @@ public class ExtractTexts {
     };
 
 
-    public static void execute(String specFile)
+    public static void execute(String specFile, String inputOverride)
         throws IOException, DocumentException
     {
         ExtractTextSpec spec = ExtractTextSpec.loadFromFile(specFile);
+        if( inputOverride!=null ) {
+            spec.input = inputOverride;
+        }
 
         /*
           DumperOptions options = new DumperOptions();

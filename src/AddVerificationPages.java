@@ -810,10 +810,13 @@ public class AddVerificationPages {
         reader.close();
     }
 
-    public static void execute(String specFile)
+    public static void execute(String specFile, String inputOverride)
         throws IOException, DocumentException, Base64DecodeException
     {
         SealSpec spec = SealSpec.loadFromFile(specFile);
+        if( inputOverride!=null ) {
+            spec.input = inputOverride;
+        }
 
         /*
           DumperOptions options = new DumperOptions();

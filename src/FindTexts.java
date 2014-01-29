@@ -266,10 +266,13 @@ class MyRepresenter extends Representer
 
 public class FindTexts {
 
-    public static void execute(String specFile)
+    public static void execute(String specFile, String inputOverride)
         throws IOException, DocumentException
     {
         FindTextSpec spec = FindTextSpec.loadFromFile(specFile);
+        if( inputOverride!=null ) {
+            spec.input = inputOverride;
+        }
 
         /*
           DumperOptions options = new DumperOptions();
