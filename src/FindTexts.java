@@ -343,6 +343,7 @@ public class FindTexts {
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
         options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN );
         options.setPrettyFlow(false);
+        options.setWidth(Integer.MAX_VALUE);
         //Yaml yaml = new Yaml(options);
         Representer representer = new MyRepresenter();
         representer.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);

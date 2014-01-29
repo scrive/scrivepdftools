@@ -76,6 +76,9 @@ class Rect
 
     // result output mode
     public ArrayList<String> lines;
+
+    // neither input nor output but has to be here to not annoy snakeyaml
+    public ArrayList<String> expected;
 };
 
 class ExtractTextSpec
@@ -196,7 +199,8 @@ class ExtractTextsRenderListener implements RenderListener
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
             if( cp.x>=l && cp.x<=r &&
-                cp.y>=b && cp.y>=t ) {
+                cp.y>=b && cp.y>=t &&
+                cp.c.codePointAt(0)>=32 ) {
                 foundText = foundText + cp.c;
             }
         }
@@ -292,6 +296,7 @@ public class ExtractTexts {
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
         options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN );
         options.setPrettyFlow(false);
+        options.setWidth(Integer.MAX_VALUE);
         //Yaml yaml = new Yaml(options);
         Representer representer = new MyRepresenter();
         representer.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
