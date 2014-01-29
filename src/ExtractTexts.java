@@ -126,7 +126,7 @@ class ExtractTextsRenderListener implements RenderListener
      * than index. It should be substracted from index and used on the
      * next page as limit.
      */
-    public String foundText;
+    public ArrayList<String> foundText;
 
     public class CharPos {
         /*
@@ -193,15 +193,21 @@ class ExtractTextsRenderListener implements RenderListener
 
     public void find(double l, double b, double r, double t) {
 
-        foundText = "";
+        foundText = new ArrayList<String>();
 
         int i;
+        CharPos last = null;
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
             if( cp.x>=l && cp.x<=r &&
                 cp.y>=b && cp.y>=t &&
                 cp.c.codePointAt(0)>=32 ) {
-                foundText = foundText + cp.c;
+                if( last==null || last.y != cp.y ) {
+                    foundText.add("");
+                }
+                int idx = foundText.size()-1;
+                foundText.set(idx, foundText.get(idx)+cp.c);
+                last = cp;
             }
         }
     }
@@ -285,8 +291,7 @@ public class ExtractTexts {
                 double r = rect.rect.get(2)*crop.getWidth();
                 double t = rect.rect.get(3)*crop.getHeight();
                 rl.find(l,b,t,r);
-                rect.lines = new ArrayList<String>();
-                rect.lines.add(rl.foundText);
+                rect.lines = rl.foundText;
             }
         }
 
