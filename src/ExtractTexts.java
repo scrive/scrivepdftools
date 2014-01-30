@@ -84,6 +84,7 @@ class Rect
 class ExtractTextSpec
 {
     public String input;
+    public Boolean yamlOutput;
     public ArrayList<Rect> rects;
 
 
@@ -302,7 +303,14 @@ public class ExtractTexts {
         reader.close();
 
         DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
+            // output in yaml mode, useful for testing
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        }
+        else {
+            // output in json mode
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        }
         options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN );
         options.setPrettyFlow(false);
         options.setWidth(Integer.MAX_VALUE);

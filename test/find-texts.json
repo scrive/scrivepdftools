@@ -1,4 +1,5 @@
 { "input": "test/three-page-a4.pdf"
+, "yamlOutput": true
 , "matches": [ { "text": "Page 1", "index": 1, "pages": [1] }
              , { "text": "Page 1", "index": 2, "pages": [1] }
              , { "text": "Page", "index": 2, "pages": [1] }

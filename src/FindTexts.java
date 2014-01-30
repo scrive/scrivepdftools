@@ -84,6 +84,7 @@ class Match
 class FindTextSpec
 {
     public String input;
+    public Boolean yamlOutput;
     public ArrayList<Match> matches;
 
 
@@ -340,7 +341,14 @@ public class FindTexts {
         reader.close();
 
         DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
+            // output in yaml mode, useful for testing
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        }
+        else {
+            // output in json mode
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        }
         options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN );
         options.setPrettyFlow(false);
         options.setWidth(Integer.MAX_VALUE);
@@ -355,7 +363,10 @@ public class FindTexts {
         // that I have no idea how to suppress.  I'm going to remove
         // it now.
 
-        json = json.substring(json.indexOf("{"));
+        int k = json.indexOf("{");
+        if( k>0 ) {
+            json = json.substring(k);
+        }
 
         // We need to force utf-8 encoding here.
         PrintStream out = new PrintStream(System.out, true, "utf-8");
