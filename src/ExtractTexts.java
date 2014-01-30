@@ -296,7 +296,15 @@ public class ExtractTexts {
                 double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
                 double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
                 rl.find(l,b,r,t);
-                rect.lines = rl.foundText;
+                rect.lines = new ArrayList<String>();
+                for( String line : rl.foundText ) {
+                    line = line.replaceAll("\\A[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+","");
+                    line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]\\z","");
+                    line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+"," ");
+                    if( !line.equals("")) {
+                        rect.lines.add(line);
+                    }
+                }
             }
         }
 
