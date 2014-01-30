@@ -191,6 +191,10 @@ class ExtractTextsRenderListener implements RenderListener
         }
     }
 
+    /*
+     * Params l, b, r, t are in PDF points coordinates. Those take
+     * into account that crop box does not have to begin in 0,0.
+     */
     public void find(double l, double b, double r, double t) {
 
         foundText = new ArrayList<String>();
@@ -200,7 +204,7 @@ class ExtractTextsRenderListener implements RenderListener
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
             if( cp.x>=l && cp.x<=r &&
-                cp.y>=b && cp.y>=t &&
+                cp.y>=b && cp.y<=t &&
                 cp.c.codePointAt(0)>=32 ) {
                 if( last==null || last.y != cp.y ) {
                     foundText.add("");
@@ -286,11 +290,11 @@ public class ExtractTexts {
             if( rect.page>=1 && rect.page<=charsForPages.size()) {
                 ExtractTextsRenderListener rl = charsForPages.get(rect.page-1);
                 Rectangle crop = reader.getPageSizeWithRotation(rect.page);
-                double l = rect.rect.get(0)*crop.getWidth();
-                double b = rect.rect.get(1)*crop.getHeight();
-                double r = rect.rect.get(2)*crop.getWidth();
-                double t = rect.rect.get(3)*crop.getHeight();
-                rl.find(l,b,t,r);
+                double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
+                double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
+                double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
+                double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
+                rl.find(l,b,r,t);
                 rect.lines = rl.foundText;
             }
         }
@@ -313,7 +317,10 @@ public class ExtractTexts {
         // that I have no idea how to suppress.  I'm going to remove
         // it now.
 
-        json = json.substring(json.indexOf("{"));
+        int k = json.indexOf("{");
+        if( k>0 ) {
+            json = json.substring(k);
+        }
 
         // We need to force utf-8 encoding here.
         PrintStream out = new PrintStream(System.out, true, "utf-8");

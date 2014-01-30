@@ -22,7 +22,7 @@ classes/%.class : src/%.java
 scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class classes/ExtractTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
 
-test : test-add-verification-pages test-find-texts
+test : test-add-verification-pages test-find-texts test-extract-texts
 
 test-add-verification-pages : test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
@@ -74,7 +74,7 @@ test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 	open $@
 
-test-find-texts : test-find-texts.json.txt
+test-find-texts : test-find-texts.json.txt test-extract-test-document.json.txt
 
 test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
@@ -83,5 +83,9 @@ test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
 test-extract-texts : test-extract-texts.json.txt
 
 test-extract-texts.json.txt : test/extract-texts.json scrivepdftools.jar
+	java -jar scrivepdftools.jar extract-texts $< > $@
+	open $@
+
+test-extract-test-document.json.txt : test/extract-test-document.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
 	open $@
