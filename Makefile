@@ -74,13 +74,13 @@ test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 	open $@
 
-test-find-texts : test-find-texts.json.txt test-extract-test-document.json.txt
+test-find-texts : test-find-texts.json.txt
 
 test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
 	open $@
 
-test-extract-texts : test-extract-texts.json.txt
+test-extract-texts : test-extract-texts.json.txt test-extract-test-document.json.txt
 
 test-extract-texts.json.txt : test/extract-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
