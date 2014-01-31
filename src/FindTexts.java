@@ -86,6 +86,7 @@ class FindTextSpec
     public String input;
     public Boolean yamlOutput;
     public ArrayList<Match> matches;
+    public String stampedOutput;
 
 
     /*
@@ -137,6 +138,9 @@ class MyRenderListener implements RenderListener
     public CharPos foundText;
     public int foundTextCount;
 
+    private PdfStamper stamper;
+    private int page;
+
     public class CharPos {
         /*
          * This is Unicode code point as used by java.String, so it
@@ -162,8 +166,10 @@ class MyRenderListener implements RenderListener
 
     public ArrayList<CharPos> allCharacters;
 
-    MyRenderListener()
+    MyRenderListener(PdfStamper stamper, int page)
     {
+        this.stamper = stamper;
+        this.page = page;
         allCharacters = new ArrayList<CharPos>();
     }
     public void beginTextBlock() {
@@ -179,7 +185,7 @@ class MyRenderListener implements RenderListener
         for( TextRenderInfo tri: individualCharacters ) {
             String text = tri.getText();
             /*
-             * We deliberatelly ignore spaces are those are not
+             * We deliberatelly ignore spaces as those are not
              * reliable in PDFs.
              */
             if( !text.equals(" ") && !text.equals("\t") &&
@@ -203,6 +209,31 @@ class MyRenderListener implements RenderListener
                 cp.ey = p.get(Vector.I2);
 
                 allCharacters.add(cp);
+
+                if( stamper!=null ) {
+                    PdfContentByte canvas = stamper.getOverContent(page);
+                    Rectangle frame = new Rectangle((float)cp.bx,
+                                                    (float)cp.by,
+                                                    (float)cp.ex,
+                                                    (float)cp.ey);
+                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                    frame.setBorderWidth(0.1f);
+                    frame.setBorder(15);
+                    canvas.rectangle(frame);
+                }
+
+                /*
+                 * Y coordinate postfixup. It seems that all
+                 * coordinates here are moved down by half of the
+                 * difference between baseline and descent. Strange.
+                 */
+                /*
+                double fixup = cp.y - cp.by;
+                System.err.println("cp: " + cp);
+                cp.y += fixup/2;
+                cp.by += fixup/2;
+                cp.ey += fixup/2;
+                */
             }
         }
     }
@@ -291,6 +322,10 @@ public class FindTexts {
     {
         PdfReader reader = new PdfReader(spec.input);
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+        PdfStamper stamper = null;
+        if( spec.stampedOutput!=null ) {
+            stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
+        }
 
         ArrayList<MyRenderListener> charsForPages =
             new ArrayList<MyRenderListener>();
@@ -302,7 +337,7 @@ public class FindTexts {
          */
 
         for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-            MyRenderListener collectCharacters = new MyRenderListener();
+            MyRenderListener collectCharacters = new MyRenderListener(stamper, i);
             parser.processContent(i, collectCharacters);
             charsForPages.add(collectCharacters);
 
@@ -322,13 +357,25 @@ public class FindTexts {
                             match.page = i;
                             Rectangle crop = reader.getPageSizeWithRotation(i);
                             match.coords = new ArrayList<Double>();
-                            match.coords.add(new Double(rl.foundText.x/crop.getWidth()));
-                            match.coords.add(new Double(rl.foundText.y/crop.getHeight()));
+                            match.coords.add(new Double((rl.foundText.x - crop.getLeft())/crop.getWidth()));
+                            match.coords.add(new Double(1 - (rl.foundText.y - crop.getBottom())/crop.getHeight()));
                             match.bbox = new ArrayList<Double>();
-                            match.bbox.add(new Double(rl.foundText.bx/crop.getWidth()));
-                            match.bbox.add(new Double(rl.foundText.by/crop.getHeight()));
-                            match.bbox.add(new Double(rl.foundText.ex/crop.getWidth()));
-                            match.bbox.add(new Double(rl.foundText.ey/crop.getHeight()));
+                            match.bbox.add(new Double((rl.foundText.bx - crop.getLeft())/crop.getWidth()));
+                            match.bbox.add(new Double(1 - (rl.foundText.by - crop.getBottom())/crop.getHeight()));
+                            match.bbox.add(new Double((rl.foundText.ex - crop.getLeft())/crop.getWidth()));
+                            match.bbox.add(new Double(1 - (rl.foundText.ey - crop.getBottom())/crop.getHeight()));
+
+                            if( stamper!=null ) {
+                                PdfContentByte canvas = stamper.getOverContent(i);
+                                Rectangle frame = new Rectangle((float)rl.foundText.bx,
+                                                                (float)rl.foundText.by,
+                                                                (float)rl.foundText.ex,
+                                                                (float)rl.foundText.ey);
+                                frame.setBorderColor(new BaseColor(0f, 1f, 0f));
+                                frame.setBorderWidth(0.1f);
+                                frame.setBorder(15);
+                                canvas.rectangle(frame);
+                            }
                             break;
                         }
                         else {
@@ -339,6 +386,9 @@ public class FindTexts {
             }
         }
 
+        if( stamper!=null ) {
+            stamper.close();
+        }
         reader.close();
 
         DumperOptions options = new DumperOptions();
