@@ -1,0 +1,37 @@
+!!ExtractTextSpec
+"input": "test/three-page-a4.pdf"
+"rects":
+- "lines":
+  - "Page 1 "
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines":
+  - "Page 2 "
+  "page": 2
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines": null
+  "page": 7
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines": []
+  "page": 1
+  "rect":
+  - 0.4
+  - 0.0
+  - 4.0
+  - 0.6
+  - 0.6
+"stampedOutput": "test/three-page-a4-stamped.pdf"
+"yamlOutput": true
+

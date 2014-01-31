@@ -1,0 +1,70 @@
+!!FindTextSpec
+"input": "test/three-page-a4.pdf"
+"matches":
+- "bbox":
+  - 0.15201592646330297
+  - 0.8939216509567721
+  - 0.21413691143042224
+  - 0.908176818661706
+  "coords":
+  - 0.15201592646330297
+  - 0.9002138260654634
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "Page 1"
+- "bbox": null
+  "coords": null
+  "index": 2
+  "page": null
+  "pages":
+  - 1
+  "text": "Page 1"
+- "bbox": null
+  "coords": null
+  "index": 2
+  "page": null
+  "pages":
+  - 1
+  "text": "Page"
+- "bbox":
+  - 0.15201592646330297
+  - 0.8939216509567721
+  - 0.19309858725971124
+  - 0.908176818661706
+  "coords":
+  - 0.15201592646330297
+  - 0.9002138260654634
+  "index": 2
+  "page": 2
+  "pages":
+  - 1
+  - 2
+  "text": "Page"
+- "bbox":
+  - 0.15201592646330297
+  - 0.8939216509567721
+  - 0.19309858725971124
+  - 0.908176818661706
+  "coords":
+  - 0.15201592646330297
+  - 0.9002138260654634
+  "index": 3
+  "page": 3
+  "pages":
+  - 1
+  - 2
+  - 3
+  "text": "Page"
+- "bbox": null
+  "coords": null
+  "index": 233
+  "page": null
+  "pages":
+  - 1
+  - 2
+  - 3
+  "text": ""
+"yamlOutput": true
+

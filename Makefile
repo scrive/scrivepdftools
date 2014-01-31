@@ -74,20 +74,20 @@ test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 	open $@
 
-test-find-texts : test-find-texts.json.txt
+test-find-texts : test/test-find-texts.output.yaml
 
-test-find-texts.json.txt : test/find-texts.json scrivepdftools.jar
+test/test-find-texts.output.yaml : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
-	open $@
+	diff test/test-find-texts.expect.yaml $@
 
-test-extract-texts : test-extract-texts.json.txt test-extract-test-document.json.txt
+test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
 
-test-extract-texts.json.txt : test/extract-texts.json scrivepdftools.jar
+test/test-extract-texts.output.yaml : test/extract-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
-	open $@
+	diff test/test-extract-texts.expect.yaml $@
 	open test/three-page-a4-stamped.pdf
 
-test-extract-test-document.json.txt : test/extract-test-document.json scrivepdftools.jar
+test/test-extract-test-document.output.yaml : test/extract-test-document.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
-	open $@
+	diff test/test-extract-test-document.expect.yaml $@
 	open test/test-document-stamped.pdf
