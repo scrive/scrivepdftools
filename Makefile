@@ -1,3 +1,8 @@
+#
+#
+# You may use 'make OPEN=open' so that generated PDFs open automatically
+#
+#
 
 CLASSPATH1=itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar
 CLASSPATH=.:itextpdf-5.4.5.jar:$(CLASSPATH1)
@@ -35,15 +40,21 @@ test-add-verification-pages : test/seal-simplest.pdf \
 
 test/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
@@ -51,7 +62,9 @@ test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
@@ -61,18 +74,24 @@ test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
         -e 's!"test/seal-images.pdf"!"test/seal-images-preseal.pdf"!g' \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-fields.pdf : test/seal-fields.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	sed -e 's!"preseal": false!"preseal": true!g' \
         -e 's!"test/seal-fields.pdf"!"test/seal-fields-preseal.pdf"!g' \
          $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
-	open $@
+ifdef OPEN
+	$(OPEN) $@
+endif
 
 test-find-texts : test/test-find-texts.output.yaml
 
@@ -85,9 +104,13 @@ test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-
 test/test-extract-texts.output.yaml : test/extract-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
 	diff test/test-extract-texts.expect.yaml $@
-	open test/three-page-a4-stamped.pdf
+ifdef OPEN
+	$(OPEN) test/three-page-a4-stamped.pdf
+endif
 
 test/test-extract-test-document.output.yaml : test/extract-test-document.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
 	diff test/test-extract-test-document.expect.yaml $@
-	open test/test-document-stamped.pdf
+ifdef OPEN
+	$(OPEN) test/test-document-stamped.pdf
+endif
