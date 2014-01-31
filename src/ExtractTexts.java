@@ -193,6 +193,9 @@ class ExtractTextsRenderListener implements RenderListener
     /*
      * Params l, b, r, t are in PDF points coordinates. Those take
      * into account that crop box does not have to begin in 0,0.
+     *
+     * Character is considered to be in a rect if point in the middle
+     * of its baseline falls within rect (including border equality).
      */
     public void find(double l, double b, double r, double t) {
 
@@ -202,7 +205,9 @@ class ExtractTextsRenderListener implements RenderListener
         CharPos last = null;
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
-            if( cp.x>=l && cp.x<=r &&
+
+            double x = (cp.bx + cp.ey)/2;
+            if(    x>=l &&    x<=r &&
                 cp.y>=b && cp.y<=t &&
                 cp.c.codePointAt(0)>=32 ) {
                 if( last==null || last.y != cp.y ) {
@@ -280,7 +285,7 @@ public class ExtractTexts {
                     PdfContentByte canvas = stamper.getOverContent(i);
                     Rectangle frame = new Rectangle((float)l,(float)b,(float)r,(float)t);
                     frame.setBorderColor(new BaseColor(0f, 1f, 0f));
-                    frame.setBorderWidth(1);
+                    frame.setBorderWidth(0.1f);
                     frame.setBorder(15);
                     canvas.rectangle(frame);
                 }
