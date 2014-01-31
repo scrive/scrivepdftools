@@ -297,26 +297,23 @@ public class ExtractTexts {
         PdfReader reader = new PdfReader(spec.input);
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
 
-        ArrayList<ExtractTextsRenderListener> charsForPages =
-            new ArrayList<ExtractTextsRenderListener>();
+        ExtractTextsRenderListener charsForPages[] = new ExtractTextsRenderListener[reader.getNumberOfPages()];
 
         /*
-         * Some pages may not require searching because for example
-         * nobody requested any text positions from them. We could
-         * skip those here.
+         * Some pages may have no rectangles to find text in. This
+         * avoids parsing of pages that are not required.
          */
-
-        for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-            ExtractTextsRenderListener collectCharacters = new ExtractTextsRenderListener();
-            parser.processContent(i, collectCharacters);
-            charsForPages.add(collectCharacters);
-
-        }
-
         for(Rect rect : spec.rects ) {
 
-            if( rect.page>=1 && rect.page<=charsForPages.size()) {
-                ExtractTextsRenderListener rl = charsForPages.get(rect.page-1);
+            if( rect.page>=1 && rect.page<reader.getNumberOfPages()) {
+
+                ExtractTextsRenderListener rl = charsForPages[rect.page-1];
+                if( rl == null ) {
+                    rl = new ExtractTextsRenderListener();
+                    parser.processContent(rect.page, rl);
+                    charsForPages[rect.page-1] = rl;
+                }
+
                 Rectangle crop = reader.getPageSizeWithRotation(rect.page);
                 double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
                 double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
