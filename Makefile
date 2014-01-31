@@ -93,11 +93,21 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-find-texts : test/test-find-texts.output.yaml
+test-find-texts : test/test-find-texts.output.yaml test/test-find-texts-test-document.output.yaml
 
 test/test-find-texts.output.yaml : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
+ifdef OPEN
+	$(OPEN) test/three-page-a4-find-texts-stamped.pdf
+endif
 	diff -w test/test-find-texts.expect.yaml $@
+
+test/test-find-texts-test-document.output.yaml : test/find-texts-test-document.json scrivepdftools.jar
+	java -jar scrivepdftools.jar find-texts $< > $@
+ifdef OPEN
+	$(OPEN) test/test-document-find-texts-stamped.pdf
+endif
+	diff -w test/test-find-texts-test-document.expect.yaml $@
 
 test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
 
