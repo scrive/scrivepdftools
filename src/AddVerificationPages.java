@@ -153,6 +153,7 @@ class SealSpec
      */
     public static Yaml getYaml() {
         Constructor constructor = new Constructor(SealSpec.class);
+        constructor.getPropertyUtils().setSkipMissingProperties(true);
 
         /*
          * Java reflection is missing some crucial information about

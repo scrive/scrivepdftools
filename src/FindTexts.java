@@ -96,6 +96,7 @@ class FindTextSpec
     public static Yaml getYaml() {
 
         Constructor constructor = new Constructor(FindTextSpec.class);
+        constructor.getPropertyUtils().setSkipMissingProperties(true);
         /*
          * Java reflection is missing some crucial information about
          * elements of containers.  Add this information here.

@@ -75,9 +75,6 @@ class Rect
 
     // result output mode
     public ArrayList<String> lines;
-
-    // neither input nor output but has to be here to not annoy snakeyaml
-    public ArrayList<String> expected;
 };
 
 class ExtractTextSpec
@@ -95,6 +92,8 @@ class ExtractTextSpec
     public static Yaml getYaml() {
 
         Constructor constructor = new Constructor(ExtractTextSpec.class);
+        constructor.getPropertyUtils().setSkipMissingProperties(true);
+
         /*
          * Java reflection is missing some crucial information about
          * elements of containers.  Add this information here.
