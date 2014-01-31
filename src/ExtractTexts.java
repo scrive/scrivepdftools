@@ -62,7 +62,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 
 /*
@@ -86,7 +85,7 @@ class ExtractTextSpec
     public String input;
     public Boolean yamlOutput;
     public ArrayList<Rect> rects;
-
+    public String stampedOutput;
 
     /*
      * YAML is compatible with JSON (at least with the JSON we generate).
@@ -264,6 +263,34 @@ public class ExtractTexts {
 
     }
 
+    public static void stampRects(PdfReader reader, ExtractTextSpec spec)
+        throws IOException, DocumentException
+    {
+        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
+
+        for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+            for(Rect rect : spec.rects ) {
+                if( rect.page==i ) {
+
+                    Rectangle crop = reader.getPageSizeWithRotation(rect.page);
+                    double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
+                    double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
+                    double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
+                    double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
+
+                    PdfContentByte canvas = stamper.getOverContent(i);
+                    Rectangle frame = new Rectangle((float)l,(float)b,(float)r,(float)t);
+                    frame.setBorderColor(new BaseColor(0f, 1f, 0f));
+                    frame.setBorderWidth(1);
+                    frame.setBorder(15);
+                    canvas.rectangle(frame);
+                }
+            }
+        }
+
+        stamper.close();
+    }
+
     public static void execute(ExtractTextSpec spec)
         throws IOException, DocumentException
     {
@@ -306,6 +333,11 @@ public class ExtractTexts {
                     }
                 }
             }
+        }
+
+
+        if( spec.stampedOutput != null ) {
+            stampRects(reader, spec);
         }
 
         reader.close();

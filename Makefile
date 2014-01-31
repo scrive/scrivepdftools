@@ -85,7 +85,9 @@ test-extract-texts : test-extract-texts.json.txt test-extract-test-document.json
 test-extract-texts.json.txt : test/extract-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
 	open $@
+	open test/three-page-a4-stamped.pdf
 
 test-extract-test-document.json.txt : test/extract-test-document.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
 	open $@
+	open test/test-document-stamped.pdf
