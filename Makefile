@@ -97,20 +97,20 @@ test-find-texts : test/test-find-texts.output.yaml
 
 test/test-find-texts.output.yaml : test/find-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar find-texts $< > $@
-	diff test/test-find-texts.expect.yaml $@
+	diff -w test/test-find-texts.expect.yaml $@
 
 test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
 
 test/test-extract-texts.output.yaml : test/extract-texts.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
-	diff test/test-extract-texts.expect.yaml $@
 ifdef OPEN
 	$(OPEN) test/three-page-a4-stamped.pdf
 endif
+	diff -w test/test-extract-texts.expect.yaml $@
 
 test/test-extract-test-document.output.yaml : test/extract-test-document.json scrivepdftools.jar
 	java -jar scrivepdftools.jar extract-texts $< > $@
-	diff test/test-extract-test-document.expect.yaml $@
 ifdef OPEN
 	$(OPEN) test/test-document-stamped.pdf
 endif
+	diff -w test/test-extract-test-document.expect.yaml $@
