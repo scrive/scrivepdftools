@@ -1,0 +1,11 @@
+{ "input": "test/test-document.pdf"
+, "yamlOutput": true
+, "extra_top_level": "please ignore me"
+, "stampedOutput": "test/test-document-stamped.pdf"
+, "rects": [ { "rect": [0,  0,  1,  1  ], "page": 1 }
+           , { "rect": [0,  0,  1,  0.5], "page": 1 }
+           , { "rect": [0,  0.5,1,  1  ], "page": 1 }
+           , { "rect": [0,  0,  0.5,1  ], "page": 1 }
+           , { "rect": [0.5,0,  1,  1  ], "page": 1, "extra": "a key that should be ignored" }
+           ]
+}

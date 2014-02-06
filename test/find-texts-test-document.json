@@ -1,0 +1,8 @@
+{ "input": "test/test-document.pdf"
+, "yamlOutput": true
+, "stampedOutput": "test/test-document-find-texts-stamped.pdf"
+, "matches": [ { "text": "Test", "index": 1, "pages": [1] }
+             , { "text": "SkrivaPa", "index": 3, "pages": [1] }
+             , { "text": "document", "index": 3, "pages": [1] }
+             ]
+}
