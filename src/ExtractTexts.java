@@ -92,6 +92,7 @@ class ExtractTextSpec
     public static Yaml getYaml() {
 
         Constructor constructor = new Constructor(ExtractTextSpec.class);
+        constructor.setPropertyUtils(constructor.getPropertyUtils());
         constructor.getPropertyUtils().setSkipMissingProperties(true);
 
         /*
