@@ -75,6 +75,8 @@ class Rect
 
     // result output mode
     public ArrayList<String> lines;
+
+    public ArrayList<String> expected;
 };
 
 class ExtractTextSpec
