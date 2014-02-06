@@ -207,9 +207,9 @@ class ExtractTextsRenderListener implements RenderListener
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
 
-            double x = (cp.bx + cp.ey)/2;
+            double x = (cp.bx + cp.ex)/2;
             if(    x>=l &&    x<=r &&
-                cp.y>=b && cp.y<=t &&
+                   (cp.y>=b && cp.y<=t || cp.y>=t && cp.y<=b) &&
                 cp.c.codePointAt(0)>=32 ) {
                 if( last==null || last.y != cp.y ) {
                     foundText.add("");
