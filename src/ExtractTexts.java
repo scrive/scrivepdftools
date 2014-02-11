@@ -213,6 +213,7 @@ class ExtractTextsRenderListener implements RenderListener
             if(    x>=l &&    x<=r &&
                    (cp.y>=b && cp.y<=t || cp.y>=t && cp.y<=b) &&
                 cp.c.codePointAt(0)>=32 ) {
+
                 if( last==null || last.y != cp.y ) {
                     foundText.add("");
                 }
@@ -304,15 +305,18 @@ public class ExtractTexts {
         PdfReader reader = new PdfReader(spec.input);
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
 
-        ExtractTextsRenderListener charsForPages[] = new ExtractTextsRenderListener[reader.getNumberOfPages()];
+        int npages = reader.getNumberOfPages();
+
+        ExtractTextsRenderListener charsForPages[] = new ExtractTextsRenderListener[npages];
 
         /*
          * Some pages may have no rectangles to find text in. This
          * avoids parsing of pages that are not required.
          */
+
         for(Rect rect : spec.rects ) {
 
-            if( rect.page>=1 && rect.page<reader.getNumberOfPages()) {
+            if( rect.page>=1 && rect.page<=npages) {
 
                 ExtractTextsRenderListener rl = charsForPages[rect.page-1];
                 if( rl == null ) {
