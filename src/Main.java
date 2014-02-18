@@ -24,6 +24,7 @@ class Main
     public static void main(String[] args)
         throws IOException, DocumentException
     {
+        com.itextpdf.text.pdf.PdfReader.unethicalreading = true;
         if( args.length!=2 && args.length!=3) {
             System.err.println("Usage:");
             System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json optional-input.pdf");
