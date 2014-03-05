@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.File;
+import java.io.RandomAccessFile;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.net.URL;
@@ -113,6 +115,9 @@ class SealingTexts
     public String dateText;
     public String historyText;
     public String verificationFooter;
+    public String attachmentText;
+    public String hiddenAttachmentText;
+    public String onePageText;
 }
 
 class SealAttachment
@@ -128,6 +133,7 @@ class FileDesc
     public String role;
     public String pagesText;
     public String attachedBy;
+    public String input;
 }
 
 class SealSpec
@@ -181,6 +187,26 @@ class SealSpec
         InputStream input = new FileInputStream(new File(fileName));
         Yaml yaml = getYaml();
         return (SealSpec)yaml.load(input);
+    }
+}
+
+class FileAttachment
+{
+    public byte[] content;
+    public String name;
+
+    public FileAttachment(String filename, String name)
+        throws IOException
+    {
+        RandomAccessFile f = new RandomAccessFile(filename, "r");
+        this.content = new byte[(int)f.length()];
+        f.read(this.content);
+        this.name = name;
+    }
+
+    public FileAttachment(byte[] content, String name) {
+        this.content = content;
+        this.name = name;
     }
 }
 
@@ -245,7 +271,7 @@ public class AddVerificationPages {
      * I did not find a way to do this without directly serializing
      * document.
      */
-    public static void concatenatePdfsInto(PdfReader sources[], OutputStream os)
+    public static void concatenatePdfsInto(Iterable<PdfReader> sources, OutputStream os)
         throws IOException, DocumentException
     {
         Document document = new Document();
@@ -264,6 +290,68 @@ public class AddVerificationPages {
 
         document.close();
         writer.close();
+    }
+
+    /*
+     * Put footer with attachment name on each page.
+     */
+    public static ByteArrayOutputStream addAttachmentFooter(SealSpec spec, FileDesc file, PdfReader reader)
+        throws DocumentException, IOException
+    {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PdfStamper stamper = new PdfStamper(reader, os);
+
+        stamper.setFormFlattening(true);
+        stamper.setFreeTextFlattening(true);
+
+        int count = reader.getNumberOfPages();
+        for( int i=1; i<=count; i++ ) {
+
+            Rectangle cropBox = reader.getCropBox(i);
+            int rotate = reader.getPageRotation(i);
+            while (rotate > 0) {
+                cropBox = cropBox.rotate();
+                rotate -= 90;
+            }
+
+            PdfContentByte canvas = stamper.getOverContent(i);
+            addPaginationFooter(spec, stamper, canvas, cropBox,
+                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                                spec.staticTexts.attachmentText + ": " + file.title);
+        }
+        stamper.close();
+        reader.close();
+        return os;
+    }
+
+    /*
+     * Create a PDF with one page with a centered image
+     */
+    public static ByteArrayOutputStream pdfFromImageFile(String filepath)
+        throws DocumentException, IOException
+    {
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Image image = Image.getInstance(filepath);
+        Document document = new Document();
+        PdfWriter writer = PdfWriter.getInstance(document, os);
+
+        document.open();
+        document.newPage();
+        float pageWidth = document.right() - document.left();
+        float pageHeight = document.top() - document.bottom();
+        float scaleWidth = (document.right() - document.left()) / image.getScaledWidth();
+        float scaleHeight = (document.top() - document.bottom()) / image.getScaledHeight();
+        float scaleFactor = Math.min(scaleWidth, scaleHeight);
+        if( scaleFactor < 1) {
+            // Scale to fit (but do not scale up)
+            image.scalePercent(scaleFactor * 100);
+        }
+        image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
+                                  document.bottom() + (pageHeight - image.getScaledHeight())/2);
+        document.add(image);
+        document.close();
+        return os;
     }
 
     /*
@@ -343,65 +431,74 @@ public class AddVerificationPages {
                 }
             }
 
-            /*
-             * Add pagination at the bottom of the page, only if not presealing.
-             */
-            if( spec.preseal==null || !spec.preseal ) {
-                float requestedSealSize = 18f;
-                canvas.addTemplate(sealMarkerImported,
-                                   requestedSealSize/sealMarkerImported.getWidth(),
-                                   0, 0,
-                                   requestedSealSize/sealMarkerImported.getHeight(),
-                                   cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
-                                   cropBox.getBottom() + 23 - requestedSealSize/2);
-
-                String docnrtext = spec.staticTexts.docPrefix + " " + spec.documentNumber;
-                String signedinitials = spec.staticTexts.signedText + ": " + spec.initials;
-
-                /*
-                 * This is the blue line at the bottom color
-                 */
-                CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
-                Paragraph para = createParagraph(docnrtext, 8, Font.NORMAL, lightTextColor);
-
-                ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
-                                           para,
-                                           cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
-                                           20,
-                                           0);
-                float docnrtextwidth = ColumnText.getWidth(para);
-
-                para = createParagraph(signedinitials, 8, Font.NORMAL, color);
-                ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
-                                           para,
-                                           cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
-                                           20,
-                                           0);
-                float signedinitialswidth = ColumnText.getWidth(para);
-
-                Rectangle rect;
-                rect = new Rectangle(cropBox.getLeft() + 60,
-                                     23,
-                                     cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
-                                     23);
-                rect.setBorderWidth(1);
-                rect.setBorderColor(color);
-                rect.setBorder(Rectangle.BOTTOM);
-                canvas.rectangle(rect);
-
-                rect = new Rectangle(cropBox.getRight() - 60,
-                                     23,
-                                     cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
-                                     23);
-                rect.setBorderWidth(1);
-                rect.setBorderColor(color);
-                rect.setBorder(Rectangle.BOTTOM);
-                canvas.rectangle(rect);
-            }
+            addPaginationFooter(spec, stamper, canvas, cropBox,
+                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                                spec.staticTexts.signedText + ": " + spec.initials);
         }
         stamper.close();
         reader.close();
     }
+
+    /*
+     * Add pagination at the bottom of the page, only if not presealing.
+     */
+    public static void addPaginationFooter(SealSpec spec, PdfStamper stamper, PdfContentByte canvas, Rectangle cropBox, String lefttext, String righttext)
+        throws DocumentException, IOException
+    {
+        PdfReader sealMarker = getSealMarker();
+        PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
+
+        if( spec.preseal==null || !spec.preseal ) {
+            float requestedSealSize = 18f;
+            canvas.addTemplate(sealMarkerImported,
+                               requestedSealSize/sealMarkerImported.getWidth(),
+                               0, 0,
+                               requestedSealSize/sealMarkerImported.getHeight(),
+                               cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
+                               cropBox.getBottom() + 23 - requestedSealSize/2);
+
+            Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
+
+            ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
+                                       para,
+                                       cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
+                                       20,
+                                       0);
+            float docnrtextwidth = ColumnText.getWidth(para);
+
+            para = createParagraph(righttext, 8, Font.NORMAL, lightTextColor);
+            ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
+                                       para,
+                                       cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
+                                       20,
+                                       0);
+            float signedinitialswidth = ColumnText.getWidth(para);
+
+            /*
+             * This is the blue line at the bottom color
+             */
+            CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
+            Rectangle rect;
+            rect = new Rectangle(cropBox.getLeft() + 60,
+                                 23,
+                                 cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
+                                 23);
+            rect.setBorderWidth(1);
+            rect.setBorderColor(color);
+            rect.setBorder(Rectangle.BOTTOM);
+            canvas.rectangle(rect);
+
+            rect = new Rectangle(cropBox.getRight() - 60,
+                                 23,
+                                 cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
+                                 23);
+            rect.setBorderWidth(1);
+            rect.setBorderColor(color);
+            rect.setBorder(Rectangle.BOTTOM);
+            canvas.rectangle(rect);
+        }
+    }
+
 
     /*
      * Gather all fields from all places they could be in SealSpec.
@@ -795,20 +892,28 @@ public class AddVerificationPages {
         reader.close();
     }
 
-    public static void addFileAttachments(PdfReader reader, Iterable<SealAttachment> attachments, OutputStream os )
+    public static void addFileAttachments(PdfReader reader, Iterable<FileAttachment> attachments, OutputStream os )
         throws IOException, DocumentException, Base64DecodeException
     {
         PdfStamper stamper = new PdfStamper(reader, os);
 
+        for( FileAttachment attachment : attachments ) {
+            stamper.addFileAttachment(attachment.name, attachment.content, null, attachment.name);
+        }
+        stamper.close();
+        reader.close();
+    }
+
+    public static void appendSealAttachments(Iterable<SealAttachment> attachments, List<FileAttachment> fileAttachments )
+        throws Base64DecodeException
+    {
         for( SealAttachment attachment : attachments ) {
             byte data[] = Base64.decode(attachment.fileBase64Content);
             if( data==null ) {
                 throw new Base64DecodeException();
             }
-            stamper.addFileAttachment(attachment.fileName, data, null, attachment.fileName);
+            fileAttachments.add(new FileAttachment(data, attachment.fileName));
         }
-        stamper.close();
-        reader.close();
     }
 
     public static void execute(String specFile, String inputOverride)
@@ -839,6 +944,31 @@ public class AddVerificationPages {
             ByteArrayOutputStream sourceWithFields = new ByteArrayOutputStream();
             ByteArrayOutputStream concatenatedPdf = new ByteArrayOutputStream();
 
+            ArrayList<PdfReader> pdfsToConcatenate = new ArrayList<PdfReader>();
+            ArrayList<FileAttachment> fileAttachments = new ArrayList<FileAttachment>();
+
+            for( int i=1; i<spec.filesList.size(); i++) {
+
+                if( spec.filesList.get(i).input != null) {
+                    // Attempt to inline file if image or PDF, otherwise make it a PDF file attachment.
+                    // Adjust pagesText if image or if we need to make a PDF file attachment.
+                    try {
+                        PdfReader a;
+                        try {
+                            a = new PdfReader(pdfFromImageFile(spec.filesList.get(i).input).toByteArray());
+                            spec.filesList.get(i).pagesText = spec.staticTexts.onePageText;
+
+                        } catch (IOException e) {
+                            a = new PdfReader(spec.filesList.get(i).input);
+                        }
+                        ByteArrayOutputStream a2 = addAttachmentFooter(spec, spec.filesList.get(i), a);
+                        pdfsToConcatenate.add(new PdfReader(a2.toByteArray()));
+                    } catch (IOException e) {
+                        spec.filesList.get(i).pagesText = spec.staticTexts.hiddenAttachmentText;
+                        fileAttachments.add(new FileAttachment(spec.filesList.get(i).input, spec.filesList.get(i).input));
+                    }
+                }
+            }
 
             prepareSealPages(spec, sealPagesRaw);
 
@@ -846,12 +976,16 @@ public class AddVerificationPages {
 
             stampFieldsAndPaginationOverPdf(spec, new PdfReader(spec.input), getAllFields(spec), sourceWithFields);
 
-            concatenatePdfsInto(new PdfReader[] { new PdfReader(sourceWithFields.toByteArray()),
-                                                  new PdfReader(sealPages.toByteArray()) },
-                concatenatedPdf);
+
+            pdfsToConcatenate.add(0,new PdfReader(sourceWithFields.toByteArray()));
+            pdfsToConcatenate.add(1,new PdfReader(sealPages.toByteArray()));
+
+            concatenatePdfsInto(pdfsToConcatenate, concatenatedPdf);
+
+            appendSealAttachments(spec.attachments, fileAttachments);
 
             addFileAttachments(new PdfReader(concatenatedPdf.toByteArray()),
-                               spec.attachments,
+                               fileAttachments,
                                new FileOutputStream(spec.output));
         }
         else {

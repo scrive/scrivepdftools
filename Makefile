@@ -29,8 +29,10 @@ scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPage
 
 test : test-add-verification-pages test-find-texts test-extract-texts
 
-test-add-verification-pages : test/seal-simplest.pdf \
+test-add-verification-pages :\
+       test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
+       test/seal-filetypes.pdf \
        test/seal-many-people.pdf \
        test/seal-images.pdf \
        test/seal-images-preseal.pdf \
@@ -45,6 +47,12 @@ ifdef OPEN
 endif
 
 test/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/seal-filetypes.pdf : test/seal-filetypes.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
