@@ -248,7 +248,7 @@ Sealing works like this:
 3. On pages of input file add fields at exact positions.
 4. Save it to byte stream.
 5. Create final seal pages (if preseal == False).
-6. Concatenate 4 and 6.
+6. Concatenate 4 and 5.
 7. Save to output.
 
 */
