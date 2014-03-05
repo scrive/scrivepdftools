@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.List;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Map;
 import java.net.URL;
@@ -107,7 +108,7 @@ class SealingTexts
     public String docPrefix;
     public String signedText;
     public String partnerText;
-    public String secretaryText;
+    public String initiatorText;
     public String documentText;
     public String orgNumberText;
     public String personalNumberText;
@@ -144,6 +145,7 @@ class SealSpec
     public String documentNumber;
     public ArrayList<Person> persons;
     public ArrayList<Person> secretaries;
+    public Person initiator;
     public ArrayList<HistEntry> history;
     public String initials;
     public String hostpart;
@@ -775,18 +777,18 @@ public class AddVerificationPages {
         document.add(table);
 
         /*
+         * Initiator part
+         */
+        if( spec.initiator!=null) {
+            addSubtitle(document, spec.staticTexts.initiatorText);
+            addPersonsTable(Arrays.asList(spec.initiator), document, spec);
+        }
+
+        /*
          * Partners part
          */
         addSubtitle(document, spec.staticTexts.partnerText);
         addPersonsTable(spec.persons, document, spec);
-
-        /*
-         * Secretaries part
-         */
-        if( spec.secretaries!=null && !spec.secretaries.isEmpty()) {
-            addSubtitle(document, spec.staticTexts.secretaryText);
-            addPersonsTable(spec.secretaries, document, spec);
-        }
 
         /*
          * History log part

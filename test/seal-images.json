@@ -43,7 +43,7 @@
                  "docPrefix": "Dok.nr.",
                  "signedText": "Undertecknat:",
                  "partnerText": "Parter",
-                 "secretaryText": "Ej undertecknande part",
+                 "initiatorText": "Initierare",
                  "documentText": "Dokument",
                  "orgNumberText": "Org.nr.",
                  "personalNumberText": "ID-nr.",
