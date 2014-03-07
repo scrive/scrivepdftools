@@ -116,7 +116,6 @@ class SealingTexts
     public String dateText;
     public String historyText;
     public String verificationFooter;
-    public String attachmentText;
     public String hiddenAttachmentText;
     public String onePageText;
 }
@@ -319,7 +318,7 @@ public class AddVerificationPages {
             PdfContentByte canvas = stamper.getOverContent(i);
             addPaginationFooter(spec, stamper, canvas, cropBox,
                                 spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                                spec.staticTexts.attachmentText + ": " + file.title);
+                                file.role);
         }
         stamper.close();
         reader.close();
@@ -350,7 +349,7 @@ public class AddVerificationPages {
             image.scalePercent(scaleFactor * 100);
         }
         image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
-                                  document.bottom() + (pageHeight - image.getScaledHeight())/2);
+                                  document.top() - image.getScaledHeight());
         document.add(image);
         document.close();
         return os;
