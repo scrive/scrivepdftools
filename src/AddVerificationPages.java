@@ -343,11 +343,9 @@ public class AddVerificationPages {
         float pageHeight = document.top() - document.bottom();
         float scaleWidth = (document.right() - document.left()) / image.getScaledWidth();
         float scaleHeight = (document.top() - document.bottom()) / image.getScaledHeight();
-        float scaleFactor = Math.min(scaleWidth, scaleHeight);
-        if( scaleFactor < 1) {
-            // Scale to fit (but do not scale up)
-            image.scalePercent(scaleFactor * 100);
-        }
+        float dpiFactor = 72f / 113f; // The default 72 DPI yields a bit too large and grainy images, so pretend we have ... 113 DPI.
+        float scaleFactor = Math.min(scaleWidth, Math.min(scaleHeight,dpiFactor));
+        image.scalePercent(scaleFactor * 100);
         image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
                                   document.top() - image.getScaledHeight());
         document.add(image);
