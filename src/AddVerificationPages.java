@@ -962,7 +962,7 @@ public class AddVerificationPages {
                         pdfsToConcatenate.add(new PdfReader(a2.toByteArray()));
                     } catch (IOException e) {
                         spec.filesList.get(i).pagesText = spec.staticTexts.hiddenAttachmentText;
-                        fileAttachments.add(new FileAttachment(spec.filesList.get(i).input, spec.filesList.get(i).input));
+                        fileAttachments.add(new FileAttachment(spec.filesList.get(i).input, new File(spec.filesList.get(i).input).getName()));
                     }
                 }
             }
