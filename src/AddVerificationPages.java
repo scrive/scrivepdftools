@@ -651,14 +651,16 @@ public class AddVerificationPages {
                         PdfPCell cell2 = new PdfPCell(image, true);
                         cell2.setBorder(Rectangle.BOTTOM);
                         /*
-                         * For some reason bottom line below signature
-                         * image is not visible in some magnification
-                         * zooms. Something is overlapping something
-                         * else and rounding errors obscure the
-                         * line. We need to make it more than 1.0 in
-                         * width to cover up for this crap.
+                         * For some reason bottom images in color
+                         * space gray have calculated final dimensions
+                         * in other way that rgb ones. This results in
+                         * images partially obscuring bottom line in
+                         * cell so it looks thinner than full line
+                         * weight. Add artificial padding at the
+                         * bottom so that ovelapping does not happen.
                          */
-                        cell2.setBorderWidth(1.6f);
+                        cell2.setPaddingBottom(1);
+                        cell2.setBorderWidth(1f);
                         cell2.setBorderColor(lightTextColor);
 
                         table2.addCell(cell2);
