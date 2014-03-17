@@ -314,9 +314,11 @@ public class AddVerificationPages {
             }
 
             PdfContentByte canvas = stamper.getOverContent(i);
-            addPaginationFooter(spec, stamper, canvas, cropBox,
-                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                                file.role);
+            if(spec.preseal == null || !spec.preseal) {
+                addPaginationFooter(spec, stamper, canvas, cropBox,
+                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                        file.role);
+            }
         }
         stamper.close();
         reader.close();
@@ -427,17 +429,18 @@ public class AddVerificationPages {
                     }
                 }
             }
-
-            addPaginationFooter(spec, stamper, canvas, cropBox,
-                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                                spec.staticTexts.signedText + ": " + spec.initials);
+            if(spec.preseal == null || !spec.preseal) {
+                addPaginationFooter(spec, stamper, canvas, cropBox,
+                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                        spec.staticTexts.signedText + ": " + spec.initials);
+            }
         }
         stamper.close();
         reader.close();
     }
 
     /*
-     * Add pagination at the bottom of the page, only if not presealing.
+     * Add pagination at the bottom of the page, only use if not presealing.
      */
     public static void addPaginationFooter(SealSpec spec, PdfStamper stamper, PdfContentByte canvas, Rectangle cropBox, String lefttext, String righttext)
         throws DocumentException, IOException
@@ -445,55 +448,54 @@ public class AddVerificationPages {
         PdfReader sealMarker = getSealMarker();
         PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
-        if( spec.preseal==null || !spec.preseal ) {
-            float requestedSealSize = 18f;
-            canvas.addTemplate(sealMarkerImported,
-                               requestedSealSize/sealMarkerImported.getWidth(),
-                               0, 0,
-                               requestedSealSize/sealMarkerImported.getHeight(),
-                               cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
-                               cropBox.getBottom() + 23 - requestedSealSize/2);
 
-            Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
+        float requestedSealSize = 18f;
+        canvas.addTemplate(sealMarkerImported,
+                requestedSealSize/sealMarkerImported.getWidth(),
+                0, 0,
+                requestedSealSize/sealMarkerImported.getHeight(),
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
+                cropBox.getBottom() + 23 - requestedSealSize/2);
 
-            ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
-                                       para,
-                                       cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
-                                       20,
-                                       0);
-            float docnrtextwidth = ColumnText.getWidth(para);
+        Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
 
-            para = createParagraph(righttext, 8, Font.NORMAL, lightTextColor);
-            ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
-                                       para,
-                                       cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
-                                       20,
-                                       0);
-            float signedinitialswidth = ColumnText.getWidth(para);
+        ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
+                para,
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
+                20,
+                0);
+        float docnrtextwidth = ColumnText.getWidth(para);
 
-            /*
-             * This is the blue line at the bottom color
-             */
-            CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
-            Rectangle rect;
-            rect = new Rectangle(cropBox.getLeft() + 60,
-                                 23,
-                                 cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
-                                 23);
-            rect.setBorderWidth(1);
-            rect.setBorderColor(color);
-            rect.setBorder(Rectangle.BOTTOM);
-            canvas.rectangle(rect);
+        para = createParagraph(righttext, 8, Font.NORMAL, lightTextColor);
+        ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
+                para,
+                cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
+                20,
+                0);
+        float signedinitialswidth = ColumnText.getWidth(para);
 
-            rect = new Rectangle(cropBox.getRight() - 60,
-                                 23,
-                                 cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
-                                 23);
-            rect.setBorderWidth(1);
-            rect.setBorderColor(color);
-            rect.setBorder(Rectangle.BOTTOM);
-            canvas.rectangle(rect);
-        }
+        /*
+         * This is the blue line at the bottom color
+         */
+         CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
+        Rectangle rect;
+        rect = new Rectangle(cropBox.getLeft() + 60,
+                23,
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
+                23);
+        rect.setBorderWidth(1);
+        rect.setBorderColor(color);
+        rect.setBorder(Rectangle.BOTTOM);
+        canvas.rectangle(rect);
+
+        rect = new Rectangle(cropBox.getRight() - 60,
+                23,
+                cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
+                23);
+        rect.setBorderWidth(1);
+        rect.setBorderColor(color);
+        rect.setBorder(Rectangle.BOTTOM);
+        canvas.rectangle(rect);
     }
 
 
