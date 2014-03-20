@@ -316,9 +316,11 @@ public class AddVerificationPages {
             }
 
             PdfContentByte canvas = stamper.getOverContent(i);
-            addPaginationFooter(spec, stamper, canvas, cropBox,
-                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                                file.role);
+            if(spec.preseal == null || !spec.preseal) {
+                addPaginationFooter(spec, stamper, canvas, cropBox,
+                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                        file.role);
+            }
         }
         stamper.close();
         reader.close();
@@ -343,7 +345,27 @@ public class AddVerificationPages {
         float pageHeight = document.top() - document.bottom();
         float scaleWidth = (document.right() - document.left()) / image.getScaledWidth();
         float scaleHeight = (document.top() - document.bottom()) / image.getScaledHeight();
-        float dpiFactor = 72f / 113f; // The default 72 DPI yields a bit too large and grainy images, so pretend we have ... 113 DPI.
+        // The default 72 DPI yields a bit too large and grainy
+        // images, so pretend we have ... 113 DPI.
+
+        // Why this number?  The problem is image files with
+        // screenshots that don't have any resolution information
+        // (DPI), yet, some people may have expectations that if one
+        // puts a screenshot in a PDF and views the PDF on the screen
+        // when zoomed to 100%, the screenshot image should have the
+        // same size as the original screenshot.  In an unscientific
+        // test, the only platform that renders a PDF page in true
+        // physical size when zoomed to 100% is OS X.  So we picked a
+        // DPI that happens to fit well with Macbook Pros 13" which
+        // have 113.48 pixels per inch (assuming pixel doubling with
+        // Retina displays).
+
+        // TODO: We may want to check if the image resolution is
+        // different from the default of 72 DPI, which indicates that
+        // the image actually knows it geometry and we may want to
+        // respect that.
+
+        float dpiFactor = 72f / 113f;
         float scaleFactor = Math.min(scaleWidth, Math.min(scaleHeight,dpiFactor));
         image.scalePercent(scaleFactor * 100);
         image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
@@ -429,17 +451,18 @@ public class AddVerificationPages {
                     }
                 }
             }
-
-            addPaginationFooter(spec, stamper, canvas, cropBox,
-                                spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                                spec.staticTexts.signedText + ": " + spec.initials);
+            if(spec.preseal == null || !spec.preseal) {
+                addPaginationFooter(spec, stamper, canvas, cropBox,
+                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                        spec.staticTexts.signedText + ": " + spec.initials);
+            }
         }
         stamper.close();
         reader.close();
     }
 
     /*
-     * Add pagination at the bottom of the page, only if not presealing.
+     * Add pagination at the bottom of the page, only use if not presealing.
      */
     public static void addPaginationFooter(SealSpec spec, PdfStamper stamper, PdfContentByte canvas, Rectangle cropBox, String lefttext, String righttext)
         throws DocumentException, IOException
@@ -447,55 +470,54 @@ public class AddVerificationPages {
         PdfReader sealMarker = getSealMarker();
         PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
-        if( spec.preseal==null || !spec.preseal ) {
-            float requestedSealSize = 18f;
-            canvas.addTemplate(sealMarkerImported,
-                               requestedSealSize/sealMarkerImported.getWidth(),
-                               0, 0,
-                               requestedSealSize/sealMarkerImported.getHeight(),
-                               cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
-                               cropBox.getBottom() + 23 - requestedSealSize/2);
 
-            Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
+        float requestedSealSize = 18f;
+        canvas.addTemplate(sealMarkerImported,
+                requestedSealSize/sealMarkerImported.getWidth(),
+                0, 0,
+                requestedSealSize/sealMarkerImported.getHeight(),
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize/2,
+                cropBox.getBottom() + 23 - requestedSealSize/2);
 
-            ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
-                                       para,
-                                       cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
-                                       20,
-                                       0);
-            float docnrtextwidth = ColumnText.getWidth(para);
+        Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
 
-            para = createParagraph(righttext, 8, Font.NORMAL, lightTextColor);
-            ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
-                                       para,
-                                       cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
-                                       20,
-                                       0);
-            float signedinitialswidth = ColumnText.getWidth(para);
+        ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
+                para,
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
+                20,
+                0);
+        float docnrtextwidth = ColumnText.getWidth(para);
 
-            /*
-             * This is the blue line at the bottom color
-             */
-            CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
-            Rectangle rect;
-            rect = new Rectangle(cropBox.getLeft() + 60,
-                                 23,
-                                 cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
-                                 23);
-            rect.setBorderWidth(1);
-            rect.setBorderColor(color);
-            rect.setBorder(Rectangle.BOTTOM);
-            canvas.rectangle(rect);
+        para = createParagraph(righttext, 8, Font.NORMAL, lightTextColor);
+        ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
+                para,
+                cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize,
+                20,
+                0);
+        float signedinitialswidth = ColumnText.getWidth(para);
 
-            rect = new Rectangle(cropBox.getRight() - 60,
-                                 23,
-                                 cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
-                                 23);
-            rect.setBorderWidth(1);
-            rect.setBorderColor(color);
-            rect.setBorder(Rectangle.BOTTOM);
-            canvas.rectangle(rect);
-        }
+        /*
+         * This is the blue line at the bottom color
+         */
+         CMYKColor color = new CMYKColor(0.8f, 0.6f, 0.3f, 0.4f);
+        Rectangle rect;
+        rect = new Rectangle(cropBox.getLeft() + 60,
+                23,
+                cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize - docnrtextwidth - requestedSealSize/2,
+                23);
+        rect.setBorderWidth(1);
+        rect.setBorderColor(color);
+        rect.setBorder(Rectangle.BOTTOM);
+        canvas.rectangle(rect);
+
+        rect = new Rectangle(cropBox.getRight() - 60,
+                23,
+                cropBox.getLeft() + cropBox.getWidth()/2 + requestedSealSize + signedinitialswidth + requestedSealSize/2,
+                23);
+        rect.setBorderWidth(1);
+        rect.setBorderColor(color);
+        rect.setBorder(Rectangle.BOTTOM);
+        canvas.rectangle(rect);
     }
 
 
@@ -653,14 +675,16 @@ public class AddVerificationPages {
                         PdfPCell cell2 = new PdfPCell(image, true);
                         cell2.setBorder(Rectangle.BOTTOM);
                         /*
-                         * For some reason bottom line below signature
-                         * image is not visible in some magnification
-                         * zooms. Something is overlapping something
-                         * else and rounding errors obscure the
-                         * line. We need to make it more than 1.0 in
-                         * width to cover up for this crap.
+                         * For some reason bottom images in color
+                         * space gray have calculated final dimensions
+                         * in other way that rgb ones. This results in
+                         * images partially obscuring bottom line in
+                         * cell so it looks thinner than full line
+                         * weight. Add artificial padding at the
+                         * bottom so that ovelapping does not happen.
                          */
-                        cell2.setBorderWidth(1.6f);
+                        cell2.setPaddingBottom(1);
+                        cell2.setBorderWidth(1f);
                         cell2.setBorderColor(lightTextColor);
 
                         table2.addCell(cell2);
