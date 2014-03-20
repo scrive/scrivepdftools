@@ -33,6 +33,8 @@ test-add-verification-pages :\
        test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
        test/seal-filetypes.pdf \
+       test/seal-filetypes-preseal.pdf \
+       test/seal-filetypes-us-letter.pdf \
        test/seal-many-people.pdf \
        test/seal-images.pdf \
        test/seal-images-preseal.pdf \
@@ -53,6 +55,18 @@ ifdef OPEN
 endif
 
 test/seal-filetypes.pdf : test/seal-filetypes.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@

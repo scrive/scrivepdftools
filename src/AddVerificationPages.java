@@ -343,7 +343,27 @@ public class AddVerificationPages {
         float pageHeight = document.top() - document.bottom();
         float scaleWidth = (document.right() - document.left()) / image.getScaledWidth();
         float scaleHeight = (document.top() - document.bottom()) / image.getScaledHeight();
-        float dpiFactor = 72f / 113f; // The default 72 DPI yields a bit too large and grainy images, so pretend we have ... 113 DPI.
+        // The default 72 DPI yields a bit too large and grainy
+        // images, so pretend we have ... 113 DPI.
+
+        // Why this number?  The problem is image files with
+        // screenshots that don't have any resolution information
+        // (DPI), yet, some people may have expectations that if one
+        // puts a screenshot in a PDF and views the PDF on the screen
+        // when zoomed to 100%, the screenshot image should have the
+        // same size as the original screenshot.  In an unscientific
+        // test, the only platform that renders a PDF page in true
+        // physical size when zoomed to 100% is OS X.  So we picked a
+        // DPI that happens to fit well with Macbook Pros 13" which
+        // have 113.48 pixels per inch (assuming pixel doubling with
+        // Retina displays).
+
+        // TODO: We may want to check if the image resolution is
+        // different from the default of 72 DPI, which indicates that
+        // the image actually knows it geometry and we may want to
+        // respect that.
+
+        float dpiFactor = 72f / 113f;
         float scaleFactor = Math.min(scaleWidth, Math.min(scaleHeight,dpiFactor));
         image.scalePercent(scaleFactor * 100);
         image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
