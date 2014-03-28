@@ -84,7 +84,7 @@ class Person
     public Boolean emailverified;
     public Boolean phoneverified;
     public ArrayList<Field> fields;
-
+    public String signtime;
 }
 
 class Field
@@ -118,6 +118,7 @@ class SealingTexts
     public String verificationFooter;
     public String hiddenAttachmentText;
     public String onePageText;
+    public String signedAtText;
 }
 
 class SealAttachment
@@ -690,6 +691,11 @@ public class AddVerificationPages {
                         table2.addCell(cell2);
                         cell.addElement(table2);
                 }
+            }
+            if( person.signtime!=null && !person.signtime.equals("") ) {
+                para = createParagraph(spec.staticTexts.signedAtText + " " + person.signtime, 10, Font.NORMAL, lightTextColor);
+                para.setLeading(0f, 1.2f);
+                cell.addElement(para);
             }
             table.addCell(cell);
             cells++;

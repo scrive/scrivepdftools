@@ -34,7 +34,8 @@
                           "includeInSummary": true,
                           "onlyForSummary": false,
                           "keyColor": [255, 255, 255]}
-                         ]}],
+                         ],
+             "signtime": "2014-03-14 18:45:30"}],
  "secretaries": [],
  "history": [],
  "initials": "LD, LD, \u017c\u00f3\u0142w \u017b\u00d3\u0141W",
@@ -50,6 +51,7 @@
                  "eventsText": "Registrerade h\u00e4ndelser",
                  "dateText": "Datum",
                  "historyText": "H\u00e4ndelser",
+                 "signedAtText": "Signed at",
                  "verificationFooter": "This verification was issued by Scrive. Information in italics has been safely verified by Scrive. The time stamp ensures that the originality of this document can be proven mathematically and independently of Scrive. For more information see the legal attachment (use a PDF-reader that can show concealed attachments). For your convenience Scrive also provides a service that enables you to automatically verify the document's originality at: https://scrive.com/verify"},
  "attachments": [],
  "filesList": []}
