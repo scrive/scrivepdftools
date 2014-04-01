@@ -133,20 +133,35 @@ endif
 	diff -w test/test-find-texts-test-document.expect.yaml test/test-find-texts-test-document.output-1.yaml
 	mv test/test-find-texts-test-document.output-1.yaml test/test-find-texts-test-document.output.yaml
 
-test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
+test-extract-texts : test/test-extract-texts.extract-output.yaml test/test-extract-test-document.extract-output.yaml
 
-test/test-extract-texts.output.yaml : test/extract-texts.json scrivepdftools.jar
-	java -jar scrivepdftools.jar extract-texts $< > test/test-extract-texts.output-1.yaml
+#
+# Note about organization of tests here.
+#
+# A test is a tripple (json spec, pdf input, expected output). Those
+# need to be specified in this order as 1st, 2nd and 3rd
+# dependency. For example:
+#
+# test1.extract-output.yaml : spec.json input-document.pdf expected-output.yaml relevant-java.jar
+#
+# This setup allows to check a single spec against many inputs,
+# effectivelly enabling easy creation of MxN matrix.
+#
+# Which process to use is encoded in output 'extended extension'. For
+# text extraction output has to end with '.extract-output.yaml'.
+#
+# The rule below knows how to use each dependency.  It is ok to have
+# more dependencies, but those will be ignored.
+test/%.extract-output.yaml :
+	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
+          $< > $<.ext
+	java -jar scrivepdftools.jar extract-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
 ifdef OPEN
-	$(OPEN) test/three-page-a4-stamped.pdf
+	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
-	diff -w test/test-extract-texts.expect.yaml test/test-extract-texts.output-1.yaml
-	mv test/test-extract-texts.output-1.yaml test/test-extract-texts.output.yaml
+	diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
+	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-extract-test-document.output.yaml : test/extract-test-document.json scrivepdftools.jar
-	java -jar scrivepdftools.jar extract-texts $< > test/test-extract-test-document.output-1.yaml
-ifdef OPEN
-	$(OPEN) test/test-document-stamped.pdf
-endif
-	diff -w test/test-extract-test-document.expect.yaml test/test-extract-test-document.output-1.yaml
-	mv test/test-extract-test-document.output-1.yaml test/test-extract-test-document.output.yaml
+test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three-page-a4.pdf test/test-extract-texts.expect.yaml scrivepdftools.jar
+
+test/test-extract-test-document.extract-output.yaml : test/extract-test-document.json test/test-document.pdf test/test-extract-test-document.expect.yaml scrivepdftools.jar
