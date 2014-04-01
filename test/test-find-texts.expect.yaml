@@ -1,12 +1,7 @@
 !!FindTextSpec
 "input": "test/three-page-a4.pdf"
 "matches":
-- "bbox":
-  - 0.15201592646330297
-  - 0.10607834904322788
-  - 0.21413691143042224
-  - 0.09182318133829404
-  "coords":
+- "coords":
   - 0.15201592646330297
   - 0.09978617393453659
   "index": 1
@@ -14,26 +9,19 @@
   "pages":
   - 1
   "text": "Page 1"
-- "bbox": null
-  "coords": null
+- "coords": null
   "index": 2
   "page": null
   "pages":
   - 1
   "text": "Page 1"
-- "bbox": null
-  "coords": null
+- "coords": null
   "index": 2
   "page": null
   "pages":
   - 1
   "text": "Page"
-- "bbox":
-  - 0.15201592646330297
-  - 0.10607834904322788
-  - 0.19309858725971124
-  - 0.09182318133829404
-  "coords":
+- "coords":
   - 0.15201592646330297
   - 0.09978617393453659
   "index": 2
@@ -42,12 +30,7 @@
   - 1
   - 2
   "text": "Page"
-- "bbox":
-  - 0.15201592646330297
-  - 0.10607834904322788
-  - 0.19309858725971124
-  - 0.09182318133829404
-  "coords":
+- "coords":
   - 0.15201592646330297
   - 0.09978617393453659
   "index": 3
@@ -57,8 +40,7 @@
   - 2
   - 3
   "text": "Page"
-- "bbox": null
-  "coords": null
+- "coords": null
   "index": 233
   "page": null
   "pages":
