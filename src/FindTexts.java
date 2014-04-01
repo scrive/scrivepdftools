@@ -220,17 +220,15 @@ class MyRenderListener implements RenderListener
                 cp.x = p.get(Vector.I1);
                 cp.y = p.get(Vector.I2);
 
-                /*
                 line = tri.getDescentLine();
                 p = line.getStartPoint();
-                cp.bx = p.get(Vector.I1);
-                cp.by = p.get(Vector.I2);
+                float bx = p.get(Vector.I1);
+                float by = p.get(Vector.I2);
 
                 line = tri.getAscentLine();
                 p = line.getEndPoint();
-                cp.ex = p.get(Vector.I1);
-                cp.ey = p.get(Vector.I2);
-                */
+                float ex = p.get(Vector.I1);
+                float ey = p.get(Vector.I2);
 
                 allCharacters.add(cp);
 
@@ -242,6 +240,15 @@ class MyRenderListener implements RenderListener
                                                     (float)cp.y+1);
                     frame.setBorderColor(new BaseColor(1f, 0f, 1f));
                     frame.setBorderWidth(1f);
+                    frame.setBorder(15);
+                    canvas.rectangle(frame);
+
+                    frame = new Rectangle((float)bx,
+                                          (float)by,
+                                          (float)ex,
+                                          (float)ey);
+                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                    frame.setBorderWidth(0.1f);
                     frame.setBorder(15);
                     canvas.rectangle(frame);
                 }
