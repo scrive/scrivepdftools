@@ -78,7 +78,22 @@ class Match
     // result output mode
     public Integer page;
     public ArrayList<Double> coords;
+
+    /*
+     * Note: iText as of version 5.4.5 does a very surprising job when
+     * calculating font bounding box. Especially upper and lower
+     * bounds seem to be usually too low.  Either they forgot to take
+     * into account one of the font metrics or they miscalculate
+     * something.  Anyway until this is fixed trying to rely on font
+     * bounding box introduces compatibility nightmare as it will
+     * force us to always rely on miscalculated bounding box.
+     *
+     * Therefore bounding box disabled until we find a customer for
+     * this feature and are able to fix it.
+     */
+    /*
     public ArrayList<Double> bbox;
+    */
 };
 
 class FindTextSpec
@@ -154,14 +169,20 @@ class MyRenderListener implements RenderListener
         /*
          * Coordinates as returned by iText. We know that y is font
          * baseline coordinate.
-         *
-         * bx, by are coordinates of lower left corner. ex, ey are
-         * coordinates of upper right corner. [bx by ex ey] is the
-         * bounding box for this character.
          */
-        double x, y, bx, by, ex, ey;
+        double x, y;
+
+         /*
+          * Due to bugs in iText 5.4.5 this part isn't working
+          * yet. The bx, by are coordinates of lower left corner. ex,
+          * ey are coordinates of upper right corner. [bx by ex ey] is
+          * the bounding box for this character.
+          */
+        /*
+        double bx, by, ex, ey;
+        */
         public String toString() {
-            return c + "," + x + "," + y + "," + bx + "," + by + "," + ex + "," + ey;
+            return c + "," + x + "," + y;
         }
     };
 
@@ -199,6 +220,7 @@ class MyRenderListener implements RenderListener
                 cp.x = p.get(Vector.I1);
                 cp.y = p.get(Vector.I2);
 
+                /*
                 line = tri.getDescentLine();
                 p = line.getStartPoint();
                 cp.bx = p.get(Vector.I1);
@@ -208,17 +230,18 @@ class MyRenderListener implements RenderListener
                 p = line.getEndPoint();
                 cp.ex = p.get(Vector.I1);
                 cp.ey = p.get(Vector.I2);
+                */
 
                 allCharacters.add(cp);
 
                 if( stamper!=null ) {
                     PdfContentByte canvas = stamper.getOverContent(page);
-                    Rectangle frame = new Rectangle((float)cp.bx,
-                                                    (float)cp.by,
-                                                    (float)cp.ex,
-                                                    (float)cp.ey);
+                    Rectangle frame = new Rectangle((float)cp.x-1,
+                                                    (float)cp.y-1,
+                                                    (float)cp.x+1,
+                                                    (float)cp.y+1);
                     frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                    frame.setBorderWidth(0.1f);
+                    frame.setBorderWidth(1f);
                     frame.setBorder(15);
                     canvas.rectangle(frame);
                 }
@@ -259,10 +282,12 @@ class MyRenderListener implements RenderListener
                     cp.c = needle;
                     cp.x = allCharacters.get(i).x;
                     cp.y = allCharacters.get(i).y;
+                    /*
                     cp.bx = allCharacters.get(i).bx;
                     cp.by = allCharacters.get(i).by;
                     cp.ex = allCharacters.get(i+k-1).ex;
                     cp.ey = allCharacters.get(i+k-1).ey;
+                    */
                     foundText = cp;
                     return;
                 }
@@ -360,20 +385,24 @@ public class FindTexts {
                             match.coords = new ArrayList<Double>();
                             match.coords.add(new Double((rl.foundText.x - crop.getLeft())/crop.getWidth()));
                             match.coords.add(new Double(1 - (rl.foundText.y - crop.getBottom())/crop.getHeight()));
+                            /*
+                              See note about bbox field in the struct Match.
+
                             match.bbox = new ArrayList<Double>();
                             match.bbox.add(new Double((rl.foundText.bx - crop.getLeft())/crop.getWidth()));
                             match.bbox.add(new Double(1 - (rl.foundText.by - crop.getBottom())/crop.getHeight()));
                             match.bbox.add(new Double((rl.foundText.ex - crop.getLeft())/crop.getWidth()));
                             match.bbox.add(new Double(1 - (rl.foundText.ey - crop.getBottom())/crop.getHeight()));
+                            */
 
                             if( stamper!=null ) {
                                 PdfContentByte canvas = stamper.getOverContent(i);
-                                Rectangle frame = new Rectangle((float)rl.foundText.bx,
-                                                                (float)rl.foundText.by,
-                                                                (float)rl.foundText.ex,
-                                                                (float)rl.foundText.ey);
+                                Rectangle frame = new Rectangle((float)rl.foundText.x-1,
+                                                                (float)rl.foundText.y-1,
+                                                                (float)rl.foundText.x+1,
+                                                                (float)rl.foundText.y+1);
                                 frame.setBorderColor(new BaseColor(0f, 1f, 0f));
-                                frame.setBorderWidth(0.1f);
+                                frame.setBorderWidth(2f);
                                 frame.setBorder(15);
                                 canvas.rectangle(frame);
                             }

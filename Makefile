@@ -118,18 +118,20 @@ endif
 test-find-texts : test/test-find-texts.output.yaml test/test-find-texts-test-document.output.yaml
 
 test/test-find-texts.output.yaml : test/find-texts.json scrivepdftools.jar
-	java -jar scrivepdftools.jar find-texts $< > $@
+	java -jar scrivepdftools.jar find-texts $< > test/test-find-texts.output-1.yaml
 ifdef OPEN
 	$(OPEN) test/three-page-a4-find-texts-stamped.pdf
 endif
-	diff -w test/test-find-texts.expect.yaml $@
+	diff -w test/test-find-texts.expect.yaml test/test-find-texts.output-1.yaml
+	mv test/test-find-texts.output-1.yaml test/test-find-texts.output.yaml
 
 test/test-find-texts-test-document.output.yaml : test/find-texts-test-document.json scrivepdftools.jar
-	java -jar scrivepdftools.jar find-texts $< > $@
+	java -jar scrivepdftools.jar find-texts $< > test/test-find-texts-test-document.output-1.yaml
 ifdef OPEN
 	$(OPEN) test/test-document-find-texts-stamped.pdf
 endif
-	diff -w test/test-find-texts-test-document.expect.yaml $@
+	diff -w test/test-find-texts-test-document.expect.yaml test/test-find-texts-test-document.output-1.yaml
+	mv test/test-find-texts-test-document.output-1.yaml test/test-find-texts-test-document.output.yaml
 
 test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
 
