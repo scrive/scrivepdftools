@@ -115,23 +115,21 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-find-texts : test/test-find-texts.output.yaml test/test-find-texts-test-document.output.yaml
+test-find-texts : test/test-find-texts.find-output.yaml test/test-find-texts-test-document.find-output.yaml
 
-test/test-find-texts.output.yaml : test/find-texts.json scrivepdftools.jar
-	java -jar scrivepdftools.jar find-texts $< > test/test-find-texts.output-1.yaml
+test/%.find-output.yaml :
+	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
+          $< > $<.ext
+	java -jar scrivepdftools.jar find-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
 ifdef OPEN
-	$(OPEN) test/three-page-a4-find-texts-stamped.pdf
+	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
-	diff -w test/test-find-texts.expect.yaml test/test-find-texts.output-1.yaml
-	mv test/test-find-texts.output-1.yaml test/test-find-texts.output.yaml
+	diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
+	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-find-texts-test-document.output.yaml : test/find-texts-test-document.json scrivepdftools.jar
-	java -jar scrivepdftools.jar find-texts $< > test/test-find-texts-test-document.output-1.yaml
-ifdef OPEN
-	$(OPEN) test/test-document-find-texts-stamped.pdf
-endif
-	diff -w test/test-find-texts-test-document.expect.yaml test/test-find-texts-test-document.output-1.yaml
-	mv test/test-find-texts-test-document.output-1.yaml test/test-find-texts-test-document.output.yaml
+test/test-find-texts.find-output.yaml : test/find-texts.json test/three-page-a4.pdf test/test-find-texts.expect.yaml scrivepdftools.jar
+
+test/test-find-texts-test-document.find-output.yaml : test/find-texts-test-document.json test/test-document.pdf test/test-find-texts-test-document.expect.yaml scrivepdftools.jar
 
 test-extract-texts : test/test-extract-texts.extract-output.yaml test/test-extract-test-document.extract-output.yaml
 

@@ -25,6 +25,6 @@
   "pages":
   - 1
   "text": "document"
-"stampedOutput": "test/test-document-find-texts-stamped.pdf"
+"stampedOutput": "test/test-find-texts-test-document.find-output.pdf"
 "yamlOutput": true
 
