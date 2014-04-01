@@ -1,7 +1,8 @@
 !!ExtractTextSpec
 "input": "test/three-page-a4.pdf"
 "rects":
-- "lines":
+- "expected": null
+  "lines":
   - "Page 1 "
   "page": 1
   "rect":
@@ -9,7 +10,8 @@
   - 0.0
   - 1.0
   - 1.0
-- "lines":
+- "expected": null
+  "lines":
   - "Page 2 "
   "page": 2
   "rect":
@@ -17,21 +19,25 @@
   - 0.0
   - 1.0
   - 1.0
-- "lines": null
+- "expected": null
+  "lines": null
   "page": 7
   "rect":
   - 0.0
   - 0.0
   - 1.0
   - 1.0
-- "lines": []
+- "expected": null
+  "lines": []
   "page": 1
   "rect":
   - 0.4
   - 0.4
   - 0.6
   - 0.6
-- "lines": []
+- "expected": null
+  "lines":
+  - "Page 1"
   "page": 1
   "rect":
   - 0.15201592646330297

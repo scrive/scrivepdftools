@@ -1,35 +1,64 @@
 !!ExtractTextSpec
 "input": "test/test-document.pdf"
 "rects":
-- "lines": null
+- "expected": null
+  "lines":
+  - "Test document"
+  - "This is a test document to use for show of SkrivaPa services. This is a test"
+  - "document to use for show of SkrivaPa services. This is a test document to"
+  - "use for show of SkrivaPa services. This is a test document to use for show"
+  - "of SkrivaPa services. This is a test document to use for show of SkrivaPa"
+  - "services. This is a test document to use for show of SkrivaPa services."
   "page": 1
   "rect":
   - 0.0
   - 0.0
   - 1.0
   - 1.0
-- "lines": null
+- "expected": null
+  "lines":
+  - "Test document"
   "page": 1
   "rect":
   - 0.0
   - 0.0
   - 1.0
   - 0.5
-- "lines": null
+- "expected": null
+  "lines":
+  - "This is a test document to use for show of SkrivaPa services. This is a test"
+  - "document to use for show of SkrivaPa services. This is a test document to"
+  - "use for show of SkrivaPa services. This is a test document to use for show"
+  - "of SkrivaPa services. This is a test document to use for show of SkrivaPa"
+  - "services. This is a test document to use for show of SkrivaPa services."
   "page": 1
   "rect":
   - 0.0
   - 0.5
   - 1.0
   - 1.0
-- "lines": null
+- "expected": null
+  "lines":
+  - "Test do"
+  - "This is a test document to use for sho"
+  - "document to use for show of SkrivaP"
+  - "use for show of SkrivaPa services. Th"
+  - "of SkrivaPa services. This is a test do"
+  - "services. This is a test document to us"
   "page": 1
   "rect":
   - 0.0
   - 0.0
   - 0.5
   - 1.0
-- "lines": null
+- "expected": null
+  "lines":
+  - "cument"
+  - "w of SkrivaPa services. This is a test"
+  - "a services. This is a test document to"
+  - "is is a test document to use for show"
+  - "cument to use for show of SkrivaPa"
+  - "e for show of SkrivaPa services."
   "page": 1
   "rect":
   - 0.5

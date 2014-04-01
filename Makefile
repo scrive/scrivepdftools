@@ -134,15 +134,17 @@ endif
 test-extract-texts : test/test-extract-texts.output.yaml test/test-extract-test-document.output.yaml
 
 test/test-extract-texts.output.yaml : test/extract-texts.json scrivepdftools.jar
-	java -jar scrivepdftools.jar extract-texts $< > $@
+	java -jar scrivepdftools.jar extract-texts $< > test/test-extract-texts.output-1.yaml
 ifdef OPEN
 	$(OPEN) test/three-page-a4-stamped.pdf
 endif
-	diff -w test/test-extract-texts.expect.yaml $@
+	diff -w test/test-extract-texts.expect.yaml test/test-extract-texts.output-1.yaml
+	mv test/test-extract-texts.output-1.yaml test/test-extract-texts.output.yaml
 
 test/test-extract-test-document.output.yaml : test/extract-test-document.json scrivepdftools.jar
-	java -jar scrivepdftools.jar extract-texts $< > $@
+	java -jar scrivepdftools.jar extract-texts $< > test/test-extract-test-document.output-1.yaml
 ifdef OPEN
 	$(OPEN) test/test-document-stamped.pdf
 endif
-	diff -w test/test-extract-test-document.expect.yaml $@
+	diff -w test/test-extract-test-document.expect.yaml test/test-extract-test-document.output-1.yaml
+	mv test/test-extract-test-document.output-1.yaml test/test-extract-test-document.output.yaml
