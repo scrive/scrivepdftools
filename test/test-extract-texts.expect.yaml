@@ -1,7 +1,6 @@
 "input": "test/three-page-a4.pdf"
 "rects":
-- "expected": null
-  "lines":
+- "lines":
   - "Page 1 "
   "page": 1
   "rect":
@@ -9,8 +8,7 @@
   - 0.0
   - 1.0
   - 1.0
-- "expected": null
-  "lines":
+- "lines":
   - "Page 2 "
   "page": 2
   "rect":
@@ -18,24 +16,20 @@
   - 0.0
   - 1.0
   - 1.0
-- "expected": null
-  "lines": null
-  "page": 7
+- "page": 7
   "rect":
   - 0.0
   - 0.0
   - 1.0
   - 1.0
-- "expected": null
-  "lines": []
+- "lines": []
   "page": 1
   "rect":
   - 0.4
   - 0.4
   - 0.6
   - 0.6
-- "expected": null
-  "lines":
+- "lines":
   - "Page 1"
   "page": 1
   "rect":

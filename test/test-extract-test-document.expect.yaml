@@ -1,7 +1,6 @@
 "input": "test/test-document.pdf"
 "rects":
-- "expected": null
-  "lines":
+- "lines":
   - "Test document"
   - "This is a test document to use for show of SkrivaPa services. This is a test"
   - "document to use for show of SkrivaPa services. This is a test document to"
@@ -14,8 +13,7 @@
   - 0.0
   - 1.0
   - 1.0
-- "expected": null
-  "lines":
+- "lines":
   - "Test document"
   "page": 1
   "rect":
@@ -23,8 +21,7 @@
   - 0.0
   - 1.0
   - 0.5
-- "expected": null
-  "lines":
+- "lines":
   - "This is a test document to use for show of SkrivaPa services. This is a test"
   - "document to use for show of SkrivaPa services. This is a test document to"
   - "use for show of SkrivaPa services. This is a test document to use for show"
@@ -36,8 +33,7 @@
   - 0.5
   - 1.0
   - 1.0
-- "expected": null
-  "lines":
+- "lines":
   - "Test do"
   - "This is a test document to use for sho"
   - "document to use for show of SkrivaP"
@@ -50,8 +46,7 @@
   - 0.0
   - 0.5
   - 1.0
-- "expected": null
-  "lines":
+- "lines":
   - "cument"
   - "w of SkrivaPa services. This is a test"
   - "a services. This is a test document to"

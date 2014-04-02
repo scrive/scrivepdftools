@@ -32,6 +32,7 @@ import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.nodes.*;
+import org.yaml.snakeyaml.introspector.Property;
 
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -300,32 +301,6 @@ class MyRenderListener implements RenderListener
                 }
                 index = index - 1;
             }
-        }
-    }
-};
-
-/*
- * MyRepresenter exists for the sole purpose of putting strings in
- * double quotes.
- *
- * Using DumperOptions.ScalarStyle.DOUBLE_QUOTED had this additional
- * feature of putting also numbers (ints and floats) in quotes and
- * tagging them with tags. To get around this I have to write this
- * function.
- *
- * This has also the nice property of putting key names in double
- * quotes producing well formed json.
- */
-class MyRepresenter extends Representer
-{
-    protected Node representScalar(Tag tag,
-                                   String value,
-                                   Character c) {
-        if( tag==Tag.STR ) {
-            return super.representScalar(tag,value,DumperOptions.ScalarStyle.DOUBLE_QUOTED.getChar());
-        }
-        else {
-            return super.representScalar(tag,value,c);
         }
     }
 };
