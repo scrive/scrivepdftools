@@ -1,4 +1,3 @@
-!!FindTextSpec
 "input": "test/test-document.pdf"
 "matches":
 - "coords":

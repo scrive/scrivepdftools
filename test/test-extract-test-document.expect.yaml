@@ -1,4 +1,3 @@
-!!ExtractTextSpec
 "input": "test/test-document.pdf"
 "rects":
 - "expected": null

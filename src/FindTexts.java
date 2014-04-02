@@ -443,18 +443,10 @@ public class FindTexts {
         //Yaml yaml = new Yaml(options);
         Representer representer = new MyRepresenter();
         representer.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        representer.addClassTag(FindTextSpec.class,Tag.MAP);
 
         Yaml yaml = new Yaml(representer, options);
         String json = yaml.dump(spec);
-
-        // Yaml generates a type marker !!FindTextSpec in output
-        // that I have no idea how to suppress.  I'm going to remove
-        // it now.
-
-        int k = json.indexOf("{");
-        if( k>0 ) {
-            json = json.substring(k);
-        }
 
         // We need to force utf-8 encoding here.
         PrintStream out = new PrintStream(System.out, true, "utf-8");
