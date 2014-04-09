@@ -73,6 +73,7 @@ class Rect
 {
     public Integer page;
     public ArrayList<Double> rect;
+    public ArrayList<Float> color;
 
     // result output mode
     public ArrayList<String> lines;
@@ -245,13 +246,23 @@ public class ExtractTexts {
 
     }
 
+
+    static BaseColor colorFromRect(Rect rect) {
+        if( rect.color!=null && rect.color.size()==3) {
+            return new BaseColor(rect.color.get(0), rect.color.get(1), rect.color.get(2));
+        }
+        else {
+            return new BaseColor(0f, 1f, 0f);
+        }
+    }
+
     public static void stampRects(PdfReader reader, ExtractTextSpec spec)
         throws IOException, DocumentException
     {
         PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
 
         for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-            for(Rect rect : spec.rects ) {
+            for(Rect rect : spec.rects) {
                 if( rect.page==i ) {
 
                     Rectangle crop = reader.getPageSizeWithRotation(rect.page);
@@ -262,8 +273,8 @@ public class ExtractTexts {
 
                     PdfContentByte canvas = stamper.getOverContent(i);
                     Rectangle frame = new Rectangle((float)l,(float)b,(float)r,(float)t);
-                    frame.setBorderColor(new BaseColor(0f, 1f, 0f));
-                    frame.setBorderWidth(0.1f);
+                    frame.setBorderColor(colorFromRect(rect));
+                    frame.setBorderWidth(0.3f);
                     frame.setBorder(15);
                     canvas.rectangle(frame);
                 }
