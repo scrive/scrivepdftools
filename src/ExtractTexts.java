@@ -49,11 +49,13 @@ import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.itextpdf.text.pdf.parser.Vector;
 import com.itextpdf.text.pdf.parser.LineSegment;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfSmartCopy;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Font.FontFamily;
@@ -81,12 +83,20 @@ class Rect
     public ArrayList<String> expected;
 };
 
+class MatchedTemplate
+{
+    public ArrayList<Float> color;
+    public String title;
+};
+
 class ExtractTextSpec
 {
     public String input;
     public Boolean yamlOutput;
     public ArrayList<Rect> rects;
     public String stampedOutput;
+
+    public ArrayList<MatchedTemplate> listOfTemplates;
 
     /*
      * YAML is compatible with JSON (at least with the JSON we generate).
@@ -105,6 +115,7 @@ class ExtractTextSpec
          */
         TypeDescription extractTextDesc = new TypeDescription(ExtractTextSpec.class);
         extractTextDesc.putListPropertyType("rects", Rect.class);
+        extractTextDesc.putListPropertyType("listOfTemplates", MatchedTemplate.class);
         constructor.addTypeDescription(extractTextDesc);
 
         Yaml yaml = new Yaml(constructor);
@@ -247,9 +258,9 @@ public class ExtractTexts {
     }
 
 
-    static BaseColor colorFromRect(Rect rect) {
-        if( rect.color!=null && rect.color.size()==3) {
-            return new BaseColor(rect.color.get(0), rect.color.get(1), rect.color.get(2));
+    static BaseColor colorFromArrayListFloat(ArrayList<Float> color) {
+        if( color!=null && color.size()==3) {
+            return new BaseColor(color.get(0), color.get(1), color.get(2));
         }
         else {
             return new BaseColor(0f, 1f, 0f);
@@ -261,7 +272,8 @@ public class ExtractTexts {
     {
         PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
 
-        for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+        int i;
+        for (i = 1; i <= reader.getNumberOfPages(); i++) {
             for(Rect rect : spec.rects) {
                 if( rect.page==i ) {
 
@@ -273,11 +285,34 @@ public class ExtractTexts {
 
                     PdfContentByte canvas = stamper.getOverContent(i);
                     Rectangle frame = new Rectangle((float)l,(float)b,(float)r,(float)t);
-                    frame.setBorderColor(colorFromRect(rect));
+                    frame.setBorderColor(colorFromArrayListFloat(rect.color));
                     frame.setBorderWidth(0.3f);
                     frame.setBorder(15);
                     canvas.rectangle(frame);
                 }
+            }
+        }
+
+        if( spec.listOfTemplates!=null ) {
+            ColumnText ct = new ColumnText(null);
+            for (MatchedTemplate mt : spec.listOfTemplates) {
+                Paragraph p = new Paragraph(mt.title,
+                                            FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL,
+                                                                colorFromArrayListFloat(mt.color)));
+                ct.addElement(p);
+            }
+
+            while(true) {
+                // Add a new page
+                stamper.insertPage(i, reader.getPageSize(1));
+
+                // Add as much content of the column as possible
+                PdfContentByte canvas = stamper.getOverContent(i);
+                ct.setCanvas(canvas);
+                ct.setSimpleColumn(16, 16, 559, 770);
+                if (!ColumnText.hasMoreText(ct.go()))
+                    break;
+                i++;
             }
         }
 

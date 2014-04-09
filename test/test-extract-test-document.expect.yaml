@@ -1,4 +1,15 @@
 "input": "test/test-document.pdf"
+"listOfTemplates":
+- "color":
+  - 0.5
+  - 1.0
+  - 1.0
+  "title": "First of matched templates"
+- "color":
+  - 0.5
+  - 1.0
+  - 0.0
+  "title": "Second of matched templates"
 "rects":
 - "lines":
   - "Test document"
@@ -33,7 +44,11 @@
   - 0.5
   - 1.0
   - 1.0
-- "lines":
+- "color":
+  - 1.0
+  - 0.0
+  - 0.0
+  "lines":
   - "Test do"
   - "This is a test document to use for sho"
   - "document to use for show of SkrivaP"
