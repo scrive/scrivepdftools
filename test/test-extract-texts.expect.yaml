@@ -1,4 +1,5 @@
 "input": "test/three-page-a4.pdf"
+"numberOfPages": 3
 "rects":
 - "lines":
   - "Page 1 "

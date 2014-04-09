@@ -95,6 +95,7 @@ class ExtractTextSpec
     public Boolean yamlOutput;
     public ArrayList<Rect> rects;
     public String stampedOutput;
+    public Integer numberOfPages;
 
     public ArrayList<MatchedTemplate> listOfTemplates;
 
@@ -326,6 +327,8 @@ public class ExtractTexts {
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
 
         int npages = reader.getNumberOfPages();
+
+        spec.numberOfPages = npages;
 
         ExtractTextsRenderListener charsForPages[] = new ExtractTextsRenderListener[npages];
 
