@@ -692,8 +692,8 @@ public class AddVerificationPages {
                         cell.addElement(table2);
                 }
             }
-            if( person.signtime!=null && !person.signtime.equals("") ) {
-                para = createParagraph(spec.staticTexts.signedAtText + " " + person.signtime, 10, Font.ITALIC, lightTextColor);
+            if( spec.staticTexts.signedAtText!=null && person.signtime!=null && !person.signtime.equals("") ) {
+                para = createParagraph(spec.staticTexts.signedAtText + " " + person.signtime, 8, Font.ITALIC, lightTextColor);
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
