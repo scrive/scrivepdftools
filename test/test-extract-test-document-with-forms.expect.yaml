@@ -1,0 +1,165 @@
+"input": "test/document-with-text-in-forms.pdf"
+"listOfTemplates":
+- "color":
+  - 0.5
+  - 1.0
+  - 1.0
+  "title": "First of matched templates"
+- "color":
+  - 0.5
+  - 1.0
+  - 0.0
+  "title": "Second of matched templates"
+"numberOfPages": 8
+"rects":
+- "lines":
+  - "AVTAL TELE2 SVERIGE AB"
+  - "Ordernummer:"
+  - "Orderdatum:"
+  - "KUNDINFORMATION"
+  - "PersonnummerNamnC/O"
+  - "GatuadressPostnummerPostadress"
+  - "Antal produkter på detta avtal:"
+  - "Priser:Jag har tagit del av aktuellt pris för beställd prudukt/beställda produkter."
+  - "Bilagor:"
+  - "UNDERSKRIFT"
+  - "Ort/datumUnderskrift"
+  - "IdentitetskontrollNamnförtydligande"
+  - "Har du frågor om ditt köp vänligen kontakta den återförsäljare du handlat av."
+  - "KundserviceOrg nrTelefonFax"
+  - "Tele2 Sverige AB"
+  - "1066 66 Stockholm"
+  - "556267-51640772-25 25 250200-24 00 70"
+  - "Kundens exemplar"
+  - "Sida 1 av 4"
+  - "196806230063"
+  - "Test Testsson"
+  - "T2R-00001836"
+  - "2014-04-24"
+  - "Test Testsson"
+  - "1010101010 Körkort - Id-handling har belysts i UV-ljus"
+  - "Gatan 17"
+  - "1"
+  - "1. Tele2 Sverige AB - Allmänna villkor - Privat"
+  - "2. Abonnemangsvillkor mobiltjänster - Tele2"
+  - "12345Staden"
+  - "Tele2 och Test Testsson har denna dag träffat avtal avseende produkter och tjänster specificerade under rubriken \"Produktinformation\"."
+  - "Nedan angivna bilagor utgör del av avtalet."
+  - "SalesSupport 701400"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines":
+  - "AVTAL TELE2 SVERIGE AB"
+  - "Ordernummer:"
+  - "Orderdatum:"
+  - "KUNDINFORMATION"
+  - "PersonnummerNamnC/O"
+  - "GatuadressPostnummerPostadress"
+  - "Antal produkter på detta avtal:"
+  - "Priser:Jag har tagit del av aktuellt pris för beställd prudukt/beställda produkter."
+  - "Bilagor:"
+  - "Kundens exemplar"
+  - "196806230063"
+  - "T2R-00001836"
+  - "2014-04-24"
+  - "Test Testsson"
+  - "Gatan 17"
+  - "1"
+  - "1. Tele2 Sverige AB - Allmänna villkor - Privat"
+  - "2. Abonnemangsvillkor mobiltjänster - Tele2"
+  - "12345Staden"
+  - "Tele2 och Test Testsson har denna dag träffat avtal avseende produkter och tjänster specificerade under rubriken \"Produktinformation\"."
+  - "Nedan angivna bilagor utgör del av avtalet."
+  - "SalesSupport 701400"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 0.5
+- "lines":
+  - "UNDERSKRIFT"
+  - "Ort/datumUnderskrift"
+  - "IdentitetskontrollNamnförtydligande"
+  - "Har du frågor om ditt köp vänligen kontakta den återförsäljare du handlat av."
+  - "KundserviceOrg nrTelefonFax"
+  - "Tele2 Sverige AB"
+  - "1066 66 Stockholm"
+  - "556267-51640772-25 25 250200-24 00 70"
+  - "Sida 1 av 4"
+  - "Test Testsson1010101010 Körkort - Id-handling har belysts i UV-ljus"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+- "color":
+  - 1.0
+  - 0.0
+  - 0.0
+  "lines":
+  - "AVTAL TELE2"
+  - "Ordernummer:"
+  - "Orderdatum:"
+  - "KUNDINFORMATION"
+  - "PersonnummerNamn"
+  - "GatuadressPostnummer"
+  - "Antal produkter på detta avtal:"
+  - "Priser:Jag har tagit del av aktuellt pris för b"
+  - "Bilagor:"
+  - "UNDERSKRIFT"
+  - "Ort/datum"
+  - "Identitetskontroll"
+  - "Har du frågor om ditt köp vänligen kontakta den återförsäljare du handla"
+  - "KundserviceOrg nr"
+  - "Tele2 Sverige AB"
+  - "1066 66 Stockholm"
+  - "556267-5164"
+  - "196806230063"
+  - "T2R-00001836"
+  - "2014-04-24"
+  - "Test Testsson"
+  - "1010101010 Körkort - Id-handling har belysts i UV-ljus"
+  - "Gatan 17"
+  - "1"
+  - "1. Tele2 Sverige AB - Allmänna villkor - Privat"
+  - "2. Abonnemangsvillkor mobiltjänster - Tele2"
+  - "12345"
+  - "Tele2 och Test Testsson har denna dag träffat avtal avseende produkte"
+  - "Nedan angivna bilagor utgör del av avtalet."
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+- "lines":
+  - "SVERIGE AB"
+  - "C/O"
+  - "Postadress"
+  - "eställd prudukt/beställda produkter."
+  - "Underskrift"
+  - "Namnförtydligande"
+  - "t av."
+  - "TelefonFax"
+  - "0772-25 25 250200-24 00 70"
+  - "Kundens exemplar"
+  - "Sida 1 av 4"
+  - "Test Testsson"
+  - "Staden"
+  - "r och tjänster specificerade under rubriken \"Produktinformation\"."
+  - "SalesSupport 701400"
+  "page": 1
+  "rect":
+  - 0.5
+  - 0.0
+  - 1.0
+  - 1.0
+"stampedOutput": "test/test-extract-test-document-with-forms.extract-output.pdf"
+"yamlOutput": true
+

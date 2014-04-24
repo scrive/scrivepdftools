@@ -131,7 +131,7 @@ test/test-find-texts.find-output.yaml : test/find-texts.json test/three-page-a4.
 
 test/test-find-texts-test-document.find-output.yaml : test/find-texts-test-document.json test/test-document.pdf test/test-find-texts-test-document.expect.yaml scrivepdftools.jar
 
-test-extract-texts : test/test-extract-texts.extract-output.yaml test/test-extract-test-document.extract-output.yaml
+test-extract-texts : test/test-extract-texts.extract-output.yaml test/test-extract-test-document.extract-output.yaml test/test-extract-test-document-with-forms.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -163,3 +163,5 @@ endif
 test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three-page-a4.pdf test/test-extract-texts.expect.yaml scrivepdftools.jar
 
 test/test-extract-test-document.extract-output.yaml : test/extract-test-document.json test/test-document.pdf test/test-extract-test-document.expect.yaml scrivepdftools.jar
+
+test/test-extract-test-document-with-forms.extract-output.yaml : test/extract-test-document.json test/document-with-text-in-forms.pdf test/test-extract-test-document-with-forms.expect.yaml scrivepdftools.jar

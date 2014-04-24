@@ -323,7 +323,19 @@ public class ExtractTexts {
     public static void execute(ExtractTextSpec spec)
         throws IOException, DocumentException
     {
+        /* This is here to flatten forms so that texts in them can be read
+         */
         PdfReader reader = new PdfReader(spec.input);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PdfStamper stamper = new PdfStamper(reader, os);
+
+        stamper.setFormFlattening(true);
+        stamper.setFreeTextFlattening(true);
+
+        stamper.close();
+        reader.close();
+
+        reader = new PdfReader(os.toByteArray());
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
 
         int npages = reader.getNumberOfPages();
