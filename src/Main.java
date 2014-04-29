@@ -50,6 +50,9 @@ class Main
             else if( args[0].equals("extract-texts")) {
                 ExtractTexts.execute(args[1], input);
             }
+            else if( args[0].equals("normalize")) {
+                Normalize.execute(args[1], input);
+            }
             else {
                 System.err.println("Uknown verb " + args[0]);
             }

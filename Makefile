@@ -24,10 +24,17 @@ classes/%.class : src/%.java
 	if [ ! -d classes ]; then mkdir classes; fi
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
-scrivepdftools.jar : Manifest.txt classes/Main.class classes/AddVerificationPages.class classes/FindTexts.class classes/ExtractTexts.class assets/sealmarker.pdf assets/SourceSansPro-Light.ttf
+scrivepdftools.jar : Manifest.txt \
+                     classes/Main.class \
+                     classes/AddVerificationPages.class \
+                     classes/FindTexts.class \
+                     classes/ExtractTexts.class \
+                     classes/Normalize.class \
+                     assets/sealmarker.pdf \
+                     assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
 
-test : test-add-verification-pages test-find-texts test-extract-texts
+test : test-add-verification-pages test-find-texts test-extract-texts test-normalize
 
 test-add-verification-pages :\
        test/seal-simplest.pdf \
@@ -165,3 +172,11 @@ test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three
 test/test-extract-test-document.extract-output.yaml : test/extract-test-document.json test/test-document.pdf test/test-extract-test-document.expect.yaml scrivepdftools.jar
 
 test/test-extract-test-document-with-forms.extract-output.yaml : test/extract-test-document.json test/document-with-text-in-forms.pdf test/test-extract-test-document-with-forms.expect.yaml scrivepdftools.jar
+
+test-normalize : test/document-with-text-in-forms-flattened.pdf
+
+test/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
