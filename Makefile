@@ -30,6 +30,7 @@ scrivepdftools.jar : Manifest.txt \
                      classes/FindTexts.class \
                      classes/ExtractTexts.class \
                      classes/Normalize.class \
+                     classes/ImageNoImageMask.class \
                      assets/sealmarker.pdf \
                      assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
