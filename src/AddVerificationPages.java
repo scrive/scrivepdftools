@@ -15,11 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+import java.awt.image.*;
+import java.awt.Color;
+import javax.imageio.*;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -548,37 +553,80 @@ public class AddVerificationPages {
         return result;
     }
 
-    static Image createImageWithKeyColor(Field field) throws Base64DecodeException, BadElementException, MalformedURLException, IOException
+    static Image createImageWithKeyColor(Field field) throws Base64DecodeException, BadElementException, MalformedURLException, IOException, DocumentException
     {
         byte rawdata[] = Base64.decode(field.valueBase64);
         if( rawdata==null ) {
             throw new Base64DecodeException();
         }
 
-        Image image = Image.getInstance(rawdata);
+        BufferedImage bufImg = ImageIO.read(new ByteArrayInputStream(rawdata));
 
-        if( field.keyColor!=null ) {
-            /*
-             * Color space is 3 for RGB, 1 for
-             * Gray. No idea what to do if this
-             * returns something else.
-             */
-            int colorSpace = image.getColorspace();
+        /*
+        System.err.println("getTransparency: " + bufImg.getTransparency());
+        System.err.println("isAlphaPremultiplied: " + bufImg.isAlphaPremultiplied());
+        System.err.println("getType: " + bufImg.getType());
+        SampleModel sampleModel = bufImg.getSampleModel();
+        System.err.println("getSampleModel.getDataType: " + sampleModel.getDataType());
+        System.err.println("getSampleModel.getNumBands: " + sampleModel.getNumBands());
+        System.err.println("getSampleModel.getNumDataElements: " + sampleModel.getNumDataElements());
+        */
 
-            int r = field.keyColor.get(0);
-            int g = field.keyColor.get(1);
-            int b = field.keyColor.get(2);
-            int ave = (r + g + b) / 3;
+        BufferedImage bufImg2 = new BufferedImage(bufImg.getWidth(), bufImg.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+        for (int y=0; y<bufImg.getHeight(); y++ ) {
+            for (int x=0; x<bufImg.getWidth(); x++ ) {
+                int argb = bufImg.getRGB(x,y);
+                int r = (argb >>> 16) & 255;
+                int g = (argb >>> 8) & 255;
+                int b = (argb >>> 0) & 255;
+                int a = (argb >>> 24) & 255;
+                int min_color = Math.min(r, Math.min(g,b));
+                /*
+                 * In a sense we would like to create an identity
+                 * transformation from RGB to ARGB knowing that alpha
+                 * will blend with WHITE. Intuitivelly we would like
+                 * to take as much white from RGB and give it to
+                 * ARGB. We can do that by moving as much white from
+                 * RGB to A.
+                 *
+                 * In the degenerate case of all colors being the same
+                 * we can set RGB to 0,0,0 and move all colors into A.
+                 *
+                 * c' - color in source file and expected on screen after alpha rendering
+                 * c  - color to put in output file
+                 * c' = a*c*255 + (255-a)*255
+                 * a*c = c'*255 - (255-a)*255
+                 * c = (c' - (255-a))*255/a
+                 *
+                 * After successful transformation lowest component
+                 * should have value 0. Distance between 255 and that
+                 * component should be expanded, all other distances
+                 * should be expanded proportionally.
+                 *
+                 * Note: java.image support alpha channel
+                 * premultiplied, but here we try to blend not iwth
+                 * zero but with full white color. I did not find a
+                 * method to do this corectly using build in methods.
+                 */
 
-            switch(colorSpace) {
-            case 3: // RGB
-                image.setTransparency(new int[] { r, r, g, g, b, b } );
-                break;
-            case 1: // Gray, this is negative color space
-                image.setTransparency(new int[] { 255 - ave, 255 - ave } );
-                break;
+                a = a*(255 - min_color)/255;
+                if( a!=0 ) {
+                    r = (r - (255-a))*255/a;
+                    g = (g - (255-a))*255/a;
+                    b = (b - (255-a))*255/a;
+                }
+                int nargb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+                bufImg2.setRGB(x,y,nargb);
             }
         }
+        /*
+         * Here we do not use preblended (alpha premultiplied) because
+         * PDF could use this when /Matte key is present in image
+         * dictionary. This problematic so just use non-preblended
+         * mode here.
+         */
+
+        Image image = Image.getInstance(bufImg2, null);
         return image;
     }
 
