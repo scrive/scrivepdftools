@@ -91,6 +91,7 @@ test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
         -e s!colormap-8bit-1.png!`$(BASE64) test/colormap-8bit-1.png`!g \
         -e s!colormap-8bit-2.png!`$(BASE64) test/colormap-8bit-2.png`!g \
+        -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
@@ -104,6 +105,7 @@ test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
         -e 's!"preseal": false!"preseal": true!g' \
         -e s!colormap-8bit-1.png!`$(BASE64) test/colormap-8bit-1.png`!g \
         -e s!colormap-8bit-2.png!`$(BASE64) test/colormap-8bit-2.png`!g \
+        -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g \
         -e 's!"test/seal-images.pdf"!"test/seal-images-preseal.pdf"!g' \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
