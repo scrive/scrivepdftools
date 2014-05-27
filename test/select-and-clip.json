@@ -1,0 +1,5 @@
+{"input":"test/document-sealed.pdf",
+ "output":"test/sealed-document-sealing-removed.pdf",
+ "pages": [1,1,1],
+ "clip": [0,34,595,842]
+}

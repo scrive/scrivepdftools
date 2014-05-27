@@ -30,12 +30,16 @@ scrivepdftools.jar : Manifest.txt \
                      classes/FindTexts.class \
                      classes/ExtractTexts.class \
                      classes/Normalize.class \
-                     classes/ImageNoImageMask.class \
+                     classes/SelectAndClip.class \
                      assets/sealmarker.pdf \
                      assets/SourceSansPro-Light.ttf
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
 
-test : test-add-verification-pages test-find-texts test-extract-texts test-normalize
+test : test-add-verification-pages \
+       test-find-texts \
+       test-extract-texts \
+       test-normalize \
+       test-select-and-clip
 
 test-add-verification-pages :\
        test/seal-simplest.pdf \
@@ -184,6 +188,14 @@ test-normalize : test/document-with-text-in-forms-flattened.pdf
 
 test/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test-select-and-clip : test/sealed-document-sealing-removed.pdf
+
+test/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@
 endif

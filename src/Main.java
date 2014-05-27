@@ -30,6 +30,8 @@ class Main
             System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar find-texts config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar extract-texts config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar normalize config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
@@ -52,6 +54,9 @@ class Main
             }
             else if( args[0].equals("normalize")) {
                 Normalize.execute(args[1], input);
+            }
+            else if( args[0].equals("select-and-clip")) {
+                SelectAndClip.execute(args[1], input);
             }
             else {
                 System.err.println("Uknown verb " + args[0]);
