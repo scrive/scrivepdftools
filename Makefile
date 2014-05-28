@@ -149,7 +149,10 @@ test/test-find-texts.find-output.yaml : test/find-texts.json test/three-page-a4.
 
 test/test-find-texts-test-document.find-output.yaml : test/find-texts-test-document.json test/test-document.pdf test/test-find-texts-test-document.expect.yaml scrivepdftools.jar
 
-test-extract-texts : test/test-extract-texts.extract-output.yaml test/test-extract-test-document.extract-output.yaml test/test-extract-test-document-with-forms.extract-output.yaml
+test-extract-texts : test/test-extract-texts.extract-output.yaml \
+                     test/test-extract-test-document.extract-output.yaml \
+	                 test/test-extract-test-document-with-forms.extract-output.yaml \
+                     test/test-extract-texts-out-of-order.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -183,6 +186,8 @@ test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three
 test/test-extract-test-document.extract-output.yaml : test/extract-test-document.json test/test-document.pdf test/test-extract-test-document.expect.yaml scrivepdftools.jar
 
 test/test-extract-test-document-with-forms.extract-output.yaml : test/extract-test-document.json test/document-with-text-in-forms.pdf test/test-extract-test-document-with-forms.expect.yaml scrivepdftools.jar
+
+test/test-extract-texts-out-of-order.extract-output.yaml : test/extract-texts-whole-first-page.json test/text-out-of-order.pdf test/test-extract-texts-out-of-order.expect.yaml scrivepdftools.jar
 
 test-normalize : test/document-with-text-in-forms-flattened.pdf
 
