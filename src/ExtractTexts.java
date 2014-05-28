@@ -23,9 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 import java.net.URL;
 import java.lang.Character.UnicodeBlock;
 import org.yaml.snakeyaml.*;
@@ -130,6 +128,7 @@ class ExtractTextSpec
     }
 }
 
+
 class ExtractTextsRenderListener implements RenderListener
 {
     /*
@@ -166,6 +165,11 @@ class ExtractTextsRenderListener implements RenderListener
             return c + "," + x + "," + y + "," + bx + "," + by + "," + ex + "," + ey;
         }
     };
+
+    static double roundForCompare(double v) {
+        // 8pt font as smallest font supported
+        return Math.round(v/8.0) * 8.0;
+    }
 
     public ArrayList<CharPos> allCharacters;
 
@@ -228,12 +232,45 @@ class ExtractTextsRenderListener implements RenderListener
                    (cp.y>=b && cp.y<=t || cp.y>=t && cp.y<=b) &&
                 cp.c.codePointAt(0)>=32 ) {
 
-                if( last==null || last.y != cp.y ) {
+                String txt = cp.c;
+
+                if( last==null || roundForCompare(last.y) != roundForCompare(cp.y) ) {
                     foundText.add("");
                 }
+                else if( cp.bx - last.ex > 8 ) {
+                    // need to put a space in here
+                    txt = " " + txt;
+                }
                 int idx = foundText.size()-1;
-                foundText.set(idx, foundText.get(idx)+cp.c);
+                foundText.set(idx, foundText.get(idx) + txt);
                 last = cp;
+            }
+        }
+    }
+    public void finalizeSearch()
+    {
+        // we need to sort all characters top to bottom and left to right
+
+        CharPosComparator comparator = new CharPosComparator();
+        Collections.sort(allCharacters, comparator);
+    }
+
+    class CharPosComparator implements Comparator<CharPos> {
+
+        @Override
+        public int compare(CharPos cp1, CharPos cp2) {
+            if (roundForCompare(cp1.y)==roundForCompare(cp2.y)) {
+                if( cp1.bx < cp2.bx )
+                    return -1;
+                else if( cp1.bx > cp2.bx )
+                    return 1;
+                else return 0;
+
+            } else if (cp1.y < cp2.y ) {
+                return 1;
+            }
+            else {
+                return -1;
             }
         }
     }
@@ -357,6 +394,7 @@ public class ExtractTexts {
                 if( rl == null ) {
                     rl = new ExtractTextsRenderListener();
                     parser.processContent(rect.page, rl);
+                    rl.finalizeSearch();
                     charsForPages[rect.page-1] = rl;
                 }
 
