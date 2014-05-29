@@ -1,5 +1,5 @@
 {"input":"test/signed-demo-contract.pdf",
  "output":"test/signed-demo-contract-sealing-removed.pdf",
- "pages": [1,1,1],
+ "pages": [1,2],
  "clip": [0,34,595,842]
 }
