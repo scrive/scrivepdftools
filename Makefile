@@ -200,9 +200,16 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-select-and-clip : test/sealed-document-sealing-removed.pdf
+test-select-and-clip : test/sealed-document-sealing-removed.pdf \
+                       test/signed-demo-contract-sealing-removed.pdf
 
 test/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar select-and-clip $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@
