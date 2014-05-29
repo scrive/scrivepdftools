@@ -51,6 +51,7 @@ import com.itextpdf.text.pdf.PdfSmartCopy;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Font.FontFamily;
@@ -1070,92 +1071,82 @@ public class AddVerificationPages {
         }
     }
 
-    static Boolean hasCJK(String str) {
-        /*
-         * Warning: Java represents 16bit values as 'char'. This is
-         * not a Unicode code point!  Basically surrogate pairs are
-         * represented as two separate chars. This means the following
-         * needs to be adjusted to cover chars if the range
-         * 0x10000-0x1FFFF.
-         *
-         * For now I have no idea how to do this correctly.
-         */
-        for( int i=0; i<str.length(); i++ ) {
-            char c = str.charAt(i);
-            UnicodeBlock cblock = UnicodeBlock.of(c);
-            if( cblock==UnicodeBlock.CJK_COMPATIBILITY
-                || cblock==UnicodeBlock.CJK_COMPATIBILITY_FORMS
-                || cblock==UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-                || cblock==UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT
-                || cblock==UnicodeBlock.CJK_RADICALS_SUPPLEMENT
-                || cblock==UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
-                || cblock==UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-                || cblock==UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
-                || cblock==UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-                /* These are present in newer Java:
-                || cblock==UnicodeBlock.CJK_STROKES
-                || cblock==UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C
-                || cblock==UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D */
-                )
-                return true;
-        }
-        return false;
-    }
+    static BaseFont baseFonts[];
 
-    static BaseFont baseFontHelvetica;
-    static BaseFont baseFontKochiMincho;
-
-    /*
-     * Fontology in PDF seems to be the most annoying thing in the world.
-     *
-     * For all reasonable alphabets we use Helvetica.ttf that we embed
-     * inside jar file.
-     *
-     * CJK case needs a bit more research. As it seems proper font
-     * needs to be chosen for each of the scripts. Font needs to be
-     * embedded. As example how to create a Chineese font:
-     *
-     * BaseFont bf = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.EMBEDDED);
-     * Font font = new Font(bf, 12)
-     *
-     */
-
-    static Font getFontForString(String text, float size, int style, BaseColor color)
+    static void initializeBaseFonts()
         throws DocumentException, IOException
     {
-        Font font = null;
-        /*
-         * At this point we do not support Chinese, but should it be
-         * needed it can be added as in the below code. Just get a
-         * proper font and use it for chinese like strings.
-        */
-        /*
-        if( font==null && hasCJK(text)) {
-            if(baseFontKochiMincho==null ) {
-                baseFontKochiMincho = BaseFont.createFont("public/fonts/kochi-mincho-subst.ttf",  BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                baseFontKochiMincho.setSubset(true);
-            }
-            font = new Font(baseFontKochiMincho, size, style, color);
-        }
-        */
-        if( font==null ) {
-            if(baseFontHelvetica==null ) {
+        if( baseFonts==null ) {
+            BaseFont baseFont;
+            baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
+                                            BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            baseFont.setSubset(true);
 
-                /* Investigate using FontFactory */
-                baseFontHelvetica = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
-                                                         BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                baseFontHelvetica.setSubset(true);
-            }
-            font = new Font(baseFontHelvetica, size, style, color);
+            baseFonts = new BaseFont[1];
+            baseFonts[0] = baseFont;
         }
-        return font;
     }
+
+    /*
+     * For future generation messing with this code: proper iteration
+     * over code-points in String is:
+     *
+     * String str = "....";
+     * int offset = 0, strLen = str.length();
+     * while (offset < strLen) {
+     *   int curChar = str.codePointAt(offset);
+     *   offset += Character.charCount(curChar);
+     *   // do something with curChar
+     * }
+     *
+     * iText currently represents chars as 16bit values so it cannot
+     * use code points defined above that limit, but should it support
+     * that we will be ready!
+     */
 
     static Paragraph createParagraph(String text, float size, int style, BaseColor color)
         throws DocumentException, IOException
     {
-        Font font = getFontForString(text, size, style, color);
-        return new Paragraph(text, font);
+        initializeBaseFonts();
+        Paragraph para = new Paragraph();
+
+        BaseFont baseFont = null;
+        Chunk lastChunk = null;
+        BaseFont lastBaseFont = null;
+
+        for( int i=0; i<text.length(); i++ ) {
+            char c = text.charAt(i);
+            baseFont = null;
+            for( BaseFont baseFont1: baseFonts ) {
+                if( baseFont1.charExists(c)) {
+                    baseFont = baseFont1;
+                    break;
+                }
+            }
+            if( lastChunk!=null && (lastBaseFont==baseFont || baseFont==null) ) {
+                lastChunk.append(String.valueOf(c));
+            }
+            else {
+                if( lastChunk!=null ) {
+                    para.add(lastChunk);
+                }
+                if( baseFont!=null ) {
+                    Font font = new Font(baseFont, size, style, color);
+                    lastBaseFont = baseFont;
+                    lastChunk = new Chunk(String.valueOf(c),font);
+                }
+                else {
+                    // we did not find a suitable font so we use the
+                    // font of the character before it
+                    lastChunk = new Chunk(String.valueOf(c));
+                }
+            }
+        }
+        if( lastChunk!=null ) {
+            para.add(lastChunk);
+        }
+
+        return para;
     }
 
     static PdfReader sealMarkerCached;
