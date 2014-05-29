@@ -159,6 +159,7 @@ class SealSpec
     public ArrayList<SealAttachment> attachments;
     public ArrayList<FileDesc> filesList;
     public ArrayList<Field> fields;
+    public ArrayList<String> fonts;
 
     /*
      * YAML is compatible with JSON (at least with the JSON we generate).
@@ -1015,6 +1016,7 @@ public class AddVerificationPages {
     public static void execute(SealSpec spec)
         throws IOException, DocumentException, Base64DecodeException
     {
+        initializeBaseFonts(spec.fonts);
         if( spec.preseal==null || !spec.preseal ) {
 
             ByteArrayOutputStream sealPagesRaw = new ByteArrayOutputStream();
@@ -1073,17 +1075,37 @@ public class AddVerificationPages {
 
     static BaseFont baseFonts[];
 
-    static void initializeBaseFonts()
+    static void initializeBaseFonts(ArrayList<String> fonts)
         throws DocumentException, IOException
     {
         if( baseFonts==null ) {
-            BaseFont baseFont;
-            baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
-                                            BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            baseFont.setSubset(true);
+            if( fonts!=null ) {
+                ArrayList<BaseFont> baseFonts1 = new ArrayList<BaseFont>();
+                for( String fontPath : fonts ) {
+                    BaseFont baseFont;
+                    baseFont = BaseFont.createFont( fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                    baseFont.setSubset(true);
 
-            baseFonts = new BaseFont[1];
-            baseFonts[0] = baseFont;
+                    baseFonts1.add(baseFont);
+                }
+                baseFonts = new BaseFont[baseFonts1.size()];
+                baseFonts1.toArray(baseFonts);
+            }
+            else {
+                // this is a backward compatibility fallback, should
+                // be removed as soon as font list is propagated where
+                // it should be
+
+                BaseFont baseFont;
+                baseFonts = new BaseFont[2];
+
+                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
+                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                baseFonts[0] = baseFont;
+                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/NotoSans-Regular.ttf").toString(),
+                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                baseFonts[1] = baseFont;
+            }
         }
     }
 
@@ -1107,7 +1129,6 @@ public class AddVerificationPages {
     static Paragraph createParagraph(String text, float size, int style, BaseColor color)
         throws DocumentException, IOException
     {
-        initializeBaseFonts();
         Paragraph para = new Paragraph();
 
         BaseFont baseFont = null;
