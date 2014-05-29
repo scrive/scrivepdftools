@@ -24,6 +24,9 @@ classes/%.class : src/%.java
 	if [ ! -d classes ]; then mkdir classes; fi
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
+FONTS=assets/SourceSansPro-Light.ttf \
+      assets/NotoSans-Regular.ttf
+
 scrivepdftools.jar : Manifest.txt \
                      classes/Main.class \
                      classes/AddVerificationPages.class \
@@ -32,8 +35,8 @@ scrivepdftools.jar : Manifest.txt \
                      classes/Normalize.class \
                      classes/SelectAndClip.class \
                      assets/sealmarker.pdf \
-                     assets/SourceSansPro-Light.ttf
-	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/SourceSansPro-Light.ttf -C classes .
+	                 $(FONTS)
+	jar cfm $@ Manifest.txt assets/sealmarker.pdf $(FONTS) -C classes .
 
 test : test-add-verification-pages \
        test-find-texts \
