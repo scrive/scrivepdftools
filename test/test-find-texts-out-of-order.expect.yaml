@@ -1,0 +1,16 @@
+"input": "test/text-out-of-order.pdf"
+"matches":
+- "coords":
+  - 0.8901417225178463
+  - 0.9722291502912308
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  - 2
+  - 3
+  - 4
+  "text": "1 av 1"
+"stampedOutput": "test/test-find-texts-out-of-order.find-output.pdf"
+"yamlOutput": true
+

@@ -23,9 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 import java.net.URL;
 import java.lang.Character.UnicodeBlock;
 import org.yaml.snakeyaml.*;
@@ -303,6 +301,39 @@ class MyRenderListener implements RenderListener
             }
         }
     }
+
+    static double roundForCompare(double v) {
+        // 8pt font as smallest font supported
+        return Math.round(v/8.0) * 8.0;
+    }
+
+    public void finalizeSearch()
+    {
+        // we need to sort all characters top to bottom and left to right
+
+        CharPosComparator comparator = new CharPosComparator();
+        Collections.sort(allCharacters, comparator);
+    }
+
+    class CharPosComparator implements Comparator<CharPos> {
+
+        @Override
+        public int compare(CharPos cp1, CharPos cp2) {
+            if (roundForCompare(cp1.y)==roundForCompare(cp2.y)) {
+                if( cp1.x < cp2.x )
+                    return -1;
+                else if( cp1.x > cp2.x )
+                    return 1;
+                else return 0;
+
+            } else if (cp1.y < cp2.y ) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+    }
 };
 
 public class FindTexts {
@@ -347,6 +378,7 @@ public class FindTexts {
         for (int i = 1; i <= reader.getNumberOfPages(); i++) {
             MyRenderListener collectCharacters = new MyRenderListener(stamper, i);
             parser.processContent(i, collectCharacters);
+            collectCharacters.finalizeSearch();
             charsForPages.add(collectCharacters);
 
         }
