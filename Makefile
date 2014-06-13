@@ -97,6 +97,7 @@ test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
         -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
+        -e s!jpeg-image-90.jpg!`$(BASE64) test/jpeg-image-90.jpg`!g \
         -e s!colormap-8bit-1.png!`$(BASE64) test/colormap-8bit-1.png`!g \
         -e s!colormap-8bit-2.png!`$(BASE64) test/colormap-8bit-2.png`!g \
         -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g \
@@ -110,6 +111,7 @@ test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
         -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
+        -e s!jpeg-image-90.jpg!`$(BASE64) test/jpeg-image-90.jpg`!g \
         -e 's!"preseal": false!"preseal": true!g' \
         -e s!colormap-8bit-1.png!`$(BASE64) test/colormap-8bit-1.png`!g \
         -e s!colormap-8bit-2.png!`$(BASE64) test/colormap-8bit-2.png`!g \
