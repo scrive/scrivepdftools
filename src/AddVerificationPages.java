@@ -91,6 +91,9 @@ class Person
     public Boolean phoneverified;
     public ArrayList<Field> fields;
     public String signtime;
+    public String signedAtText;
+    public String personalNumberText;
+    public String companyNumberText;
 }
 
 class Field
@@ -149,11 +152,13 @@ class SealSpec
     public String input;
     public String output;
     public String documentNumber;
+    public String documentNumberText;
     public ArrayList<Person> persons;
     public ArrayList<Person> secretaries;
     public Person initiator;
     public ArrayList<HistEntry> history;
     public String initials;
+    public String initialsText;
     public String hostpart;
     public SealingTexts staticTexts;
     public ArrayList<SealAttachment> attachments;
@@ -325,8 +330,14 @@ public class AddVerificationPages {
 
             PdfContentByte canvas = stamper.getOverContent(i);
             if(spec.preseal == null || !spec.preseal) {
+                String documentNumberText = spec.documentNumberText;
+                if( documentNumberText==null || documentNumberText.equals("")) {
+                    if( spec.staticTexts.docPrefix!=null ) {
+                        documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
+                    }
+                }
                 addPaginationFooter(spec, stamper, canvas, cropBox,
-                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
+                        documentNumberText,
                         file.role);
             }
         }
@@ -460,9 +471,20 @@ public class AddVerificationPages {
                 }
             }
             if(spec.preseal == null || !spec.preseal) {
+                String documentNumberText = spec.documentNumberText;
+                if( documentNumberText==null || documentNumberText.equals("")) {
+                    if( spec.staticTexts.docPrefix!=null ) {
+                        documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
+                    }
+                }
+                String initialsText = spec.initialsText;
+                if( initialsText==null || initialsText.equals("")) {
+                    if( spec.staticTexts.signedText!=null ) {
+                        initialsText = spec.staticTexts.signedText + ": " + spec.initials;
+                    }
+                }
                 addPaginationFooter(spec, stamper, canvas, cropBox,
-                        spec.staticTexts.docPrefix + " " + spec.documentNumber,
-                        spec.staticTexts.signedText + ": " + spec.initials);
+                        documentNumberText, initialsText);
             }
         }
         stamper.close();
@@ -673,15 +695,31 @@ public class AddVerificationPages {
              * Spacing.
              */
             cell.addElement(new Paragraph(""));
-            if( person.personalnumber!=null && !person.personalnumber.equals("") ) {
-                para = createParagraph(spec.staticTexts.personalNumberText + " " + person.personalnumber, 10,
+            String personalNumberText = person.personalNumberText;
+            if( personalNumberText==null || personalNumberText.equals("")) {
+                if( person.personalnumber!=null &&
+                    !person.personalnumber.equals("") &&
+                    spec.staticTexts.personalNumberText!=null ) {
+                    personalNumberText = spec.staticTexts.personalNumberText + " " + person.personalnumber;
+                }
+            }
+            if( personalNumberText!=null && !personalNumberText.equals("")) {
+                para = createParagraph(personalNumberText, 10,
                                        person.numberverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor );
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
-            if( person.companynumber!=null && !person.companynumber.equals("") ) {
-                para = createParagraph(spec.staticTexts.orgNumberText + " " + person.companynumber, 10,
+            String companyNumberText = person.companyNumberText;
+            if( companyNumberText==null || companyNumberText.equals("")) {
+                if( person.companynumber!=null &&
+                    !person.companynumber.equals("") &&
+                    spec.staticTexts.orgNumberText!=null ) {
+                    companyNumberText = spec.staticTexts.orgNumberText + " " + person.companynumber;
+                }
+            }
+            if( companyNumberText!=null && !companyNumberText.equals("")) {
+                para = createParagraph(companyNumberText, 10,
                                        person.companyverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor);
                 para.setLeading(0f, 1.2f);
@@ -742,8 +780,16 @@ public class AddVerificationPages {
                         cell.addElement(table2);
                 }
             }
-            if( spec.staticTexts.signedAtText!=null && person.signtime!=null && !person.signtime.equals("") ) {
-                para = createParagraph(spec.staticTexts.signedAtText + " " + person.signtime, 10, Font.ITALIC, lightTextColor);
+            String signedAtText = person.signedAtText;
+            if( signedAtText==null || signedAtText.equals("") ) {
+                if( spec.staticTexts.signedAtText!=null &&
+                    person.signtime!=null &&
+                    !person.signtime.equals("") ) {
+                    signedAtText = spec.staticTexts.signedAtText + " " + person.signtime;
+                }
+            }
+            if( signedAtText!=null && !signedAtText.equals("")) {
+                para = createParagraph(signedAtText, 10, Font.ITALIC, lightTextColor);
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
@@ -800,7 +846,13 @@ public class AddVerificationPages {
 
         document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
 
-        Paragraph para = createParagraph(spec.staticTexts.docPrefix + " " + spec.documentNumber, 12, Font.NORMAL, lightTextColor);
+        String documentNumberText = spec.documentNumberText;
+        if( documentNumberText==null || documentNumberText.equals("")) {
+            if( spec.staticTexts.docPrefix!=null ) {
+                documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
+            }
+        }
+        Paragraph para = createParagraph(documentNumberText, 12, Font.NORMAL, lightTextColor);
         para.setSpacingAfter(50);
         document.add(para);
 
