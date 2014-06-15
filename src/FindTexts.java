@@ -389,7 +389,12 @@ public class FindTexts {
                 String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
                     replace("\r","").replace("\u00A0","");
 
-                for (Integer i : match.pages) {
+                for (Integer ip : match.pages) {
+                    int i = ip;
+                    if( i<0 ) {
+                        // -1 is last page, -2 is second to the last
+                        i = charsForPages.size() + i + 1;
+                    }
                     if( i>=1 && i<=charsForPages.size() && match.text!=null && !match.text.equals("")) {
                         MyRenderListener rl = charsForPages.get(i-1);
                         rl.find(textNoSpaces, index);
