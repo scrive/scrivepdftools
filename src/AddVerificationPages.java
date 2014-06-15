@@ -16,18 +16,14 @@
  *
  */
 
+import com.drew.metadata.*;
+import com.drew.imaging.*;
+import com.drew.metadata.exif.*;
+
 import java.awt.image.*;
 import java.awt.Color;
 import javax.imageio.*;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
-import java.io.File;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -352,6 +348,62 @@ public class AddVerificationPages {
     public static ByteArrayOutputStream pdfFromImageFile(String filepath)
         throws DocumentException, IOException
     {
+        int rotationDegrees = 0;
+        boolean flip = false;
+        try {
+            File jpegFile = new File(filepath);
+            Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
+            /*
+            for (Directory directory : metadata.getDirectories()) {
+                for (Tag tag : directory.getTags()) {
+                    System.out.println(tag);
+                }
+            }
+            */
+            ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
+            int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            switch( orientation ) {
+            case 1:
+                rotationDegrees = 0;
+                flip = false;
+                break;
+            case 2:
+                rotationDegrees = 0;
+                flip = true;
+                break;
+            case 3:
+                rotationDegrees = 180;
+                flip = false;
+                break;
+            case 4:
+                rotationDegrees = 180;
+                flip = true;
+                break;
+            case 5:
+                rotationDegrees = 270;
+                flip = true;
+                break;
+            case 6:
+                rotationDegrees = 270;
+                flip = false;
+                break;
+            case 7:
+                rotationDegrees = 90;
+                flip = true;
+                break;
+            case 8:
+                rotationDegrees = 90;
+                flip = false;
+                break;
+            }
+
+        }
+        catch(ImageProcessingException e) {
+            // could not parse metadata
+        }
+        catch(MetadataException e) {
+            // orientation not found
+        }
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Image image = Image.getInstance(filepath);
@@ -386,6 +438,8 @@ public class AddVerificationPages {
 
         float dpiFactor = 72f / 113f;
         float scaleFactor = Math.min(scaleWidth, Math.min(scaleHeight,dpiFactor));
+        image.setRotationDegrees(rotationDegrees);
+
         image.scalePercent(scaleFactor * 100);
         image.setAbsolutePosition(document.left() + (pageWidth - image.getScaledWidth())/2,
                                   document.top() - image.getScaledHeight());
@@ -462,9 +516,19 @@ public class AddVerificationPages {
 
                         Image image = createImageWithKeyColor(field);
 
-                        image.setAbsolutePosition(realx, realy);
-                        image.scaleAbsoluteWidth(field.image_w * cropBox.getWidth());
-                        image.scaleAbsoluteHeight(field.image_h * cropBox.getHeight());
+                        float initialRotation = image.getInitialRotation();
+                        boolean flip_xy = false;
+                        if( Math.abs(initialRotation - Math.PI/2)<0.01 ||
+                            Math.abs(initialRotation - 3*Math.PI/2)<0.01 ) {
+                            flip_xy = true;
+                        }
+
+
+                        float absoluteWidth = field.image_w * cropBox.getWidth();
+                        float absoluteHeight = field.image_h * cropBox.getHeight();
+                        image.setAbsolutePosition(realx,realy);
+                        image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
+                                            flip_xy ? absoluteWidth : absoluteHeight);
 
                         canvas.addImage(image);
                     }
@@ -584,6 +648,64 @@ public class AddVerificationPages {
             throw new Base64DecodeException();
         }
 
+        int rotationDegrees = 0;
+        boolean flip = false;
+        try {
+            InputStream inputStream = new ByteArrayInputStream(rawdata);
+            BufferedInputStream bufferedInutStream = new BufferedInputStream(inputStream);
+            Metadata metadata = ImageMetadataReader.readMetadata(bufferedInutStream, false);
+            /*
+            for (Directory directory : metadata.getDirectories()) {
+                for (Tag tag : directory.getTags()) {
+                    System.out.println(tag);
+                }
+            }
+            */
+            ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
+            int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            switch( orientation ) {
+            case 1:
+                rotationDegrees = 0;
+                flip = false;
+                break;
+            case 2:
+                rotationDegrees = 0;
+                flip = true;
+                break;
+            case 3:
+                rotationDegrees = 180;
+                flip = false;
+                break;
+            case 4:
+                rotationDegrees = 180;
+                flip = true;
+                break;
+            case 5:
+                rotationDegrees = 270;
+                flip = true;
+                break;
+            case 6:
+                rotationDegrees = 270;
+                flip = false;
+                break;
+            case 7:
+                rotationDegrees = 90;
+                flip = true;
+                break;
+            case 8:
+                rotationDegrees = 90;
+                flip = false;
+                break;
+            }
+
+        }
+        catch(ImageProcessingException e) {
+            // could not parse metadata
+        }
+        catch(MetadataException e) {
+            // orientation not found
+        }
+
         BufferedImage bufImg = ImageIO.read(new ByteArrayInputStream(rawdata));
 
         /*
@@ -651,6 +773,7 @@ public class AddVerificationPages {
          */
 
         Image image = Image.getInstance(bufImg2, null);
+        image.setInitialRotation((float)(rotationDegrees*Math.PI/180));
         return image;
     }
 

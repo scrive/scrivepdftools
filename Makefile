@@ -4,7 +4,7 @@
 #
 #
 
-CLASSPATH1=itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar
+CLASSPATH1=itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar
 CLASSPATH=.:itextpdf-5.4.5.jar:$(CLASSPATH1)
 
 ifeq ($(OS),Windows_NT)
