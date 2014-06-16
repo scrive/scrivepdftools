@@ -361,42 +361,43 @@ public class AddVerificationPages {
             }
             */
             ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
-            int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-            switch( orientation ) {
-            case 1:
-                rotationDegrees = 0;
-                flip = false;
-                break;
-            case 2:
-                rotationDegrees = 0;
-                flip = true;
-                break;
-            case 3:
-                rotationDegrees = 180;
-                flip = false;
-                break;
-            case 4:
-                rotationDegrees = 180;
-                flip = true;
-                break;
-            case 5:
-                rotationDegrees = 270;
-                flip = true;
-                break;
-            case 6:
-                rotationDegrees = 270;
-                flip = false;
-                break;
-            case 7:
-                rotationDegrees = 90;
-                flip = true;
-                break;
-            case 8:
-                rotationDegrees = 90;
-                flip = false;
-                break;
+            if( exifIFD0!=null ) {
+                int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                switch( orientation ) {
+                case 1:
+                    rotationDegrees = 0;
+                    flip = false;
+                    break;
+                case 2:
+                    rotationDegrees = 0;
+                    flip = true;
+                    break;
+                case 3:
+                    rotationDegrees = 180;
+                    flip = false;
+                    break;
+                case 4:
+                    rotationDegrees = 180;
+                    flip = true;
+                    break;
+                case 5:
+                    rotationDegrees = 270;
+                    flip = true;
+                    break;
+                case 6:
+                    rotationDegrees = 270;
+                    flip = false;
+                    break;
+                case 7:
+                    rotationDegrees = 90;
+                    flip = true;
+                    break;
+                case 8:
+                    rotationDegrees = 90;
+                    flip = false;
+                    break;
+                }
             }
-
         }
         catch(ImageProcessingException e) {
             // could not parse metadata
@@ -662,40 +663,42 @@ public class AddVerificationPages {
             }
             */
             ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
-            int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-            switch( orientation ) {
-            case 1:
-                rotationDegrees = 0;
-                flip = false;
-                break;
-            case 2:
-                rotationDegrees = 0;
-                flip = true;
-                break;
-            case 3:
-                rotationDegrees = 180;
-                flip = false;
-                break;
-            case 4:
-                rotationDegrees = 180;
-                flip = true;
-                break;
-            case 5:
-                rotationDegrees = 270;
-                flip = true;
-                break;
-            case 6:
-                rotationDegrees = 270;
-                flip = false;
-                break;
-            case 7:
-                rotationDegrees = 90;
-                flip = true;
-                break;
-            case 8:
-                rotationDegrees = 90;
-                flip = false;
-                break;
+            if( exifIFD0!=null ) {
+                int orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                switch( orientation ) {
+                case 1:
+                    rotationDegrees = 0;
+                    flip = false;
+                    break;
+                case 2:
+                    rotationDegrees = 0;
+                    flip = true;
+                    break;
+                case 3:
+                    rotationDegrees = 180;
+                    flip = false;
+                    break;
+                case 4:
+                    rotationDegrees = 180;
+                    flip = true;
+                    break;
+                case 5:
+                    rotationDegrees = 270;
+                    flip = true;
+                    break;
+                case 6:
+                    rotationDegrees = 270;
+                    flip = false;
+                    break;
+                case 7:
+                    rotationDegrees = 90;
+                    flip = true;
+                    break;
+                case 8:
+                    rotationDegrees = 90;
+                    flip = false;
+                    break;
+                }
             }
 
         }
