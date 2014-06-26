@@ -140,7 +140,8 @@ endif
 
 test-find-texts : test/test-find-texts.find-output.yaml \
                   test/test-find-texts-test-document.find-output.yaml \
-                  test/test-find-texts-out-of-order.find-output.yaml
+                  test/test-find-texts-out-of-order.find-output.yaml \
+                  test/test-find-texts-json-encoding.find-output.yaml
 
 test/%.find-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
@@ -157,6 +158,8 @@ test/test-find-texts.find-output.yaml : test/find-texts.json test/three-page-a4.
 test/test-find-texts-test-document.find-output.yaml : test/find-texts-test-document.json test/test-document.pdf test/test-find-texts-test-document.expect.yaml scrivepdftools.jar
 
 test/test-find-texts-out-of-order.find-output.yaml : test/find-texts-out-of-order.json test/text-out-of-order.pdf test/test-find-texts-out-of-order.expect.yaml scrivepdftools.jar
+
+test/test-find-texts-json-encoding.find-output.yaml : test/find-text-json-encoding.json test/three-page-a4.pdf test/test-find-texts-json-encoding.expect.yaml scrivepdftools.jar
 
 test-extract-texts : test/test-extract-texts.extract-output.yaml \
                      test/test-extract-test-document.extract-output.yaml \

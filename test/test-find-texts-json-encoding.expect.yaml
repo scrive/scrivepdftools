@@ -1,0 +1,33 @@
+"input": "test/three-page-a4.pdf"
+"matches":
+- "index": 0
+  "pages":
+  - 1
+  "text": "\n"
+- "index": 0
+  "pages":
+  - 1
+  "text": "\r"
+- "index": 0
+  "pages":
+  - 1
+  "text": "\u0085"
+- "index": 0
+  "pages":
+  - 1
+  "text": "\u00A0"
+- "index": 0
+  "pages":
+  - 1
+  "text": "\u2028"
+- "index": 0
+  "pages":
+  - 1
+  "text": "\u2029"
+- "index": 0
+  "pages":
+  - 1
+  "text": ""
+"stampedOutput": "test/test-find-texts-json-encoding.find-output.pdf"
+"yamlOutput": true
+
