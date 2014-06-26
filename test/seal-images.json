@@ -61,6 +61,13 @@
                           "image_w": 0.4, "image_h": 0.18,
                           "includeInSummary": true,
                           "onlyForSummary": false,
+                          "keyColor": [255, 255, 255]},
+                         {"valueBase64": "png-with-alpha.png",
+                          "x": .55, "y": 0.1,
+                          "page": 1 ,
+                          "image_w": 0.4, "image_h": 0.18,
+                          "includeInSummary": true,
+                          "onlyForSummary": false,
                           "keyColor": [255, 255, 255]}
                          ],
              "signtime": "2014-04-11 15:53:39 CEST (+0200)"}],

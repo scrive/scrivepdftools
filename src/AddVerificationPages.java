@@ -730,6 +730,7 @@ public class AddVerificationPages {
                 int b = (argb >>> 0) & 255;
                 int a = (argb >>> 24) & 255;
                 int min_color = Math.min(r, Math.min(g,b));
+                //min_color = 0;
                 /*
                  * In a sense we would like to create an identity
                  * transformation from RGB to ARGB knowing that alpha
@@ -753,17 +754,17 @@ public class AddVerificationPages {
                  * should be expanded proportionally.
                  *
                  * Note: java.image support alpha channel
-                 * premultiplied, but here we try to blend not iwth
+                 * premultiplied, but here we try to blend not with
                  * zero but with full white color. I did not find a
                  * method to do this corectly using build in methods.
                  */
-
-                a = a*(255 - min_color)/255;
-                if( a!=0 ) {
-                    r = (r - (255-a))*255/a;
-                    g = (g - (255-a))*255/a;
-                    b = (b - (255-a))*255/a;
+                int a2 = 255 - min_color;
+                if( a2!=0 ) {
+                    r = (r - (255-a2))*255/a2;
+                    g = (g - (255-a2))*255/a2;
+                    b = (b - (255-a2))*255/a2;
                 }
+                a = a*a2/255;
                 int nargb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
                 bufImg2.setRGB(x,y,nargb);
             }
