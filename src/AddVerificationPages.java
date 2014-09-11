@@ -480,20 +480,10 @@ public class AddVerificationPages {
                     (field.onlyForSummary == null || !field.onlyForSummary)) {
 
                     if( field.value != null ) {
-                        /*
-                         * This font characteristics were taken from
-                         * Helvetica.afm that is one of standard Adobe
-                         * PDF 14 fonts.
-                         */
-                        float fontBaseline = 931f/(931f+225f);
-                        float fontOffset   = 166f/(931f+225f);
                         float fs = field.fontSize * cropBox.getWidth();
 
                         if( fs<=0 )
                             fs = 10f;
-
-                        float realx = field.x * cropBox.getWidth() + cropBox.getLeft() - fontOffset * fs;
-                        float realy = (1 - field.y) * cropBox.getHeight() + cropBox.getBottom() - fontBaseline * fs;
 
                         BaseColor color;
                         if( !field.greyed ) {
@@ -504,6 +494,23 @@ public class AddVerificationPages {
                         }
 
                         Paragraph para = createParagraph(field.value, fs, Font.NORMAL, color);
+
+                        /*
+                         * Note: lastAscentPoints and
+                         * lastDescentPoints are set in
+                         * createParagraph above.
+                         */
+                        float fontBaseline = lastAscentPoints/(lastAscentPoints + lastDescentPoints) * fs;
+                        /*
+                         * fontOffset used to compensate for text
+                         * position that was different in browser
+                         * compared to what was in PDF. It does not
+                         * seems to be necessary anymore.
+                         */
+                        float fontOffset   = 0 * fs;
+
+                        float realx = field.x * cropBox.getWidth() + cropBox.getLeft() - fontOffset;
+                        float realy = (1 - field.y) * cropBox.getHeight() + cropBox.getBottom() - fontBaseline;
 
                         ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
                                                    para,
@@ -1289,6 +1296,12 @@ public class AddVerificationPages {
     }
 
     /*
+     * Multiple returns in Java. Sorry about this.
+     */
+    static float lastAscentPoints;
+    static float lastDescentPoints;
+
+    /*
      * For future generation messing with this code: proper iteration
      * over code-points in String is:
      *
@@ -1322,6 +1335,14 @@ public class AddVerificationPages {
                     baseFont = baseFont1;
                     break;
                 }
+            }
+            if( i==0 && baseFont != null ) {
+                /*
+                 * Based on first character in the string we need to
+                 * calculate font baseline.
+                 */
+                lastAscentPoints = baseFont.getFontDescriptor(BaseFont.ASCENT, size);
+                lastDescentPoints = -baseFont.getFontDescriptor(BaseFont.DESCENT, size);
             }
             if( lastChunk!=null && (lastBaseFont==baseFont || baseFont==null) ) {
                 lastChunk.append(String.valueOf(c));
