@@ -1,5 +1,5 @@
-{"input": "../test/pdfs/visa-application.pdf",
- "output": "output.pdf",
+{"input": "test/three-page-a4.pdf",
+ "output": "test/example_spec.pdf",
  "preseal": false,
  "documentNumber": "0000001234",
  "persons": [{"fullname": "XXXXXXXXXXXXXXXXXX",

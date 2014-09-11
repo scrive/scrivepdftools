@@ -54,10 +54,17 @@ test-add-verification-pages :\
        test/seal-images.pdf \
        test/seal-images-preseal.pdf \
        test/seal-fields.pdf \
-       test/seal-fields-preseal.pdf
+       test/seal-fields-preseal.pdf \
+       test/example_spec.pdf
 
 
 test/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/example_spec.pdf : test/example_spec.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
