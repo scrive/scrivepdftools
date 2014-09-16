@@ -1,0 +1,102 @@
+{"input": "test/three-page-a4.pdf",
+ "output": "test/field-positions.pdf",
+ "preseal": true,
+  # A4 page size in points is 595x842
+ "documentNumber": "0000001234",
+ "persons": [{"fullname": "XXXXXXXXXXXXXXXXXX",
+              "company": "Company",
+              "personalnumber": "",
+              "companynumber": "Company number 00006-45671",
+              "email": "email@email",
+              "phone": "123412341234",
+              "fullnameverified": false,
+              "companyverified": false,
+              "numberverified": true,
+              "emailverified": true,
+              "phoneverified": true,
+              "fields": [{"value": "XŚĆÅy (upper left corner, 50pt)",
+                          # This field should end up in upper left corner
+                          # To make it 50pt we need to calculate 50.0/595.0
+                          "x": 0, "y": 0, "page": 1,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "yyyyXŚĆÅyyyyy (lower left corner, 50pt)",
+                          # This field should end up in lower left corner
+                          # So position calculation is 1-fontSize vertical: 1-(50.0/842)
+                          # Note that we are using page HEIGHT for 'y' but page WIDTH for 'fontSize'
+                          "x": 0, "y": 0.9406175771971497 , "page": 1,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "INVISIBLE (lower left corner, 50pt)",
+                          # This field should be just below paper
+                          "x": 0, "y": 1 , "page": 1,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "X (too far right, invisible)",
+                          # This field should be right to the paper, not visible on page
+                          "x": 1, "y": 0, "page": 1,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "g",
+                          # Biggest letter, should span to bottom of the page
+                          # We need 842pt font for that, but expressed in page width units, so 842/595
+                          "x": 0, "y": 0, "page": 2,
+                          "fontSize": 1.4151260504201681,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "Å",
+                          # Biggest letter, should span to bottom of the page
+                          # We need 842pt font for that, but expressed in page width units, so 842/595
+                          "x": 0, "y": 0, "page": 2,
+                          "fontSize": 1.4151260504201681,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "ALMOST INVISIBLE (lower left corner, 50pt)",
+                          # This field should be almost just below paper, slightly visible
+                          "x": 0, "y": 0.99, "page": 3,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "X (almost too far right)",
+                          # This field should be almost too far right, but slightly visible
+                          "x": 0.99, "y": 0.2, "page": 3,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "gg",
+                          # Together with the 'KK' below this field should form a rectangle
+                          # against right side of the paper
+                          "x": 0.9159663865546218, "y": 0.3, "page": 3,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false},
+                         {"value": "KK",
+                          # Together with the 'gg' above this field should form a rectangle
+                          # against right side of the paper
+                          "x": 0.9159663865546218, "y": 0.3, "page": 3,
+                          "fontSize": 0.08403361344537816,
+                          "greyed": false,
+                          "includeInSummary": false}
+                         ]}],
+ "secretaries": [],
+ "history": [],
+ "initials": "initials",
+ "hostpart": "host",
+ "staticTexts": {"verificationTitle": "Verifikat",
+                 "docPrefix": "Dok.nr.",
+                 "signedText": "Undertecknat:",
+                 "partnerText": "Parter",
+                 "initiatorText": "Initierare",
+                 "documentText": "Dokument",
+                 "orgNumberText": "Org.nr.",
+                 "personalNumberText": "ID-nr.",
+                 "eventsText": "Registrerade h\u00e4ndelser",
+                 "dateText": "Datum",
+                 "historyText": "H\u00e4ndelser",
+                 "verificationFooter": "This verification was issued by Scrive. Information in italics has been safely verified by Scrive. The time stamp ensures that the originality of this document can be proven mathematically and independently of Scrive. For more information see the legal attachment (use a PDF-reader that can show concealed attachments). For your convenience Scrive also provides a service that enables you to automatically verify the document's originality at: https://scrive.com/verify"},
+ "attachments": [],
+ "filesList": []}

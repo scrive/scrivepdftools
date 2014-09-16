@@ -70,6 +70,12 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
+test/field-positions.pdf : test/field_positions.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
 test/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
