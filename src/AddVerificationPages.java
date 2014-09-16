@@ -496,16 +496,13 @@ public class AddVerificationPages {
                         Paragraph para = createParagraph(field.value, fs, Font.NORMAL, color);
 
                         /*
-                         * Note: lastAscentPoints and
-                         * lastDescentPoints are set in
-                         * createParagraph above.
-                         */
-                        float fontBaseline = lastAscentPoints/(lastAscentPoints + lastDescentPoints) * fs;
-                        /*
                          * fontOffset used to compensate for text
                          * position that was different in browser
                          * compared to what was in PDF. It does not
                          * seems to be necessary anymore.
+                         *
+                         * Note: fontBaseline is set as side effect of
+                         * createParagraph. Multiple results in Java.
                          */
                         float fontOffset   = 0 * fs;
 
@@ -1298,8 +1295,7 @@ public class AddVerificationPages {
     /*
      * Multiple returns in Java. Sorry about this.
      */
-    static float lastAscentPoints;
-    static float lastDescentPoints;
+    static float fontBaseline;
 
     /*
      * For future generation messing with this code: proper iteration
@@ -1341,8 +1337,7 @@ public class AddVerificationPages {
                  * Based on first character in the string we need to
                  * calculate font baseline.
                  */
-                lastAscentPoints = baseFont.getFontDescriptor(BaseFont.ASCENT, size);
-                lastDescentPoints = -baseFont.getFontDescriptor(BaseFont.DESCENT, size);
+                fontBaseline = baseFont.getFontDescriptor(BaseFont.ASCENT, size);
             }
             if( lastChunk!=null && (lastBaseFont==baseFont || baseFont==null) ) {
                 lastChunk.append(String.valueOf(c));
