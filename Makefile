@@ -4,8 +4,7 @@
 #
 #
 
-CLASSPATH1=itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar
-CLASSPATH=.:itextpdf-5.5.3.jar:$(CLASSPATH1)
+CLASSPATH=itextpdf-5.5.3.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar
 
 ifeq ($(OS),Windows_NT)
 else
@@ -20,12 +19,18 @@ endif
 
 jar : scrivepdftools.jar
 
+
 classes/%.class : src/%.java
 	if [ ! -d classes ]; then mkdir classes; fi
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
 FONTS=assets/SourceSansPro-Light.ttf \
       assets/NotoSans-Regular.ttf
+
+Manifest.txt :
+	echo "Main-Class: Main" > $@
+	echo "Class-Path: $(subst :, ,$(CLASSPATH))" >> $@
+
 
 scrivepdftools.jar : Manifest.txt \
                      classes/Main.class \
