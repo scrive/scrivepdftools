@@ -210,7 +210,16 @@ test/%.extract-output.yaml :
 ifdef OPEN
 	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
+ifdef ACCEPT
+	if diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@); then  \
+	    echo "";												  \
+	else														  \
+	    echo "Accepting new version of expect file: $(word 3,$^)";\
+	    cp $(patsubst %.yaml,%-1.yaml,$@) $(word 3,$^);			  \
+	fi
+else
 	diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
+endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
 test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three-page-a4.pdf test/test-extract-texts.expect.yaml scrivepdftools.jar
