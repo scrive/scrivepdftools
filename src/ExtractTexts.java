@@ -97,6 +97,8 @@ class ExtractTextSpec
 
     public ArrayList<MatchedTemplate> listOfTemplates;
 
+    public PdfAdditionalInfo additionalInfo;
+
     /*
      * YAML is compatible with JSON (at least with the JSON we generate).
      *
@@ -142,6 +144,9 @@ class ExtractTextsRenderListener implements RenderListener
      * next page as limit.
      */
     public ArrayList<String> foundText;
+
+    public boolean containsGlyphs;
+    public boolean containsControlCodes;
 
     public class CharPos {
         /*
@@ -189,6 +194,14 @@ class ExtractTextsRenderListener implements RenderListener
 
         for( TextRenderInfo tri: individualCharacters ) {
             String text = tri.getText();
+
+            if( !text.equals(" ") && !text.equals("\t") &&
+                !text.equals("\n")  && !text.equals("\r") &&
+                !text.equals("\u00A0")) {
+
+                containsGlyphs = true;
+                containsControlCodes = containsControlCodes || text.codePointAt(0)<32;
+            }
 
             CharPos cp = new CharPos();
             cp.c = text;
@@ -366,6 +379,12 @@ public class ExtractTexts {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PdfStamper stamper = new PdfStamper(reader, os);
 
+        spec.additionalInfo = new PdfAdditionalInfo();
+        spec.additionalInfo.numberOfPages = reader.getNumberOfPages();
+        Rectangle rx = reader.getPageSizeWithRotation(1);
+        spec.additionalInfo.firstPageWidth = rx.getWidth();
+        spec.additionalInfo.firstPageHeight = rx.getHeight();
+
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
 
@@ -396,7 +415,10 @@ public class ExtractTexts {
                     parser.processContent(rect.page, rl);
                     rl.finalizeSearch();
                     charsForPages[rect.page-1] = rl;
+                    spec.additionalInfo.containsControlCodes = spec.additionalInfo.containsControlCodes || rl.containsControlCodes;
+                    spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || rl.containsGlyphs;
                 }
+
 
                 Rectangle crop = reader.getPageSizeWithRotation(rect.page);
                 double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();

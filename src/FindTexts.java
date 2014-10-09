@@ -102,6 +102,8 @@ class FindTextSpec
     public ArrayList<Match> matches;
     public String stampedOutput;
 
+    public PdfAdditionalInfo additionalInfo;
+
 
     /*
      * YAML is compatible with JSON (at least with the JSON we generate).
@@ -155,6 +157,9 @@ class MyRenderListener implements RenderListener
 
     private PdfStamper stamper;
     private int page;
+
+    public boolean containsGlyphs;
+    public boolean containsControlCodes;
 
     public class CharPos {
         /*
@@ -212,6 +217,10 @@ class MyRenderListener implements RenderListener
             if( !text.equals(" ") && !text.equals("\t") &&
                 !text.equals("\n")  && !text.equals("\r") &&
                 !text.equals("\u00A0")) {
+
+                containsGlyphs = true;
+                containsControlCodes = containsControlCodes || text.codePointAt(0)<32;
+
                 CharPos cp = new CharPos();
                 cp.c = text;
                 LineSegment line = tri.getBaseline();
@@ -369,6 +378,12 @@ public class FindTexts {
         ArrayList<MyRenderListener> charsForPages =
             new ArrayList<MyRenderListener>();
 
+        spec.additionalInfo = new PdfAdditionalInfo();
+        spec.additionalInfo.numberOfPages = reader.getNumberOfPages();
+        Rectangle r = reader.getPageSizeWithRotation(1);
+        spec.additionalInfo.firstPageWidth = r.getWidth();
+        spec.additionalInfo.firstPageHeight = r.getHeight();
+
         /*
          * Some pages may not require searching because for example
          * nobody requested any text positions from them. We could
@@ -380,7 +395,8 @@ public class FindTexts {
             parser.processContent(i, collectCharacters);
             collectCharacters.finalizeSearch();
             charsForPages.add(collectCharacters);
-
+            spec.additionalInfo.containsControlCodes = spec.additionalInfo.containsControlCodes || collectCharacters.containsControlCodes;
+            spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || collectCharacters.containsGlyphs;
         }
 
         for(Match match : spec.matches ) {
