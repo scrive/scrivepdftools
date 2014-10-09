@@ -171,14 +171,14 @@ ifdef OPEN
 	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
 ifdef ACCEPT
-	if diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@); then  \
+	if diff $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@); then     \
 	    echo "";												  \
 	else														  \
 	    echo "Accepting new version of expect file: $(word 3,$^)";\
 	    cp $(patsubst %.yaml,%-1.yaml,$@) $(word 3,$^);			  \
 	fi
 else
-	diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
+	diff $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
@@ -220,14 +220,14 @@ ifdef OPEN
 	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
 ifdef ACCEPT
-	if diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@); then  \
+	if diff $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@); then     \
 	    echo "";												  \
 	else														  \
 	    echo "Accepting new version of expect file: $(word 3,$^)";\
 	    cp $(patsubst %.yaml,%-1.yaml,$@) $(word 3,$^);			  \
 	fi
 else
-	diff -w $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
+	diff $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
