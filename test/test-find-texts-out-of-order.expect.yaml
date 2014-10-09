@@ -1,3 +1,9 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 841.89
+  "firstPageWidth": 595.276
+  "numberOfPages": 5
 "input": "test/text-out-of-order.pdf"
 "matches":
 - "coords":

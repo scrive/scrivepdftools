@@ -1,8 +1,14 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 841.8
+  "firstPageWidth": 595.2
+  "numberOfPages": 3
 "input": "test/three-page-a4.pdf"
 "numberOfPages": 3
 "rects":
 - "lines":
-  - "Page 1 "
+  - "Page 1"
   "page": 1
   "rect":
   - 0.0
@@ -10,7 +16,7 @@
   - 1.0
   - 1.0
 - "lines":
-  - "Page 2 "
+  - "Page 2"
   "page": 2
   "rect":
   - 0.0

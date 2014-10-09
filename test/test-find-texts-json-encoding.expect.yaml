@@ -1,3 +1,9 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 841.8
+  "firstPageWidth": 595.2
+  "numberOfPages": 3
 "input": "test/three-page-a4.pdf"
 "matches":
 - "index": 0

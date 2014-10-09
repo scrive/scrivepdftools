@@ -1,3 +1,9 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 842.0
+  "firstPageWidth": 595.0
+  "numberOfPages": 1
 "input": "test/test-document.pdf"
 "matches":
 - "coords":

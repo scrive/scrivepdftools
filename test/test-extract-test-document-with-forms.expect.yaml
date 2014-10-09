@@ -1,3 +1,9 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 842.0
+  "firstPageWidth": 595.0
+  "numberOfPages": 8
 "input": "test/document-with-text-in-forms.pdf"
 "listOfTemplates":
 - "color":
