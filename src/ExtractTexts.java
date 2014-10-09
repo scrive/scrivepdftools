@@ -428,9 +428,25 @@ public class ExtractTexts {
                 rl.find(l,b,r,t);
                 rect.lines = new ArrayList<String>();
                 for( String line : rl.foundText ) {
-                    line = line.replaceAll("\\A[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+","");
-                    line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]\\z","");
                     line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+"," ");
+                    if( !line.equals("")) {
+                        int beginIndex = 0;
+                        int endIndex = line.length();
+                        char c = line.charAt(beginIndex);
+                        if( " \t\n\u000B\f\r\u00A0\uFEFF\u200B".indexOf(c)>=0 ) {
+                            beginIndex = 1;
+                        }
+                        c = line.charAt(endIndex-1);
+                        if( " \t\n\u000B\f\r\u00A0\uFEFF\u200B".indexOf(c)>=0 ) {
+                            endIndex = endIndex - 1;
+                        }
+                        if( beginIndex < endIndex ) {
+                            line = line.substring(beginIndex,endIndex);
+                        }
+                        else {
+                            line = "";
+                        }
+                    }
                     if( !line.equals("")) {
                         rect.lines.add(line);
                     }
