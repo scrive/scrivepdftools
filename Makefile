@@ -182,13 +182,29 @@ else
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-find-texts.find-output.yaml : test/find-texts.json test/three-page-a4.pdf test/test-find-texts.expect.yaml scrivepdftools.jar
+test/test-find-texts.find-output.yaml :				 \
+    test/find-texts.json							 \
+    test/three-page-a4.pdf							 \
+    test/test-find-texts.expect.yaml				 \
+    scrivepdftools.jar
 
-test/test-find-texts-test-document.find-output.yaml : test/find-texts-test-document.json test/test-document.pdf test/test-find-texts-test-document.expect.yaml scrivepdftools.jar
+test/test-find-texts-test-document.find-output.yaml :\
+    test/find-texts-test-document.json				 \
+    test/test-document.pdf							 \
+    test/test-find-texts-test-document.expect.yaml	 \
+    scrivepdftools.jar
 
-test/test-find-texts-out-of-order.find-output.yaml : test/find-texts-out-of-order.json test/text-out-of-order.pdf test/test-find-texts-out-of-order.expect.yaml scrivepdftools.jar
+test/test-find-texts-out-of-order.find-output.yaml : \
+    test/find-texts-out-of-order.json				 \
+    test/text-out-of-order.pdf						 \
+    test/test-find-texts-out-of-order.expect.yaml	 \
+    scrivepdftools.jar
 
-test/test-find-texts-json-encoding.find-output.yaml : test/find-text-json-encoding.json test/three-page-a4.pdf test/test-find-texts-json-encoding.expect.yaml scrivepdftools.jar
+test/test-find-texts-json-encoding.find-output.yaml :\
+    test/find-text-json-encoding.json				 \
+    test/three-page-a4.pdf							 \
+    test/test-find-texts-json-encoding.expect.yaml	 \
+    scrivepdftools.jar
 
 test-extract-texts : test/test-extract-texts.extract-output.yaml \
                      test/test-extract-test-document.extract-output.yaml \
@@ -232,15 +248,35 @@ else
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-extract-texts.extract-output.yaml : test/extract-texts.json test/three-page-a4.pdf test/test-extract-texts.expect.yaml scrivepdftools.jar
+test/test-extract-texts.extract-output.yaml :					\
+    test/extract-texts.json										\
+    test/three-page-a4.pdf										\
+    test/test-extract-texts.expect.yaml							\
+    scrivepdftools.jar
 
-test/test-extract-test-document.extract-output.yaml : test/extract-test-document.json test/test-document.pdf test/test-extract-test-document.expect.yaml scrivepdftools.jar
+test/test-extract-test-document.extract-output.yaml :			\
+    test/extract-test-document.json								\
+    test/test-document.pdf										\
+    test/test-extract-test-document.expect.yaml					\
+    scrivepdftools.jar
 
-test/test-extract-test-document-with-forms.extract-output.yaml : test/extract-test-document.json test/document-with-text-in-forms.pdf test/test-extract-test-document-with-forms.expect.yaml scrivepdftools.jar
+test/test-extract-test-document-with-forms.extract-output.yaml :\
+    test/extract-test-document.json								\
+    test/document-with-text-in-forms.pdf						\
+    test/test-extract-test-document-with-forms.expect.yaml		\
+    scrivepdftools.jar
 
-test/test-extract-texts-out-of-order.extract-output.yaml : test/extract-texts-whole-first-page.json test/text-out-of-order.pdf test/test-extract-texts-out-of-order.expect.yaml scrivepdftools.jar
+test/test-extract-texts-out-of-order.extract-output.yaml :		\
+    test/extract-texts-whole-first-page.json					\
+    test/text-out-of-order.pdf									\
+    test/test-extract-texts-out-of-order.expect.yaml			\
+    scrivepdftools.jar
 
-test/test-extract-cat-only.extract-output.yaml : test/extract-texts-cat-only.json test/cat-only.pdf test/test-extract-cat-only.expect.yaml scrivepdftools.jar
+test/test-extract-cat-only.extract-output.yaml :				\
+    test/extract-texts-cat-only.json							\
+    test/cat-only.pdf											\
+    test/test-extract-cat-only.expect.yaml						\
+    scrivepdftools.jar
 
 test-normalize : test/document-with-text-in-forms-flattened.pdf
 
