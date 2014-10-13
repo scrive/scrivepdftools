@@ -1,0 +1,17 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": false
+  "firstPageHeight": 841.8
+  "firstPageWidth": 595.2
+  "numberOfPages": 1
+"input": "test/cat-only.pdf"
+"rects":
+- "lines": []
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+"yamlOutput": true
+

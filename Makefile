@@ -193,7 +193,8 @@ test/test-find-texts-json-encoding.find-output.yaml : test/find-text-json-encodi
 test-extract-texts : test/test-extract-texts.extract-output.yaml \
                      test/test-extract-test-document.extract-output.yaml \
 	                 test/test-extract-test-document-with-forms.extract-output.yaml \
-                     test/test-extract-texts-out-of-order.extract-output.yaml
+                     test/test-extract-texts-out-of-order.extract-output.yaml \
+                     test/test-extract-cat-only.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -238,6 +239,8 @@ test/test-extract-test-document.extract-output.yaml : test/extract-test-document
 test/test-extract-test-document-with-forms.extract-output.yaml : test/extract-test-document.json test/document-with-text-in-forms.pdf test/test-extract-test-document-with-forms.expect.yaml scrivepdftools.jar
 
 test/test-extract-texts-out-of-order.extract-output.yaml : test/extract-texts-whole-first-page.json test/text-out-of-order.pdf test/test-extract-texts-out-of-order.expect.yaml scrivepdftools.jar
+
+test/test-extract-cat-only.extract-output.yaml : test/extract-texts-cat-only.json test/cat-only.pdf test/test-extract-cat-only.expect.yaml scrivepdftools.jar
 
 test-normalize : test/document-with-text-in-forms-flattened.pdf
 
