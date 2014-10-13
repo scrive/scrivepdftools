@@ -5,6 +5,7 @@
   "firstPageWidth": 595.2
   "numberOfPages": 1
 "input": "test/cat-only.pdf"
+"numberOfPages": 1
 "rects":
 - "lines": []
   "page": 1
