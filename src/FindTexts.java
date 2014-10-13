@@ -219,7 +219,11 @@ class MyRenderListener implements RenderListener
                 !text.equals("\u00A0")) {
 
                 containsGlyphs = true;
-                containsControlCodes = containsControlCodes || text.codePointAt(0)<32;
+                int codePoint = text.codePointAt(0);
+                // 0x20000 marks beginning of unassigned planes,
+                // 0xE0000 and 0xF0000 are special purpose planes, no
+                // useful glyphs in that range.
+                containsControlCodes = containsControlCodes || codePoint<32 || codePoint>=0x20000;
 
                 CharPos cp = new CharPos();
                 cp.c = text;
