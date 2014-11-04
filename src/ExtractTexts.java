@@ -205,32 +205,32 @@ class ExtractTextsRenderListener implements RenderListener
                 // 0xE0000 and 0xF0000 are special purpose planes, no
                 // useful glyphs in that range.
                 containsControlCodes = containsControlCodes || codePoint<32 || codePoint>=0x20000;
-            }
 
-            CharPos cp = new CharPos();
-            cp.c = text;
-            LineSegment line = tri.getBaseline();
-            Vector p1 = line.getStartPoint();
-            cp.x = p1.get(Vector.I1);
-            cp.y = p1.get(Vector.I2);
-            Vector p2 = line.getEndPoint();
+                CharPos cp = new CharPos();
+                cp.c = text;
+                LineSegment line = tri.getBaseline();
+                Vector p1 = line.getStartPoint();
+                cp.x = p1.get(Vector.I1);
+                cp.y = p1.get(Vector.I2);
+                Vector p2 = line.getEndPoint();
 
-            Vector p;
-            line = tri.getDescentLine();
-            p = line.getStartPoint();
-            cp.bx = p.get(Vector.I1);
-            cp.by = p.get(Vector.I2);
+                Vector p;
+                line = tri.getDescentLine();
+                p = line.getStartPoint();
+                cp.bx = p.get(Vector.I1);
+                cp.by = p.get(Vector.I2);
 
-            line = tri.getAscentLine();
-            p = line.getEndPoint();
-            cp.ex = p.get(Vector.I1);
-            cp.ey = p.get(Vector.I2);
+                line = tri.getAscentLine();
+                p = line.getEndPoint();
+                cp.ex = p.get(Vector.I1);
+                cp.ey = p.get(Vector.I2);
 
-            /*
-             * We take only horizontal text in account
-             */
-            if( cp.y == p2.get(Vector.I2) ) {
-                allCharacters.add(cp);
+                /*
+                 * We take only horizontal text in account
+                 */
+                if( cp.y == p2.get(Vector.I2) ) {
+                    allCharacters.add(cp);
+                }
             }
         }
     }
@@ -261,7 +261,7 @@ class ExtractTextsRenderListener implements RenderListener
                 if( last==null || roundForCompare(last.y) != roundForCompare(cp.y) ) {
                     foundText.add("");
                 }
-                else if( cp.bx - last.ex > 8 ) {
+                else if( cp.bx - last.ex > 0.1 * (Math.abs(cp.bx-cp.ex) + Math.abs(last.ex - last.bx) )) {
                     // need to put a space in here
                     txt = " " + txt;
                 }

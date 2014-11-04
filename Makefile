@@ -206,6 +206,12 @@ test/test-find-texts-json-encoding.find-output.yaml :\
     test/test-find-texts-json-encoding.expect.yaml	 \
     scrivepdftools.jar
 
+test/test-find-texts-sales-contract.find-output.yaml :\
+    test/find-text-sales-contract.json	   			 \
+    test/sales_contract.pdf							 \
+    test/test-find-texts-sales-contract.expect.yaml	 \
+    scrivepdftools.jar
+
 test-extract-texts : test/test-extract-texts.extract-output.yaml \
                      test/test-extract-test-document.extract-output.yaml \
 	                 test/test-extract-test-document-with-forms.extract-output.yaml \
