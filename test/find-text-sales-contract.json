@@ -1,0 +1,9 @@
+{ "input": "test/sales_contract.pdf"
+, "yamlOutput": true
+, "matches": [ { "text": "SALES CONTR ACT", "pages": [0,1,2], "index": 1 }
+             , { "text": "SALESCONTRACT", "pages": [0,1,2], "index": 1 }
+             , { "text": "SALES CONTRACT", "pages": [0,1,2], "index": 1 }
+             , { "text": "SALES", "pages": [0,1,2], "index": 1 }
+             , { "text": "S", "pages": [0,1,2], "index": 1 }
+             ]
+}
