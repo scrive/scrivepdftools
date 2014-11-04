@@ -228,55 +228,62 @@ class MyRenderListener implements RenderListener
                 CharPos cp = new CharPos();
                 cp.c = text;
                 LineSegment line = tri.getBaseline();
-                Vector p = line.getStartPoint();
-                cp.x = p.get(Vector.I1);
-                cp.y = p.get(Vector.I2);
+                Vector p1 = line.getStartPoint();
+                cp.x = p1.get(Vector.I1);
+                cp.y = p1.get(Vector.I2);
+                Vector p2 = line.getEndPoint();
 
-                line = tri.getDescentLine();
-                p = line.getStartPoint();
-                float bx = p.get(Vector.I1);
-                float by = p.get(Vector.I2);
+                if( p1.get(Vector.I2) == p2.get(Vector.I2)) {
+                    /*
+                     * We read only horizontal text, ignore things across
+                     */
+                    Vector p;
+                    line = tri.getDescentLine();
+                    p = line.getStartPoint();
+                    float bx = p.get(Vector.I1);
+                    float by = p.get(Vector.I2);
 
-                line = tri.getAscentLine();
-                p = line.getEndPoint();
-                float ex = p.get(Vector.I1);
-                float ey = p.get(Vector.I2);
+                    line = tri.getAscentLine();
+                    p = line.getEndPoint();
+                    float ex = p.get(Vector.I1);
+                    float ey = p.get(Vector.I2);
 
-                allCharacters.add(cp);
+                    allCharacters.add(cp);
 
-                if( stamper!=null ) {
-                    PdfContentByte canvas = stamper.getOverContent(page);
-                    Rectangle frame = new Rectangle((float)cp.x-1,
-                                                    (float)cp.y-1,
-                                                    (float)cp.x+1,
-                                                    (float)cp.y+1);
-                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                    frame.setBorderWidth(1f);
-                    frame.setBorder(15);
-                    canvas.rectangle(frame);
+                    if( stamper!=null ) {
+                        PdfContentByte canvas = stamper.getOverContent(page);
+                        Rectangle frame = new Rectangle((float)cp.x-1,
+                                                        (float)cp.y-1,
+                                                        (float)cp.x+1,
+                                                        (float)cp.y+1);
+                        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                        frame.setBorderWidth(1f);
+                        frame.setBorder(15);
+                        canvas.rectangle(frame);
 
-                    frame = new Rectangle((float)bx,
-                                          (float)by,
-                                          (float)ex,
-                                          (float)ey);
-                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                    frame.setBorderWidth(0.1f);
-                    frame.setBorder(15);
-                    canvas.rectangle(frame);
+                        frame = new Rectangle((float)bx,
+                                              (float)by,
+                                              (float)ex,
+                                              (float)ey);
+                        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                        frame.setBorderWidth(0.1f);
+                        frame.setBorder(15);
+                        canvas.rectangle(frame);
+                    }
+
+                    /*
+                     * Y coordinate postfixup. It seems that all
+                     * coordinates here are moved down by half of the
+                     * difference between baseline and descent. Strange.
+                     */
+                    /*
+                      double fixup = cp.y - cp.by;
+                      System.err.println("cp: " + cp);
+                      cp.y += fixup/2;
+                      cp.by += fixup/2;
+                      cp.ey += fixup/2;
+                    */
                 }
-
-                /*
-                 * Y coordinate postfixup. It seems that all
-                 * coordinates here are moved down by half of the
-                 * difference between baseline and descent. Strange.
-                 */
-                /*
-                double fixup = cp.y - cp.by;
-                System.err.println("cp: " + cp);
-                cp.y += fixup/2;
-                cp.by += fixup/2;
-                cp.ey += fixup/2;
-                */
             }
         }
     }
