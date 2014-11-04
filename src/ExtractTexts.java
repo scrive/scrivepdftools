@@ -210,10 +210,12 @@ class ExtractTextsRenderListener implements RenderListener
             CharPos cp = new CharPos();
             cp.c = text;
             LineSegment line = tri.getBaseline();
-            Vector p = line.getStartPoint();
-            cp.x = p.get(Vector.I1);
-            cp.y = p.get(Vector.I2);
+            Vector p1 = line.getStartPoint();
+            cp.x = p1.get(Vector.I1);
+            cp.y = p1.get(Vector.I2);
+            Vector p2 = line.getEndPoint();
 
+            Vector p;
             line = tri.getDescentLine();
             p = line.getStartPoint();
             cp.bx = p.get(Vector.I1);
@@ -224,7 +226,12 @@ class ExtractTextsRenderListener implements RenderListener
             cp.ex = p.get(Vector.I1);
             cp.ey = p.get(Vector.I2);
 
-            allCharacters.add(cp);
+            /*
+             * We take only horizontal text in account
+             */
+            if( cp.y == p2.get(Vector.I2) ) {
+                allCharacters.add(cp);
+            }
         }
     }
 

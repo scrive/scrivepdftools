@@ -210,7 +210,8 @@ test-extract-texts : test/test-extract-texts.extract-output.yaml \
                      test/test-extract-test-document.extract-output.yaml \
 	                 test/test-extract-test-document-with-forms.extract-output.yaml \
                      test/test-extract-texts-out-of-order.extract-output.yaml \
-                     test/test-extract-cat-only.extract-output.yaml
+                     test/test-extract-cat-only.extract-output.yaml \
+                     test/test-extract-texts-sales-contract.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -247,6 +248,12 @@ else
 	diff $(word 3,$^) $(patsubst %.yaml,%-1.yaml,$@)
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
+
+test/test-extract-texts-sales-contract.extract-output.yaml :	\
+    test/extract-texts-sales-contract.json						\
+    test/sales_contract.pdf										\
+    test/test-extract-texts-sales-contract.expect.yaml			\
+    scrivepdftools.jar
 
 test/test-extract-texts.extract-output.yaml :					\
     test/extract-texts.json										\

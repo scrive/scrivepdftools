@@ -1,0 +1,55 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 841.89
+  "firstPageWidth": 595.275
+  "numberOfPages": 1
+"input": "test/sales_contract.pdf"
+"numberOfPages": 1
+"rects":
+- "lines":
+  - "SALES CONTR ACT"
+  - "Supplier"
+  - "Name Phone"
+  - "Supplier Inc. 08-555 666 77"
+  - "Adress Organisation number"
+  - "Supplier Street 2 565656-5656"
+  - "Customer"
+  - "Name ID number"
+  - "Adress ZIP code Adress Phone"
+  - "E-mail Customer number Mobile number"
+  - "1. Lorem ipsum feugiat nulla facilisis at vero eros et accumsan et"
+  - "Lorem ipsum dolor sit amet, consectetuer iusto odio dignissim qui blandit."
+  - "adipiscing elit, sed diam nonummy nibh euismod"
+  - "tincidunt ut laoreet dolore magna aliquam erat 4. Elit sed diam"
+  - "volutpat. Ut wisi enim ad minim veniam, quis Lorem ipsum dolor sit amet, consectetuer"
+  - "nostrud exerci tation ullamcorper suscipit lobortis adipiscing elit, sed diam nonummy nibh euismod"
+  - "nisl ut aliquip ex ea commodo consequat. tincidunt ut laoreet dolore magna aliquam erat"
+  - "volutpat."
+  - "2. Dolor sit"
+  - "Lorem ipsum dolor sit amet, consectetuer 5. Iis qui facit eorum"
+  - "adipiscing elit, sed diam nonummy nibh euismod Nam liber tempor cum soluta nobis eleifend option"
+  - "tincidunt ut laoreet dolore magna aliquam erat congue nihil imperdiet doming id quod mazim"
+  - "volutpat. placerat facer possim assum. Typi non habent"
+  - "claritatem insitam; est usus legentis in iis qui facit"
+  - "3. Amet consectetuer adipiscing eorum claritatem. Investigationes demonstraverunt"
+  - "Lorem ipsum dolor sit amet, consectetuer lectores legere me lius quod ii legunt saepius."
+  - "adipiscing elit, sed diam nonummy nibh euismod Claritas est etiam processus dynamicus, qui"
+  - "tincidunt ut laoreet dolore magna aliquam erat sequitur mutationem consuetudium lectorum. Mirum"
+  - "volutpat. Ut wisi enim ad minim veniam, quis est notare quam littera gothica, quam nunc"
+  - "nostrud exerci tation ullamcorper suscipit lobortis putamus parum claram, anteposuerit litterarum"
+  - "nisl ut aliquip ex ea commodo consequat. Duis formas humanitatis per seacula quarta decima et"
+  - "autem vel eum iriure dolor in hendrerit in vulputate quinta decima. Eodem modo typi, qui nunc nobis"
+  - "velit esse molestie consequat, vel illum dolore eu videntur parum clari, fiant sollemnes in futurum."
+  - "Date:"
+  - "Place:"
+  - "___________________________________"
+  - "Customer name"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+"yamlOutput": true
+
