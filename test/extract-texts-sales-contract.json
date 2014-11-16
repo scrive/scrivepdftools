@@ -1,0 +1,5 @@
+{ "input": "test/sales_contract.pdf"
+, "yamlOutput": true
+, "rects": [ { "rect": [0,0,1,1], "page": 1 }
+           ]
+}
