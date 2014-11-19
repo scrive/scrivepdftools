@@ -180,25 +180,12 @@ class ExtractTextsRenderListener implements RenderListener
          */
     	public static final double LINE_TOL = 4.0;
 
-        public CharPos(String text, LineSegment base, LineSegment descent, LineSegment ascent)
+        public CharPos(String text, LineSegment base)
         {
         	c = text;
         	// save base line
         	origin = base.getStartPoint();
         	this.base = base.getEndPoint().subtract(origin);
-        	// extend base line using the bounding box
-        	Vector[] ex = { descent.getStartPoint(), descent.getEndPoint(), ascent.getStartPoint(), ascent.getEndPoint()};
-        	final Vector b1 = this.base.normalize();
-        	final float l0 = this.base.length();
-        	float x0 = 0, x1 = l0;
-            for( Vector p: ex ) {
-            	final float d = b1.dot(p.subtract(origin));
-           		x0 = Math.min(x0, d);
-           		x1 = Math.max(x0, d);
-            }
-            // adjust baseline with all extensions (x0-x1)
-            origin = origin.subtract(b1.multiply(-x0));
-            this.base.multiply((x1-x0)/l0);
         }
 
         public Vector getOrigin() {
@@ -313,7 +300,7 @@ class ExtractTextsRenderListener implements RenderListener
                 // useful glyphs in that range.
                 containsControlCodes = containsControlCodes || codePoint<32 || codePoint>=0x20000;
 
-                CharPos cp = new CharPos(text, tri.getBaseline(), tri.getDescentLine(), tri.getAscentLine());
+                CharPos cp = new CharPos(text, tri.getBaseline());
                 if( cp.isHorizontal() || cp.isVertical()) {
                     allCharacters.add(cp);
                 }
