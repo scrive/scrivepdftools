@@ -415,7 +415,19 @@ public class ExtractTexts {
     }
 
     public static Rectangle getRectInRotatedCropBoxCoordinates(PdfReader reader, int page, ArrayList<Double> rect) {
-        //Rectangle crop = reader.getPageSizeWithRotation(page);
+        /*
+         * Here we fight in two coordinate spaces:
+         * 1. Content coordinate space (the one when /Rotate is 0)
+         * 2. Visible page coordinate space (differs when /Rotate is not 0)
+         *
+         * crop is in content coordinate space.
+         * origrect is in visible page coordinate space but normalized to (0,0)-(1,1)
+         *
+         * What we need is to transform origrect BACK to unrotated
+         * content coordinate space.  We probably could use some itext
+         * mechanism for that but it proved to be inherently hard to
+         * understand. So we do manual coordinate fiddling.
+         */
         Rectangle crop = reader.getPageSize(page);
 
         Rectangle origrect;
@@ -437,7 +449,17 @@ public class ExtractTexts {
             b = origrect.getRight()       * crop.getHeight() + crop.getBottom();
             break;
         case 180:
+            l = (1-origrect.getRight())   * crop.getWidth()  + crop.getLeft();
+            t = (1-origrect.getTop())     * crop.getHeight() + crop.getBottom();
+            r = (1-origrect.getLeft())    * crop.getWidth()  + crop.getLeft();
+            b = (1-origrect.getBottom())  * crop.getHeight() + crop.getBottom();
+            break;
         case 270:
+            l = origrect.getBottom()      * crop.getWidth()  + crop.getLeft();
+            t = (1-origrect.getRight())   * crop.getHeight() + crop.getBottom();
+            r = origrect.getTop()         * crop.getWidth()  + crop.getLeft();
+            b = (1-origrect.getLeft())    * crop.getHeight() + crop.getBottom();
+            break;
         }
 
         Rectangle rect2 = new Rectangle((float)l,(float)b,(float)r,(float)t);
