@@ -1,0 +1,37 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 595.22
+  "firstPageWidth": 842.0
+  "numberOfPages": 3
+"input": "test/fuck3.pdf"
+"numberOfPages": 3
+"rects":
+- "color":
+  - 1.0
+  - 0.6733091
+  - 1.0
+  "lines":
+  - "Avis Contact Details"
+  "page": 1
+  "rect":
+  - 0.5588547
+  - 0.16791604
+  - 0.69247085
+  - 0.19790104
+- "color":
+  - 1.0
+  - 0.6733091
+  - 1.0
+  "lines":
+  - "HMAD ZANTOUT"
+  - "AMRA CENTRE MANKARA"
+  "page": 1
+  "rect":
+  - 0.66702014
+  - 0.35232383
+  - 0.78791094
+  - 0.37631184
+"stampedOutput": "test/test-extract-rotate-90.extract-output.pdf"
+"yamlOutput": true
+
