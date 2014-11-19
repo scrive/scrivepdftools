@@ -1,0 +1,151 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 792.0
+  "firstPageWidth": 612.0
+  "numberOfPages": 7
+"input": "test/rotated-text.pdf"
+"numberOfPages": 7
+"rects":
+- "lines":
+  - "Car Rental Contract at Rental End"
+  - "Rental Agreement Number : 820582696"
+  - "Contact Details"
+  - "Avis Training Services Web www.avis.co.uk"
+  - "Avis House Reservations 0844 5 818181"
+  - "Bracknell Berks RG12, GB Breakdown 0800 200 888"
+  - "Personal Details Location Details"
+  - "Name Test, SCRIVE1 Start Location"
+  - "Address Testville AMS AVISVILLE GB"
+  - "Testville, GB 01344-427410"
+  - "Company Test Scrive"
+  - "Remarks Test Scrive Return Location"
+  - "AMS AVISVILLE GB"
+  - "Vehicle Details"
+  - "Vehicle Type Renault Clio RL 1.2 Fuel at Start Fuel Charged"
+  - "Registration XX GBZ705AMS"
+  - "Colour Silver"
+  - "Group Driven B"
+  - "Transmission Manual"
+  - "Fuel Type Unleaded 0"
+  - "Miles at Start/End 1234/1235"
+  - "Miles Driven 1"
+  - "received a copy of"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines":
+  - "Rental Agreement Number 820582696 New Damage Registration XX GBZ705AMS"
+  - "Exterior Interior"
+  - "Rental Information"
+  - "Start End Actual Duration/ Charged"
+  - "Date/Time 20 Oct 14 1551 21 Oct 14 1602 1 day, 0.2 hours / 1 day"
+  - "Rental Costs Group B (£) Quantity Net Price VAT (20.00%) Gross Price"
+  - "Product 101.42 20.28 121.70"
+  - "1 day group B rental including unlimited free mileage"
+  - "Fees and Surcharges"
+  - "Premium Location Fee 12.75 2.55 15.30"
+  - "Part Name Description Count Cost (£)"
+  - "Optional Services"
+  - "Collision Damage Waiver 1 day @ 3.00 3.00 0.60 3.60"
+  - "Theft Protection 1 day @ 3.75 3.75 0.75 4.50"
+  - "Total Charges 120.92 24.18 145.10"
+  - "Notes"
+  - "Collision/Theft Excess Reduced to £500.00"
+  - "Payment Details"
+  - "Credit Card: MasterCard XXXX XXXX XXXX 1765 Expiry:12/15"
+  - "Code:WIZFLE/431"
+  - "Code:WIZFLE"
+  - "Amount due: £145.10"
+  - "Important Information and Declaration"
+  - "Before signing this agreement you should carefully read and understand the terms and conditions"
+  - "provided with this document and confirm below whether you consent to receiving information as set out"
+  - "in Clause 10."
+  - "Declaration"
+  - "Additional Information I agree to the condition of the vehicle as indicated. I consent to pay the final cost of rental and I"
+  - "understand that the cost of rental set out above is an estimate only. I may be liable for further charges as"
+  - "set out in Clauses 1, 2 and 6 which include, but are not limited to, my liability as owner of the vehicle for"
+  - "charges for traffic or parking violations, during the currency of this agreement."
+  - "Signature X"
+  - "Customer name: Test, SCRIVE1 Date 24 Oct 2014 1345"
+  "page": 3
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines":
+  - "Please ensure you have received a copy of the Terms and Conditions"
+  - "Car Rental Contract at Rental End"
+  - "Rental Agreement Number : 820582696"
+  - "Contact Details"
+  - "Avis Training Services Web www.avis.co.uk"
+  - "Avis House Reservations 0844 5 818181"
+  - "Bracknell Berks RG12, GB Breakdown 0800 200 888"
+  - "Personal Details Location Details"
+  - "Name Test, SCRIVE1 Start Location"
+  - "Address Testville AMS AVISVILLE GB"
+  - "Testville, GB 01344-427410"
+  - "Company Test Scrive"
+  - "Remarks Test Scrive Return Location"
+  - "AMS AVISVILLE GB"
+  - "Vehicle Details"
+  - "Vehicle Type Renault Clio RL 1.2 Fuel at Start Fuel Charged"
+  - "Registration XX GBZ705AMS"
+  - "Colour Silver"
+  - "Group Driven B"
+  - "Transmission Manual"
+  - "Fuel Type Unleaded 0"
+  - "Miles at Start/End 1234/1235"
+  - "Miles Driven 1"
+  "page": 5
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+- "lines":
+  - "Rental Agreement Number 820582696 New Damage Registration XX GBZ705AMS"
+  - "Exterior Interior"
+  - "Rental Information"
+  - "Start End Actual Duration/ Charged"
+  - "Date/Time 20 Oct 14 1551 21 Oct 14 1602 1 day, 0.2 hours / 1 day"
+  - "Rental Costs Group B (£) Quantity Net Price VAT (20.00%) Gross Price"
+  - "Product 101.42 20.28 121.70"
+  - "1 day group B rental including unlimited free mileage"
+  - "Fees and Surcharges"
+  - "Premium Location Fee 12.75 2.55 15.30"
+  - "Part Name Description Count Cost (£)"
+  - "Optional Services"
+  - "Collision Damage Waiver 1 day @ 3.00 3.00 0.60 3.60"
+  - "Theft Protection 1 day @ 3.75 3.75 0.75 4.50"
+  - "Total Charges 120.92 24.18 145.10"
+  - "Notes"
+  - "Collision/Theft Excess Reduced to £500.00"
+  - "Payment Details"
+  - "Credit Card: MasterCard XXXX XXXX XXXX 1765 Expiry:12/15"
+  - "Code:WIZFLE/431"
+  - "Code:WIZFLE"
+  - "Amount due: £145.10"
+  - "Important Information and Declaration"
+  - "Before signing this agreement you should carefully read and understand the terms and conditions"
+  - "provided with this document and confirm below whether you consent to receiving information as set out"
+  - "in Clause 10."
+  - "Declaration"
+  - "Additional Information I agree to the condition of the vehicle as indicated. I consent to pay the final cost of rental and I"
+  - "understand that the cost of rental set out above is an estimate only. I may be liable for further charges as"
+  - "set out in Clauses 1, 2 and 6 which include, but are not limited to, my liability as owner of the vehicle for"
+  - "charges for traffic or parking violations, during the currency of this agreement."
+  - "Signature X"
+  - "Customer name: Test, SCRIVE1 Date 24 Oct 2014 1345"
+  "page": 7
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+"yamlOutput": true
+
