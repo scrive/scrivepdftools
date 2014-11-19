@@ -130,6 +130,17 @@ class ExtractTextSpec
     }
 }
 
+class VectorUtils {
+
+	public static Vector add(Vector v1, Vector v2) {
+		return new Vector(v1.get(Vector.I1) + v2.get(Vector.I1), v1.get(Vector.I2) + v2.get(Vector.I2), v1.get(Vector.I3) + v2.get(Vector.I3));
+	}
+
+	public static double crossProduct(Vector v1, Vector v2) {
+		return v1.get(Vector.I1) * v2.get(Vector.I2) - v1.get(Vector.I2) * v2.get(Vector.I1);
+	}
+
+}
 
 class ExtractTextsRenderListener implements RenderListener
 {
@@ -140,7 +151,7 @@ class ExtractTextsRenderListener implements RenderListener
      * foundText is not null if text was found (taking into account
      * requested index). If this is null then foundTextCount should
      * say how many texts were found on the page. This should be less
-     * than index. It should be substracted from index and used on the
+     * than index. It should be subtracted from index and used on the
      * next page as limit.
      */
     public ArrayList<String> foundText;
@@ -149,32 +160,128 @@ class ExtractTextsRenderListener implements RenderListener
     public boolean containsControlCodes;
 
     public class CharPos {
-        /*
+    	/*
          * This is Unicode code point as used by java.String, so it
          * may be a surrogate pair or some other crap. As soon as we
          * enter markets that need this we need to move to full
-         * Unicode support. This requires involed changes everywhere
+         * Unicode support. This requires involved changes everywhere
          * so beware to test this properly once we are there.
          */
         String c;
         /*
          * Coordinates as returned by iText. We know that y is font
          * baseline coordinate.
-         *
-         * bx, by are coordinates of lower left corner. ex, ey are
-         * coordinates of upper right corner. [bx by ex ey] is the
-         * bounding box for this character.
          */
-        double x, y, bx, by, ex, ey;
+        private Vector origin;
+        private Vector base; // baseline = glyph direction + length
+
+        /*
+         *  Maximum vertical distance between two glyphs that can be assigned to the same line
+         */
+    	public static final double LINE_TOL = 4.0;
+
+        public CharPos(String text, LineSegment base, LineSegment descent, LineSegment ascent)
+        {
+        	c = text;
+        	// save base line
+        	origin = base.getStartPoint();
+        	this.base = base.getEndPoint().subtract(origin);
+        	// extend base line using the bounding box
+        	Vector[] ex = { descent.getStartPoint(), descent.getEndPoint(), ascent.getStartPoint(), ascent.getEndPoint()};
+        	final Vector b1 = this.base.normalize();
+        	final float l0 = this.base.length();
+        	float x0 = 0, x1 = l0;
+            for( Vector p: ex ) {
+            	final float d = b1.dot(p.subtract(origin));
+           		x0 = Math.min(x0, d);
+           		x1 = Math.max(x0, d);
+            }
+            // adjust baseline with all extensions (x0-x1)
+            origin = origin.subtract(b1.multiply(-x0));
+            this.base.multiply((x1-x0)/l0);
+        }
+
+        public Vector getOrigin() {
+        	return origin;
+        }
+        public Vector getBase()   {
+        	return base;
+        }
+
+        /*
+         * Returns the second point of a glyph's baseline
+         */
+        public Vector getEndPoint() {
+        	return VectorUtils.add(origin, base);
+        }
+
+        /*
+         * Returns glyph's width
+         */
+        public double getWidth() {
+        	return base.length();
+        }
+
+        /*
+         * Checks for most popular case of regular, horizontal text
+         */
+        public boolean isHorizontal()
+        {
+        	return Math.abs(getBase().get(Vector.I2)) < 0.0001;
+        }
+
+        public boolean isVertical()
+        {
+
+        	return Math.abs(getBase().get(Vector.I1)) < 0.0001;
+        }
+
+        // Comparison tool, gives 0 for zero, -1 for negatives and 1 for positives
+        private /*static*/ int cmp(double v) {
+        	if(Math.abs(v) < 0.001) // NOTE: adjust tolerance for 0
+        		return 0;
+        	return (v < 0) ? -1 : 1;
+        }
+
+        /*
+         * Compares text direction of two glyphs (0=same direction)
+         */
+        public int cmpDir(CharPos c) {
+        	final double dir = VectorUtils.crossProduct(getBase(), c.getBase());
+        	return cmp(dir);
+        }
+
+        /*
+         * Compares vertical position of two glyphs (0=same line)
+         */
+        public int cmpLine(CharPos c) {
+        	if (isHorizontal()) {
+        		final float d = c.getOrigin().get(Vector.I2) - getOrigin().get(Vector.I2); // simple Y2 - Y1 for horizontal text
+            	return (Math.abs(d) < LINE_TOL) ? 0 : cmp(d);
+        	}
+        	Vector p = c.getOrigin().subtract(getOrigin());
+        	final float l0 = getBase().length();
+        	Vector pp = getBase().multiply(p.dot(getBase()) / (l0 * l0));
+        	Vector d = p.subtract(pp);
+        	if (Math.abs(d.length()) < LINE_TOL)
+        		return 0;
+        	return cmp(VectorUtils.crossProduct(getBase(), d));
+        }
+
+        /*
+         * Compares horizontal position of two glyphs
+         */
+        public int cmpOrder(CharPos c) {
+        	if (isHorizontal())
+        		return cmp(getOrigin().get(Vector.I1) - c.getOrigin().get(Vector.I1));
+        	final double x = -getBase().dot(c.getOrigin().subtract(getOrigin()));
+        	return cmp(x);
+        }
+
         public String toString() {
-            return c + "," + x + "," + y + "," + bx + "," + by + "," + ex + "," + ey;
+            return "\"" + c + "\":(" + origin.get(Vector.I1) + "," + origin.get(Vector.I2) + "),<" + base.get(Vector.I1) + ","+ base.get(Vector.I2) + ")";
         }
     };
-
-    static double roundForCompare(double v) {
-        // 8pt font as smallest font supported
-        return Math.round(v/8.0) * 8.0;
-    }
 
     public ArrayList<CharPos> allCharacters;
 
@@ -206,29 +313,8 @@ class ExtractTextsRenderListener implements RenderListener
                 // useful glyphs in that range.
                 containsControlCodes = containsControlCodes || codePoint<32 || codePoint>=0x20000;
 
-                CharPos cp = new CharPos();
-                cp.c = text;
-                LineSegment line = tri.getBaseline();
-                Vector p1 = line.getStartPoint();
-                cp.x = p1.get(Vector.I1);
-                cp.y = p1.get(Vector.I2);
-                Vector p2 = line.getEndPoint();
-
-                Vector p;
-                line = tri.getDescentLine();
-                p = line.getStartPoint();
-                cp.bx = p.get(Vector.I1);
-                cp.by = p.get(Vector.I2);
-
-                line = tri.getAscentLine();
-                p = line.getEndPoint();
-                cp.ex = p.get(Vector.I1);
-                cp.ey = p.get(Vector.I2);
-
-                /*
-                 * We take only horizontal text in account
-                 */
-                if( cp.y == p2.get(Vector.I2) ) {
+                CharPos cp = new CharPos(text, tri.getBaseline(), tri.getDescentLine(), tri.getAscentLine());
+                if( cp.isHorizontal() || cp.isVertical()) {
                     allCharacters.add(cp);
                 }
             }
@@ -244,24 +330,31 @@ class ExtractTextsRenderListener implements RenderListener
      */
     public void find(double l, double b, double r, double t) {
 
+        double tmp = 0;
+        if( l>r ) {
+            tmp = l; l = r; r = tmp;
+        }
+        if( b>t ) {
+            tmp = b; b = t; t = tmp;
+        }
         foundText = new ArrayList<String>();
 
         int i;
         CharPos last = null;
         for( i=0; i<allCharacters.size(); i++ ) {
             CharPos cp = allCharacters.get(i);
-
-            double x = (cp.bx + cp.ex)/2;
-            if(    x>=l &&    x<=r &&
-                   (cp.y>=b && cp.y<=t || cp.y>=t && cp.y<=b) &&
-                cp.c.codePointAt(0)>=32 ) {
+            // check if the middle of baseline
+            final double xm = cp.getOrigin().get(Vector.I1) + cp.getBase().get(Vector.I1)/2;
+            final double ym = cp.getOrigin().get(Vector.I2) + cp.getBase().get(Vector.I2)/2;
+            if((xm >= l) && (xm <= r) && (((ym >= b) && (ym <= t)) || ((ym >= t) && (ym <= b)))
+            	&& cp.c.codePointAt(0)>=32 ) {
 
                 String txt = cp.c;
 
-                if( last==null || roundForCompare(last.y) != roundForCompare(cp.y) ) {
+                if( last==null || (0 != last.cmpDir(cp)) || (0 != last.cmpLine(cp))) {
                     foundText.add("");
                 }
-                else if( cp.bx - last.ex > 0.1 * (Math.abs(cp.bx-cp.ex) + Math.abs(last.ex - last.bx) )) {
+                else if( cp.getOrigin().subtract(last.getEndPoint()).length() > 0.1 * (cp.getWidth() + last.getWidth()) ) {
                     // need to put a space in here
                     txt = " " + txt;
                 }
@@ -281,21 +374,13 @@ class ExtractTextsRenderListener implements RenderListener
 
     class CharPosComparator implements Comparator<CharPos> {
 
-        @Override
+    	@Override
         public int compare(CharPos cp1, CharPos cp2) {
-            if (roundForCompare(cp1.y)==roundForCompare(cp2.y)) {
-                if( cp1.bx < cp2.bx )
-                    return -1;
-                else if( cp1.bx > cp2.bx )
-                    return 1;
-                else return 0;
-
-            } else if (cp1.y < cp2.y ) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
+    		final int dir = cp1.cmpDir(cp2);
+    		if(dir != 0)
+    			return dir;
+    		final int cy = cp1.cmpLine(cp2);
+    		return (cy != 0) ? cy : cp1.cmpOrder(cp2);
         }
     }
 };
@@ -329,24 +414,59 @@ public class ExtractTexts {
         }
     }
 
+    public static Rectangle getRectInRotatedCropBoxCoordinates(PdfReader reader, int page, ArrayList<Double> rect) {
+        //Rectangle crop = reader.getPageSizeWithRotation(page);
+        Rectangle crop = reader.getPageSize(page);
+
+        Rectangle origrect;
+        origrect = new Rectangle((float)(double)rect.get(0), (float)(1-rect.get(1)), (float)(double)rect.get(2), (float)(1-rect.get(3)));
+
+        double l = 0, t = 0, r = 0, b = 0;
+        int rotate = reader.getPageRotation(page);
+        switch(rotate ) {
+        default:
+            l = origrect.getLeft()        * crop.getWidth()  + crop.getLeft();
+            t = origrect.getBottom()      * crop.getHeight() + crop.getBottom();
+            r = origrect.getRight()       * crop.getWidth()  + crop.getLeft();
+            b = origrect.getTop()         * crop.getHeight() + crop.getBottom();
+            break;
+        case 90:
+            l = (1-origrect.getTop())     * crop.getWidth()  + crop.getLeft();
+            t = origrect.getLeft()        * crop.getHeight() + crop.getBottom();
+            r = (1-origrect.getBottom())  * crop.getWidth()  + crop.getLeft();
+            b = origrect.getRight()       * crop.getHeight() + crop.getBottom();
+            break;
+        case 180:
+        case 270:
+        }
+
+        Rectangle rect2 = new Rectangle((float)l,(float)b,(float)r,(float)t);
+        return rect2;
+    }
+
     public static void stampRects(PdfReader reader, ExtractTextSpec spec)
         throws IOException, DocumentException
     {
         PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
+
+        stamper.setRotateContents(false);
 
         int i;
         for (i = 1; i <= reader.getNumberOfPages(); i++) {
             for(Rect rect : spec.rects) {
                 if( rect.page==i ) {
 
+                    Rectangle frame = getRectInRotatedCropBoxCoordinates(reader, rect.page, rect.rect);
+                    /*
                     Rectangle crop = reader.getPageSizeWithRotation(rect.page);
                     double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
                     double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
                     double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
                     double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
+                    */
+
 
                     PdfContentByte canvas = stamper.getOverContent(i);
-                    Rectangle frame = new Rectangle((float)l,(float)b,(float)r,(float)t);
                     frame.setBorderColor(colorFromArrayListFloat(rect.color));
                     frame.setBorderWidth(0.3f);
                     frame.setBorder(15);
@@ -430,13 +550,13 @@ public class ExtractTexts {
                     spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || rl.containsGlyphs;
                 }
 
-
-                Rectangle crop = reader.getPageSizeWithRotation(rect.page);
-                double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
-                double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
-                double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
-                double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
+                Rectangle frame = getRectInRotatedCropBoxCoordinates(reader, rect.page, rect.rect);
+                double l = frame.getLeft();
+                double t = frame.getTop();
+                double r = frame.getRight();
+                double b = frame.getBottom();
                 rl.find(l,b,r,t);
+
                 rect.lines = new ArrayList<String>();
                 for( String line : rl.foundText ) {
                     line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+"," ");
