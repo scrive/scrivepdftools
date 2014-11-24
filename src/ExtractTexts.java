@@ -388,12 +388,28 @@ class ExtractTextsRenderListener implements RenderListener
     			return new Vector(x / SCALE, y / SCALE, 0.0f);
     		}
     	}
+    	int kh = 0, kv = 0, ks = 0;
     	Map<Dir, Integer> map = new TreeMap<Dir, Integer>();
         for( CharPos i: allCharacters ) {
-        	final Dir d = new Dir(i.getBase());
-        	Integer c = map.get(d);
-        	map.put(d, 1 + ((c == null) ? 0 : c));
+        	Vector v = i.getBase();
+        	if (i.isHorizontal() && (v.get(Vector.I1) > 0))
+        		++kh; // horizontal text
+        	else if (i.isVertical() && (v.get(Vector.I2) > 0))
+        		++kv; // vertical text
+        	else {
+        		final Dir d = new Dir(v);
+        		final Integer c = map.get(d), c1 = 1 + ((c == null) ? 0 : c);
+        		map.put(d, c1);
+        		if (c1 > ks)
+        			ks = c1;
+        	}
         }
+        if ((kh > kv) && (kh > ks)) // horizontal text dominates
+       		return new Vector(1, 0, 0);
+       if ((kv > kh) && (kv > ks)) // vertical text dominates
+       		return new Vector(0, 1, 0);
+
+       // Select dominating skewed text direction
         Dir best = null;
         int k = -1, k1 = -1;
         for( Dir d: map.keySet() ) {
