@@ -370,6 +370,53 @@ class ExtractTextsRenderListener implements RenderListener
     		return (cy != 0) ? cy : cp1.cmpOrder(cp2);
         }
     }
+    
+    Vector getTextDir()
+    {
+    	class Dir implements Comparable<Dir> {
+        	private static final float SCALE = 1000.0f;
+    		private int x, y;
+    		Dir(Vector v) {
+            	v = v.normalize();
+    			x = (int)(v.get(Vector.I1) * SCALE + 0.5);
+    			y = (int)(v.get(Vector.I2) * SCALE + 0.5);
+    		}
+    		public int compareTo(Dir o) {
+    			return (y == o.y) ? x - o.x : y - o.y;
+    		}
+    		Vector toVector() {
+    			return new Vector(x / SCALE, y / SCALE, 0.0f);
+    		}
+    	}
+    	Map<Dir, Integer> map = new TreeMap<Dir, Integer>();
+        for( CharPos i: allCharacters ) {
+        	final Dir d = new Dir(i.getBase());
+        	Integer c = map.get(d);
+        	map.put(d, 1 + ((c == null) ? 0 : c));
+        }
+        Dir best = null;
+        int k = -1, k1 = -1;
+        for( Dir d: map.keySet() ) {
+        	final int c = map.get(d);
+        	if ((best == null) || (c > k)) {
+        		k1 = k; // keep second to most popular direction
+        		best = d; k = c;
+        	}
+        }
+        if ((best == null ) || (k == k1)) // check for two or more directions with same number of glyphs
+        	return null;
+        else
+        	return best.toVector();
+    }
+
+    long detectRotate()
+    {
+    	final Vector dir = getTextDir();
+    	if (dir == null)
+    		return 0;
+    	return Math.round(-Math.atan2(dir.get(Vector.I2), dir.get(Vector.I1)) * 180 / Math.PI);
+    }
+
 };
 
 public class ExtractTexts {
