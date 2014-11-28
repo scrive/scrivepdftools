@@ -305,9 +305,25 @@ test/test-extract-rotate-90.extract-output.yaml :				\
     test/test-extract-rotate-90.expect.yaml						\
     scrivepdftools.jar
 
-test-normalize : test/document-with-text-in-forms-flattened.pdf
+test-normalize :                                   \
+    test/document-with-text-in-forms-flattened.pdf \
+    test/unrotated-text.pdf                        \
+    test/unrotated3.pdf
+                 
 
 test/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@

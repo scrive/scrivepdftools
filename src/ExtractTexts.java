@@ -425,12 +425,12 @@ class ExtractTextsRenderListener implements RenderListener
         	return best.toVector();
     }
 
-    long detectRotate()
+    int detectRotate()
     {
     	final Vector dir = getTextDir();
     	if (dir == null)
     		return 0;
-    	return Math.round(-Math.atan2(dir.get(Vector.I2), dir.get(Vector.I1)) * 180 / Math.PI);
+    	return (int)Math.round(-Math.atan2(dir.get(Vector.I2), dir.get(Vector.I1)) * 180 / Math.PI);
     }
 
 };
@@ -462,6 +462,19 @@ public class ExtractTexts {
         else {
             return new BaseColor(0f, 1f, 0f);
         }
+    }
+    
+    /**
+     * Returns auto page rotation given by dominant text direction 
+     * 
+     * @return 0/90/180/270 int
+     */
+    public static int detectPageRotation(PdfReader reader, int iPage) throws IOException {
+        ExtractTextsRenderListener chars = new ExtractTextsRenderListener();
+        PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+        parser.processContent(iPage, chars);
+        chars.finalizeSearch();
+        return -chars.detectRotate();
     }
 
     public static Rectangle getRectInRotatedCropBoxCoordinates(PdfReader reader, int page, ArrayList<Double> rect) {
