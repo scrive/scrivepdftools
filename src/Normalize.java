@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -28,12 +32,22 @@ import com.itextpdf.text.DocWriter;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfArray;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfLiteral;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfObject;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfStream;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.parser.ContentByteUtils;
+import com.itextpdf.text.pdf.parser.ContentOperator;
+import com.itextpdf.text.pdf.parser.ImageRenderInfo;
+import com.itextpdf.text.pdf.parser.PdfContentStreamProcessor;
+import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
+import com.itextpdf.text.pdf.parser.RenderListener;
+import com.itextpdf.text.pdf.parser.TextRenderInfo;
 
 class NormalizeSpec
 {
@@ -81,6 +95,61 @@ public class Normalize {
         execute(spec);
 
     }
+    
+    /**
+     * Detects specific scenario in which every even page of a document is empty.
+     * In this case all even pages are removed.
+     * 
+     * @param reader - input PDF
+     */
+    private static void removeEveryEvenPageEmpty(PdfReader reader) throws IOException {
+    	// this class checks whether a selected page is empty (no drawing operators in PDF content)
+    	class DetectEmptyPage implements ContentOperator, RenderListener {
+    		private ContentOperator original = null;
+    		private boolean empty = true;
+    		private Set<String> ops; // set of *drawing* operators to be found in PDF content
+    		DetectEmptyPage() {
+    			ops = new HashSet<String>();
+    			ops.add("f"); ops.add("F"); ops.add("S"); ops.add("s"); ops.add("f*"); ops.add("B"); ops.add("B*"); ops.add("b"); ops.add("b*");
+    			ops.add("Tj"); ops.add("TJ"); ops.add("'"); ops.add("\""); ops.add("Do"); ops.add("BI"); ops.add("sh");
+    		}    		
+    		public void invoke(PdfContentStreamProcessor processor, PdfLiteral operator, ArrayList<PdfObject> operands) throws Exception {
+    			original.invoke(processor, operator, operands);
+    			if (ops.contains(operator.toString()))
+    				empty = false;
+    		}
+    	    public void beginTextBlock() {
+    	    }
+    	    public void renderText(TextRenderInfo renderInfo) {
+    	    	empty = false;
+    	    }
+    	    public void endTextBlock() {
+    	    }
+    	    public void renderImage(ImageRenderInfo renderInfo) {
+    	    	empty = false;
+    	    }
+    	    public boolean isPageEmpty(PdfReader reader, int iPage) throws IOException {
+    	    	empty = true; 
+	            PdfContentStreamProcessor processor = new PdfContentStreamProcessor(this);
+    	        original = processor.registerContentOperator(PdfContentStreamProcessor.DEFAULTOPERATOR, this);
+        	    processor.processContent(ContentByteUtils.getContentBytesForPage(reader, iPage), reader.getPageN(iPage).getAsDict(PdfName.RESOURCES));
+        	    return empty;
+       	   }
+    	}
+    	// check if ALL even pages are empty
+    	DetectEmptyPage detect = new DetectEmptyPage(); 
+        final int n = reader.getNumberOfPages();
+        String keep = ""; 
+        for (int i = 1; i <= n; i++) {
+  			DetectEmptyPage v = new DetectEmptyPage();
+            if (i % 2 == 1)
+            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // list odd pages to keep 
+            else if (!detect.isPageEmpty(reader, i))
+            	return; // found non-empty even page
+        }
+        // remove all even pages
+        reader.selectPages(keep);
+    }
 
     /**
      * This method detects text direction and 'Rotate' flag on each page and applies auto-rotation to output horizontal text. 
@@ -89,12 +158,14 @@ public class Normalize {
      * @param reader - input PDF
      * @param stamper - output writer
      */
-    private static void unrotatePages( PdfReader reader, PdfStamper stamper) throws IOException {
+    private static void unrotatePages(PdfReader reader, PdfStamper stamper) throws IOException {
         final int n = reader.getNumberOfPages(); 
         for (int i = 1; i <= n; i++) {
             PdfDictionary page = reader.getPageN(i);
             final int rot = ExtractTexts.detectPageRotation(reader, i);
             page.put(PdfName.ROTATE, null);
+            if (rot == 0)
+            	continue; // no need to rotate
             PdfObject content = PdfReader.getPdfObject(page.get(PdfName.CONTENTS), page);
             PdfArray ar = null;
             if (content == null)
@@ -146,6 +217,7 @@ public class Normalize {
 
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
+        removeEveryEvenPageEmpty(reader);
         unrotatePages(reader, stamper);
         
         stamper.close();
