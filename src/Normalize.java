@@ -141,11 +141,8 @@ public class Normalize {
         final int n = reader.getNumberOfPages();
         String keep = ""; 
         for (int i = 1; i <= n; i++) {
-  			DetectEmptyPage v = new DetectEmptyPage();
-            if (i % 2 == 1)
-            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // list odd pages to keep 
-            else if (!detect.isPageEmpty(reader, i))
-            	return; // found non-empty even page
+            if (!detect.isPageEmpty(reader, i))
+            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // keep non-empty pages 
         }
         // remove all even pages
         reader.selectPages(keep);
