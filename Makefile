@@ -39,9 +39,11 @@ scrivepdftools.jar : Manifest.txt \
                      classes/ExtractTexts.class \
                      classes/Normalize.class \
                      classes/SelectAndClip.class \
+                     classes/WebServer.class \
                      assets/sealmarker.pdf \
+                     src/test-client.html \
 	                 $(FONTS)
-	jar cfm $@ Manifest.txt assets/sealmarker.pdf $(FONTS) -C classes .
+	jar cfm $@ Manifest.txt assets/sealmarker.pdf src/test-client.html $(FONTS) -C classes .
 
 test : test-add-verification-pages \
        test-find-texts \

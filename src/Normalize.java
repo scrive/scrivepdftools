@@ -78,12 +78,15 @@ class NormalizeSpec
 
 public class Normalize {
 
-    public static void execute(String specFile, String inputOverride)
+    public static void execute(String specFile, String inputOverride, String outputOverride)
         throws IOException, DocumentException
     {
         NormalizeSpec spec = NormalizeSpec.loadFromFile(specFile);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.output = outputOverride;
         }
 
         /*
@@ -141,11 +144,8 @@ public class Normalize {
         final int n = reader.getNumberOfPages();
         String keep = ""; 
         for (int i = 1; i <= n; i++) {
-  			DetectEmptyPage v = new DetectEmptyPage();
-            if (i % 2 == 1)
-            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // list odd pages to keep 
-            else if (!detect.isPageEmpty(reader, i))
-            	return; // found non-empty even page
+            if (!detect.isPageEmpty(reader, i))
+            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // keep non-empty pages 
         }
         // remove all even pages
         reader.selectPages(keep);
@@ -175,61 +175,6 @@ public class Normalize {
     	return true;
     }
     
-    /**
-     * Detects specific scenario in which every even page of a document is empty.
-     * In this case all even pages are removed.
-     * 
-     * @param reader - input PDF
-     * @param stamper - output writer
-     */
-    private static void removeEveryEvenPageEmpty(PdfReader reader) throws IOException {
-    	// check if the scenario is in place
-    	class DetectEmptyPage implements ContentOperator, RenderListener {
-    		private ContentOperator original = null;
-    		private boolean empty = true;
-    		private Set<String> ops; // set of *drawing* operators to be found in PDF content
-    		DetectEmptyPage() {
-    			ops = new HashSet<String>();
-    			ops.add("f"); ops.add("F"); ops.add("S"); ops.add("s"); ops.add("f*"); ops.add("B"); ops.add("B*"); ops.add("b"); ops.add("b*");
-    			ops.add("Tj"); ops.add("TJ"); ops.add("'"); ops.add("\""); ops.add("Do"); ops.add("BI"); ops.add("sh");
-    		}    		
-    		public void invoke(PdfContentStreamProcessor processor, PdfLiteral operator, ArrayList<PdfObject> operands) throws Exception {
-    			original.invoke(processor, operator, operands);
-    			if (ops.contains(operator.toString()))
-    				empty = false;
-    		}
-    	    public void beginTextBlock() {
-    	    }
-    	    public void renderText(TextRenderInfo renderInfo) {
-    	    	empty = false;
-    	    }
-    	    public void endTextBlock() {
-    	    }
-    	    public void renderImage(ImageRenderInfo renderInfo) {
-    	    	empty = false;
-    	    }
-    	    public boolean isPageEmpty(PdfReader reader, int iPage) throws IOException {
-    	    	empty = true; 
-	            PdfContentStreamProcessor processor = new PdfContentStreamProcessor(this);
-    	        original = processor.registerContentOperator(PdfContentStreamProcessor.DEFAULTOPERATOR, this);
-        	    processor.processContent(ContentByteUtils.getContentBytesForPage(reader, iPage), reader.getPageN(iPage).getAsDict(PdfName.RESOURCES));
-        	    return empty;
-       	   }
-    	}
-    	DetectEmptyPage detect = new DetectEmptyPage(); 
-        final int n = reader.getNumberOfPages();
-        String keep = ""; 
-        for (int i = 1; i <= n; i++) {
-  			DetectEmptyPage v = new DetectEmptyPage();
-            if (i % 2 == 1)
-            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // list odd pages to keep 
-            else if (!detect.isPageEmpty(reader, i))
-            	return; // found non-empty even page
-        }
-        // remove all even pages
-        reader.selectPages(keep);
-    }
-
     /**
      * This method detects text direction and 'Rotate' flag on each page and applies auto-rotation to output horizontal text. 
      * 'Rotate' flag is removed.
