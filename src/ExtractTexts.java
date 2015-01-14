@@ -436,12 +436,15 @@ class ExtractTextsRenderListener implements RenderListener
 };
 
 public class ExtractTexts {
-    public static void execute(String specFile, String inputOverride)
+    public static void execute(String specFile, String inputOverride, String outputOverride)
         throws IOException, DocumentException
     {
         ExtractTextSpec spec = ExtractTextSpec.loadFromFile(specFile);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.stampedOutput = outputOverride;
         }
 
         /*

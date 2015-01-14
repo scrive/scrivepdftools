@@ -17,16 +17,42 @@
  */
 
 import java.io.IOException;
+
 import com.itextpdf.text.DocumentException;
 
 class Main
 {
+    public static void execute(String command, String specFile, String inputOverride, String outputOverride)
+    		throws IOException, DocumentException
+    {
+        if( command.equals("add-verification-pages")) {
+            AddVerificationPages.execute(specFile, inputOverride, outputOverride);
+        }
+        else if( command.equals("find-texts")) {
+            FindTexts.execute(specFile, inputOverride, outputOverride);
+        }
+        else if( command.equals("extract-texts")) {
+            ExtractTexts.execute(specFile, inputOverride, outputOverride);
+        }
+        else if( command.equals("normalize")) {
+            Normalize.execute(specFile, inputOverride, outputOverride);
+        }
+        else if( command.equals("select-and-clip")) {
+            SelectAndClip.execute(specFile, inputOverride, outputOverride);
+        }
+        else {
+            System.err.println("Uknown verb " + command);
+        }
+    }
+
     public static void main(String[] args)
         throws IOException, DocumentException
     {
         com.itextpdf.text.pdf.PdfReader.unethicalreading = true;
         if( args.length!=2 && args.length!=3) {
             System.err.println("Usage:");
+            System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
+            System.err.println("");
             System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar find-texts config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar extract-texts config.json optional-input.pdf");
@@ -38,29 +64,14 @@ class Main
             System.err.println("   snakeyaml");
 
         }
-        else {
-            String input = null;
-            if( args.length == 3 ) {
-                input = args[2];
-            }
-            if( args[0].equals("add-verification-pages")) {
-                AddVerificationPages.execute(args[1], input);
-            }
-            else if( args[0].equals("find-texts")) {
-                FindTexts.execute(args[1], input);
-            }
-            else if( args[0].equals("extract-texts")) {
-                ExtractTexts.execute(args[1], input);
-            }
-            else if( args[0].equals("normalize")) {
-                Normalize.execute(args[1], input);
-            }
-            else if( args[0].equals("select-and-clip")) {
-                SelectAndClip.execute(args[1], input);
-            }
-            else {
-                System.err.println("Uknown verb " + args[0]);
-            }
+        else if (args[0].equals("httpserver")) {
+            if (!args[1].equals("-p")) {
+            	System.err.println("Usage:");
+            	System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
+            } else
+            	WebServer.execute(args[0], args[2]);
+        } else {
+            execute(args[0], args[1], (args.length == 3) ? args[2] : null, null);
         }
     }
 }

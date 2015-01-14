@@ -22,7 +22,9 @@ import com.drew.metadata.exif.*;
 
 import java.awt.image.*;
 import java.awt.Color;
+
 import javax.imageio.*;
+
 import java.io.*;
 import java.util.List;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.Character.UnicodeBlock;
+
 import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -212,6 +215,7 @@ class FileAttachment
         this.content = new byte[(int)f.length()];
         f.read(this.content);
         this.name = name;
+        f.close();
     }
 
     public FileAttachment(byte[] content, String name) {
@@ -1178,12 +1182,15 @@ public class AddVerificationPages {
         }
     }
 
-    public static void execute(String specFile, String inputOverride)
+    public static void execute(String specFile, String inputOverride, String outputOverride)
         throws IOException, DocumentException, Base64DecodeException
     {
         SealSpec spec = SealSpec.loadFromFile(specFile);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.output = outputOverride;
         }
 
         /*

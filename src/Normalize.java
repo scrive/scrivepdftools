@@ -78,12 +78,15 @@ class NormalizeSpec
 
 public class Normalize {
 
-    public static void execute(String specFile, String inputOverride)
+    public static void execute(String specFile, String inputOverride, String outputOverride)
         throws IOException, DocumentException
     {
         NormalizeSpec spec = NormalizeSpec.loadFromFile(specFile);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.output = outputOverride;
         }
 
         /*

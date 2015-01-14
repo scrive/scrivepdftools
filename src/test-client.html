@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+	<script language="JavaScript">
+		function onSubmit(form) {
+			if (form.config.value == "") {
+				alert("Please select JSON config for upload");	
+				return false;
+			}
+			if (form.pdf.value == "") {
+				alert("Please select PDF document for upload");	
+				return false;
+			}
+			form.action = form.command.value;
+			return true;
+		}
+	</script>
+    <head>
+        <title>scrivepdftools online test</title>
+		<style>
+			body {background-color:lightgray}
+			h1   {color:navy}
+			table, th, td {
+					background-color:darkgray;
+					border-collapse: collapse;
+					border: 1px solid black;
+				}
+			th, td {padding: 10px;}
+		</style>
+    </head>
+    <body>
+		<h1 align="center">scrivepdftools online test</h1>
+		<form enctype="multipart/form-data" action="exec.php" method="POST" onsubmit="return onSubmit(this)">
+			<table align="center">
+				<tr>
+					<td><b>Action:</b></td>
+					<td>
+						<select name="command">
+							<option name="normalize" value="normalize" checked>Normalize</option>
+							<option name="extract-texts" value="extract-texts">Extract texts</option>
+							<option name="find-texts" value="find-texts">Find texts</option>
+							<option name="select-and-clip" value="select-and-clip">Select and clip</option>
+							<option name="add-verification-pages" value="add-verification-pages">Add verification pages</option>
+						</select>					
+					</td>
+				</tr>
+				<tr><td><b>JSON config:</b></td><td><input type="file" name="config" accept="*.json"/></td></tr>
+				<tr><td><b>Input PDF:</b></td><td><input type="file" name="pdf" accept="*.pdf"/></td></tr>
+				<tr><td colspan="2" align="center"><input type="submit" value="Send"/></td></tr>
+			</table>
+        </form>
+    </body>
+</html>
