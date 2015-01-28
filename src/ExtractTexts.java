@@ -265,6 +265,27 @@ class ExtractTextsRenderListener implements RenderListener
         	return cmp(x);
         }
 
+        /*
+         * Checks if two characters occupy the same location. Returns cover length % (0-100)
+         */
+        public double covers(CharPos c) {
+            double lc = 0; // cover length
+            if (isHorizontal() && c.isHorizontal()) { // horizontal special case (perf optimized)
+                final double x0 = getOrigin().get(Vector.I1), x1 = c.getOrigin().get(Vector.I1);
+                final double b0 = getEndPoint().get(Vector.I1), b1 = c.getEndPoint().get(Vector.I1);
+                if (((x0 < x1) && (b0 <= x1)) || ((x1 < x0) && (b1 <= x0)))
+                    return 0.0;
+                lc = ((x0 < x1) ? (b0 - x1) : (b1 - x0)); 
+            } else {
+                final Vector v1 = c.getOrigin().subtract(getEndPoint());
+                final Vector v2 = getOrigin().subtract(c.getEndPoint());
+                if (Math.signum(v1.dot(getBase())) != Math.signum(v2.dot(c.getBase())))
+                    return 0.0;
+                lc = Math.min(v1.length(), v2.length());
+            }
+            return lc / Math.min(getWidth(), c.getWidth()); 
+        }
+
         public String toString() {
             return "\"" + c + "\":(" + origin.get(Vector.I1) + "," + origin.get(Vector.I2) + "),<" + base.get(Vector.I1) + ","+ base.get(Vector.I2) + ")";
         }
@@ -338,6 +359,10 @@ class ExtractTextsRenderListener implements RenderListener
 
                 String txt = cp.c;
 
+                if ((last != null) && (last.c.equals(cp.c))) { // detect duplicated glyphs (poor man's bold)
+                    if (0.5 < cp.covers(last))
+                        continue;
+                }
                 if( last==null || (0 != last.cmpDir(cp)) || (0 != last.cmpLine(cp))) {
                     foundText.add("");
                 }

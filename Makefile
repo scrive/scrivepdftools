@@ -220,8 +220,9 @@ test-extract-texts : test/test-extract-texts.extract-output.yaml				   \
                      test/test-extract-texts-out-of-order.extract-output.yaml	   \
                      test/test-extract-rotated.extract-output.yaml				   \
                      test/test-extract-texts-sales-contract.extract-output.yaml	   \
-                     test/test-extract-cat-only.extract-output.yaml \
-                     test/test-extract-rotate-90.extract-output.yaml
+                     test/test-extract-cat-only.extract-output.yaml                \
+                     test/test-extract-rotate-90.extract-output.yaml               \
+                     test/test-extract-poor-mans-bold.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -301,10 +302,16 @@ test/test-extract-rotated.extract-output.yaml :\
     test/test-extract-rotated.expect.yaml	   \
     scrivepdftools.jar
 
-test/test-extract-rotate-90.extract-output.yaml :				\
-    test/extract-texts-rotate-90.json							\
-    test/fuck3.pdf											    \
-    test/test-extract-rotate-90.expect.yaml						\
+test/test-extract-rotate-90.extract-output.yaml :               \
+    test/extract-texts-rotate-90.json                           \
+    test/fuck3.pdf                                              \
+    test/test-extract-rotate-90.expect.yaml                     \
+    scrivepdftools.jar
+
+test/test-extract-poor-mans-bold.extract-output.yaml :          \
+    test/extract-texts-whole-first-page.json                    \
+    test/poor-mans-bold.pdf                                     \
+    test/test-extract-poor-mans-bold.expect.yaml                \
     scrivepdftools.jar
 
 test-normalize :                                   \

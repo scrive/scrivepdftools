@@ -1,0 +1,30 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 842.0
+  "firstPageWidth": 595.0
+  "numberOfPages": 1
+"input": "test/poor-mans-bold.pdf"
+"numberOfPages": 1
+"rects":
+- "lines":
+  - "Agreement"
+  - "Customer information"
+  - "Name"
+  - "E-mail"
+  - "Phone number"
+  - "Order information"
+  - "Price $4000"
+  - "Cancellation notice 14 days"
+  - "Offer valid until 30 days from today"
+  - "E-signing happiness 100%"
+  - "Sign above"
+  "page": 1
+  "rect":
+  - 0.0
+  - 0.0
+  - 1.0
+  - 1.0
+"stampedOutput": "test/test-extract-poor-mans-bold.extract-output.pdf"
+"yamlOutput": true
+
