@@ -23,7 +23,7 @@ import com.itextpdf.text.DocumentException;
 class Main
 {
     public void execute(String command, String specFile, String inputOverride, String outputOverride)
-    		throws IOException, DocumentException
+            throws IOException, DocumentException
     {
         if( command.equals("add-verification-pages")) {
             AddVerificationPages.execute(specFile, inputOverride, outputOverride);
@@ -66,10 +66,10 @@ class Main
         }
         else if (args[0].equals("httpserver")) {
             if (!args[1].equals("-p")) {
-            	System.err.println("Usage:");
-            	System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
+                System.err.println("Usage:");
+                System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
             } else
-            	WebServer.execute(args[0], args[2]);
+                WebServer.execute(args[0], args[2]);
         } else {
             (new Main()).execute(args[0], args[1], (args.length == 3) ? args[2] : null, null);
         }

@@ -106,46 +106,46 @@ public class Normalize {
      * @param reader - input PDF
      */
     private static void removeEveryEvenPageEmpty(PdfReader reader) throws IOException {
-    	// this class checks whether a selected page is empty (no drawing operators in PDF content)
-    	class DetectEmptyPage implements ContentOperator, RenderListener {
-    		private ContentOperator original = null;
-    		private boolean empty = true;
-    		private Set<String> ops; // set of *drawing* operators to be found in PDF content
-    		DetectEmptyPage() {
-    			ops = new HashSet<String>();
-    			ops.add("f"); ops.add("F"); ops.add("S"); ops.add("s"); ops.add("f*"); ops.add("B"); ops.add("B*"); ops.add("b"); ops.add("b*");
-    			ops.add("Tj"); ops.add("TJ"); ops.add("'"); ops.add("\""); ops.add("Do"); ops.add("BI"); ops.add("sh");
-    		}    		
-    		public void invoke(PdfContentStreamProcessor processor, PdfLiteral operator, ArrayList<PdfObject> operands) throws Exception {
-    			original.invoke(processor, operator, operands);
-    			if (ops.contains(operator.toString()))
-    				empty = false;
-    		}
-    	    public void beginTextBlock() {
-    	    }
-    	    public void renderText(TextRenderInfo renderInfo) {
-    	    	empty = false;
-    	    }
-    	    public void endTextBlock() {
-    	    }
-    	    public void renderImage(ImageRenderInfo renderInfo) {
-    	    	empty = false;
-    	    }
-    	    public boolean isPageEmpty(PdfReader reader, int iPage) throws IOException {
-    	    	empty = true; 
-	            PdfContentStreamProcessor processor = new PdfContentStreamProcessor(this);
-    	        original = processor.registerContentOperator(PdfContentStreamProcessor.DEFAULTOPERATOR, this);
-        	    processor.processContent(ContentByteUtils.getContentBytesForPage(reader, iPage), reader.getPageN(iPage).getAsDict(PdfName.RESOURCES));
-        	    return empty;
-       	   }
-    	}
-    	// check if ALL even pages are empty
-    	DetectEmptyPage detect = new DetectEmptyPage(); 
+    // this class checks whether a selected page is empty (no drawing operators in PDF content)
+    class DetectEmptyPage implements ContentOperator, RenderListener {
+    private ContentOperator original = null;
+    private boolean empty = true;
+    private Set<String> ops; // set of *drawing* operators to be found in PDF content
+    DetectEmptyPage() {
+    ops = new HashSet<String>();
+    ops.add("f"); ops.add("F"); ops.add("S"); ops.add("s"); ops.add("f*"); ops.add("B"); ops.add("B*"); ops.add("b"); ops.add("b*");
+    ops.add("Tj"); ops.add("TJ"); ops.add("'"); ops.add("\""); ops.add("Do"); ops.add("BI"); ops.add("sh");
+    }    
+    public void invoke(PdfContentStreamProcessor processor, PdfLiteral operator, ArrayList<PdfObject> operands) throws Exception {
+    original.invoke(processor, operator, operands);
+    if (ops.contains(operator.toString()))
+    empty = false;
+    }
+        public void beginTextBlock() {
+        }
+        public void renderText(TextRenderInfo renderInfo) {
+        empty = false;
+        }
+        public void endTextBlock() {
+        }
+        public void renderImage(ImageRenderInfo renderInfo) {
+        empty = false;
+        }
+        public boolean isPageEmpty(PdfReader reader, int iPage) throws IOException {
+        empty = true; 
+            PdfContentStreamProcessor processor = new PdfContentStreamProcessor(this);
+            original = processor.registerContentOperator(PdfContentStreamProcessor.DEFAULTOPERATOR, this);
+            processor.processContent(ContentByteUtils.getContentBytesForPage(reader, iPage), reader.getPageN(iPage).getAsDict(PdfName.RESOURCES));
+            return empty;
+          }
+    }
+    // check if ALL even pages are empty
+    DetectEmptyPage detect = new DetectEmptyPage(); 
         final int n = reader.getNumberOfPages();
         String keep = ""; 
         for (int i = 1; i <= n; i++) {
             if (!detect.isPageEmpty(reader, i))
-            	keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // keep non-empty pages 
+            keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i; // keep non-empty pages 
         }
         // remove all even pages
         reader.selectPages(keep);
@@ -155,24 +155,24 @@ public class Normalize {
         PdfObject content = PdfReader.getPdfObject(page.get(PdfName.CONTENTS), page);
         PdfArray a = null;
         if (content == null)
-        	return true;
+        return true;
         else if (content.isStream()) {
-        	a = new PdfArray();
-        	a.add(page.get(PdfName.CONTENTS));
+        a = new PdfArray();
+        a.add(page.get(PdfName.CONTENTS));
         } else if (content.isArray()) {
-        	a = (PdfArray)content;
+        a = (PdfArray)content;
         }
         for (int i = 0; i < a.size(); ++i) {
-        	PdfStream stream = a.getAsStream(i);
-        	if ((stream == null) || (stream.length() == 0))
-        		continue;
-        	ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        	stream.writeContent(buf);
-        	if (buf.size() == 0)
-        		continue;
-        	return false; // content detected
+        PdfStream stream = a.getAsStream(i);
+        if ((stream == null) || (stream.length() == 0))
+        continue;
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        stream.writeContent(buf);
+        if (buf.size() == 0)
+        continue;
+        return false; // content detected
         }
-    	return true;
+    return true;
     }
     
     /**
@@ -189,17 +189,17 @@ public class Normalize {
             final int rot = ExtractTexts.detectPageRotation(reader, i);
             page.put(PdfName.ROTATE, null);
             if (rot == 0)
-            	continue; // no need to rotate
+            continue; // no need to rotate
             PdfObject content = PdfReader.getPdfObject(page.get(PdfName.CONTENTS), page);
             PdfArray ar = null;
             if (content == null)
-            	continue;
+            continue;
             else if (content.isStream()) {
-            	ar = new PdfArray();
-            	ar.add(page.get(PdfName.CONTENTS));
+            ar = new PdfArray();
+            ar.add(page.get(PdfName.CONTENTS));
                 page.put(PdfName.CONTENTS, ar);
             } else if (content.isArray()) {
-            	ar = (PdfArray)content;
+            ar = (PdfArray)content;
             }
             String ctm0 = null;
             PdfArray media = page.getAsArray(PdfName.MEDIABOX);
@@ -208,21 +208,21 @@ public class Normalize {
             final float x0 = Math.min(m[0], m[2]), y0 = Math.min(m[1], m[3]); 
             final float w0 = Math.abs(m[2] - m[0]), h0 = Math.abs(m[3] - m[1]); 
             switch (rot) {
-            	case 90:
-            		ctm0 = "0 -1 1 0 " + (-y0) + " " + (-x0 + w0) + " cm\n";
-            		bbox1 = new Rectangle(0, 0, h0, w0);
-            		break;
-        		case 180:
-        			ctm0 = "-1 0 0 -1 " + (x0 + w0) + " " + (y0 + h0) + " cm\n";
-        			break; 
-        		case 270: ctm0 = "0 1 -1 0 " + (y0 + h0) + " " + (-x0) + " cm\n";
-        			bbox1 = new Rectangle(0, 0, h0, w0);
-        			break;
-        		case 0:
-        		default: continue;  
+            case 90:
+            ctm0 = "0 -1 1 0 " + (-y0) + " " + (-x0 + w0) + " cm\n";
+            bbox1 = new Rectangle(0, 0, h0, w0);
+            break;
+        case 180:
+        ctm0 = "-1 0 0 -1 " + (x0 + w0) + " " + (y0 + h0) + " cm\n";
+        break; 
+        case 270: ctm0 = "0 1 -1 0 " + (y0 + h0) + " " + (-x0) + " cm\n";
+        bbox1 = new Rectangle(0, 0, h0, w0);
+        break;
+        case 0:
+        default: continue;  
             }
             if (bbox1 != null) {
-            	float bb1[] = {bbox1.getLeft(), bbox1.getBottom(), bbox1.getRight(), bbox1.getTop()};
+            float bb1[] = {bbox1.getLeft(), bbox1.getBottom(), bbox1.getRight(), bbox1.getTop()};
                 page.put(PdfName.MEDIABOX, new PdfArray(bb1));
                 page.put(PdfName.CROPBOX, null); // TODO: calculate CORRECT cropbox !
             }
