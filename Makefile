@@ -4,7 +4,7 @@
 #
 #
 
-CLASSPATH=itextpdf-5.5.3.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar
+CLASSPATH=itextpdf-5.5.3.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar
 
 ifeq ($(OS),Windows_NT)
 else
@@ -41,7 +41,7 @@ scrivepdftools.jar : Manifest.txt \
                      classes/SelectAndClip.class \
                      classes/WebServer.class \
                      assets/sealmarker.pdf \
-                     src/test-client.html \
+                     assets/test-client.html \
 	                 $(FONTS)
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf src/test-client.html $(FONTS) -C classes .
 
