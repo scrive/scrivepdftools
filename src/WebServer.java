@@ -61,10 +61,10 @@ public class WebServer {
                 // load HTML from resources
                 BufferedReader reader = null;
                 try {
-                   reader = new BufferedReader(new InputStreamReader(WebServer.class.getResourceAsStream("src/test-client.html")));
+                   reader = new BufferedReader(new InputStreamReader(WebServer.class.getResourceAsStream("assets/test-client.html")));
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
-                    reader = new BufferedReader(new FileReader("src/test-client.html"));
+                    reader = new BufferedReader(new FileReader("assets/test-client.html"));
                 }
                 String line = reader.readLine();
                 while (null != line) {
