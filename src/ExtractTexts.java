@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.net.URL;
 import java.lang.Character.UnicodeBlock;
+
 import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -87,9 +88,8 @@ class MatchedTemplate
     public String title;
 };
 
-class ExtractTextSpec
+class ExtractTextSpec extends YamlSpec
 {
-    public String input;
     public Boolean yamlOutput;
     public ArrayList<Rect> rects;
     public String stampedOutput;
@@ -99,34 +99,17 @@ class ExtractTextSpec
 
     public PdfAdditionalInfo additionalInfo;
 
-    /*
-     * YAML is compatible with JSON (at least with the JSON we generate).
-     *
-     * It was the simplest method to read in JSON values.
-     */
-    public static Yaml getYaml() {
+    static private ArrayList<TypeDescription> td = null;
 
-        Constructor constructor = new Constructor(ExtractTextSpec.class);
-        constructor.setPropertyUtils(constructor.getPropertyUtils());
-        constructor.getPropertyUtils().setSkipMissingProperties(true);
-
-        /*
-         * Java reflection is missing some crucial information about
-         * elements of containers.  Add this information here.
-         */
-        TypeDescription extractTextDesc = new TypeDescription(ExtractTextSpec.class);
-        extractTextDesc.putListPropertyType("rects", Rect.class);
-        extractTextDesc.putListPropertyType("listOfTemplates", MatchedTemplate.class);
-        constructor.addTypeDescription(extractTextDesc);
-
-        Yaml yaml = new Yaml(constructor);
-        return yaml;
-    }
-
-    public static ExtractTextSpec loadFromFile(String fileName) throws IOException {
-        InputStream input = new FileInputStream(new File(fileName));
-        Yaml yaml = getYaml();
-        return (ExtractTextSpec)yaml.load(input);
+    static public ArrayList<TypeDescription> getTypeDescriptors() {
+        if (td == null) {
+            td = new ArrayList<TypeDescription>();
+            TypeDescription extractTextDesc = new TypeDescription(ExtractTextSpec.class);
+            extractTextDesc.putListPropertyType("rects", Rect.class);
+            extractTextDesc.putListPropertyType("listOfTemplates", MatchedTemplate.class);
+            td.add(extractTextDesc);
+        }
+        return td;
     }
 }
 
@@ -460,28 +443,21 @@ class ExtractTextsRenderListener implements RenderListener
 
 };
 
-public class ExtractTexts {
-    public static void execute(String specFile, String inputOverride, String outputOverride)
-        throws IOException, DocumentException
-    {
-        ExtractTextSpec spec = ExtractTextSpec.loadFromFile(specFile);
+public class ExtractTexts extends Engine {
+
+    ExtractTextSpec spec = null;
+    
+    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+        // TODO: it would be nice if ExtractTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
+        YamlSpec.setTypeDescriptors(ExtractTextSpec.class, ExtractTextSpec.getTypeDescriptors());
+        spec = ExtractTextSpec.loadFromStream(specFile, ExtractTextSpec.class);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
         }
         if( outputOverride!=null ) {
             spec.stampedOutput = outputOverride;
-        }
-
-        /*
-          DumperOptions options = new DumperOptions();
-          Yaml yaml = new Yaml(options);
-          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-          System.out.println(yaml.dump(spec));
-        */
-        execute(spec);
-
+        }       
     }
-
 
     static BaseColor colorFromArrayListFloat(ArrayList<Float> color) {
         if( color!=null && color.size()==3) {
@@ -614,12 +590,14 @@ public class ExtractTexts {
         stamper.close();
     }
 
-    public static void execute(ExtractTextSpec spec)
+    public void execute(InputStream pdf, OutputStream out)
         throws IOException, DocumentException
     {
         /* This is here to flatten forms so that texts in them can be read
          */
-        PdfReader reader = new PdfReader(spec.input);
+        if (pdf == null)
+            pdf = new FileInputStream(spec.input);
+        PdfReader reader = new PdfReader(pdf);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PdfStamper stamper = new PdfStamper(reader, os);
 
@@ -634,6 +612,7 @@ public class ExtractTexts {
 
         stamper.close();
         reader.close();
+        pdf.close();
 
         reader = new PdfReader(os.toByteArray());
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
@@ -726,7 +705,7 @@ public class ExtractTexts {
         String json = yaml.dump(spec);
 
         // We need to force utf-8 encoding here.
-        PrintStream out = new PrintStream(System.out, true, "utf-8");
-        out.println(json);
+        PrintStream ps = new PrintStream((out == null) ? System.out : out, true, "utf-8");
+        ps.println(json);
     }
 }

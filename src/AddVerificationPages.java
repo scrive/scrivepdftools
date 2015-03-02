@@ -145,7 +145,7 @@ class FileDesc
     public String input;
 }
 
-class SealSpec
+class SealSpec extends YamlSpec
 {
     public Boolean preseal;
     public String input;
@@ -165,19 +165,8 @@ class SealSpec
     public ArrayList<Field> fields;
     public ArrayList<String> fonts;
 
-    /*
-     * YAML is compatible with JSON (at least with the JSON we generate).
-     *
-     * It was the simplest method to read in JSON values.
-     */
-    public static Yaml getYaml() {
-        Constructor constructor = new Constructor(SealSpec.class);
-        constructor.getPropertyUtils().setSkipMissingProperties(true);
-
-        /*
-         * Java reflection is missing some crucial information about
-         * elements of containers.  Add this information here.
-         */
+    static {
+        ArrayList<TypeDescription> td = new ArrayList<TypeDescription>();
         TypeDescription sealSpecDesc = new TypeDescription(SealSpec.class);
         sealSpecDesc.putListPropertyType("persons", Person.class);
         sealSpecDesc.putListPropertyType("secretaries", Person.class);
@@ -185,21 +174,13 @@ class SealSpec
         sealSpecDesc.putMapPropertyType("staticTexts", String.class, String.class);
         sealSpecDesc.putListPropertyType("attachments", SealAttachment.class);
         sealSpecDesc.putListPropertyType("filesList", FileDesc.class);
-        constructor.addTypeDescription(sealSpecDesc);
-
 
         TypeDescription personDesc = new TypeDescription(Person.class);
         personDesc.putListPropertyType("fields", Field.class);
-        constructor.addTypeDescription(personDesc);
 
-        Yaml yaml = new Yaml(constructor);
-        return yaml;
-    }
-
-    public static SealSpec loadFromFile(String fileName) throws IOException {
-        InputStream input = new FileInputStream(new File(fileName));
-        Yaml yaml = getYaml();
-        return (SealSpec)yaml.load(input);
+        td.add(sealSpecDesc);
+        td.add(personDesc);
+        YamlSpec.setTypeDescriptors(SealSpec.class, td);
     }
 }
 
@@ -268,8 +249,7 @@ Sealing works like this:
 */
 
 
-public class AddVerificationPages {
-
+public class AddVerificationPages extends Engine {
 
     /*
      * Define some colors.
@@ -278,6 +258,18 @@ public class AddVerificationPages {
     static CMYKColor darkTextColor = new CMYKColor(0.806f, 0.719f, 0.51f, 0.504f);
     static CMYKColor lightTextColor = new CMYKColor(0.597f, 0.512f, 0.508f, 0.201f);
     static CMYKColor frameColor = new CMYKColor(0f, 0f, 0f, 0.333f);
+
+    SealSpec spec = null;
+    
+    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+        spec = SealSpec.loadFromStream(specFile, SealSpec.class);
+        if( inputOverride!=null ) {
+            spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.output = outputOverride;
+        }
+    }
 
     /*
      * Concatenate all documents, page by page, output to OutputStream
@@ -1182,30 +1174,12 @@ public class AddVerificationPages {
         }
     }
 
-    public static void execute(String specFile, String inputOverride, String outputOverride)
+    public void execute(InputStream pdf, OutputStream out)
         throws IOException, DocumentException, Base64DecodeException
     {
-        SealSpec spec = SealSpec.loadFromFile(specFile);
-        if( inputOverride!=null ) {
-            spec.input = inputOverride;
-        }
-        if( outputOverride!=null ) {
-            spec.output = outputOverride;
-        }
-
-        /*
-          DumperOptions options = new DumperOptions();
-          Yaml yaml = new Yaml(options);
-          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-          System.out.println(yaml.dump(spec));
-        */
-        execute(spec);
-
-    }
-
-    public static void execute(SealSpec spec)
-        throws IOException, DocumentException, Base64DecodeException
-    {
+        if (pdf == null)
+            pdf = new FileInputStream(spec.input);
+       
         initializeBaseFonts(spec.fonts);
         if( spec.preseal==null || !spec.preseal ) {
 
@@ -1244,7 +1218,7 @@ public class AddVerificationPages {
 
             stampFooterOverSealPages(spec, new PdfReader(sealPagesRaw.toByteArray()), sealPages);
 
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(spec.input), getAllFields(spec), sourceWithFields);
+            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), sourceWithFields);
 
 
             pdfsToConcatenate.add(0,new PdfReader(sourceWithFields.toByteArray()));
@@ -1256,10 +1230,10 @@ public class AddVerificationPages {
 
             addFileAttachments(new PdfReader(concatenatedPdf.toByteArray()),
                                fileAttachments,
-                               new FileOutputStream(spec.output));
+                               out);
         }
         else {
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(spec.input), getAllFields(spec), new FileOutputStream(spec.output));
+            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), out);
         }
     }
 

@@ -16,33 +16,40 @@
  *
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
 
 import com.itextpdf.text.DocumentException;
 
 class Main
 {
-    public void execute(String command, String specFile, String inputOverride, String outputOverride)
-            throws IOException, DocumentException
+    public static Engine getEngine(String command) {
+        if( command.equals("add-verification-pages"))
+            return new AddVerificationPages();
+        else if( command.equals("find-texts"))
+            return new FindTexts();
+        else if( command.equals("extract-texts"))
+            return new ExtractTexts();
+        else if( command.equals("normalize"))
+            return new Normalize();
+        else if( command.equals("select-and-clip"))
+            return new SelectAndClip();
+        System.err.println("Error: Uknown command: " + command);
+        return null;
+    }
+
+    public byte[] execute(String command, byte[] spec, byte[] pdf)
+        throws IOException, DocumentException
     {
-        if( command.equals("add-verification-pages")) {
-            AddVerificationPages.execute(specFile, inputOverride, outputOverride);
-        }
-        else if( command.equals("find-texts")) {
-            FindTexts.execute(specFile, inputOverride, outputOverride);
-        }
-        else if( command.equals("extract-texts")) {
-            ExtractTexts.execute(specFile, inputOverride, outputOverride);
-        }
-        else if( command.equals("normalize")) {
-            Normalize.execute(specFile, inputOverride, outputOverride);
-        }
-        else if( command.equals("select-and-clip")) {
-            SelectAndClip.execute(specFile, inputOverride, outputOverride);
-        }
-        else {
-            System.err.println("Uknown verb " + command);
-        }
+        Engine engine = getEngine(command);
+        if (null == engine)
+            return null;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        engine.Init(new ByteArrayInputStream(spec), null, null);
+        engine.execute(new ByteArrayInputStream(pdf), out);
+        return out.toByteArray();
     }
 
     public static void main(String[] args)
@@ -68,10 +75,25 @@ class Main
             if (!args[1].equals("-p")) {
                 System.err.println("Usage:");
                 System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
-            } else
-                WebServer.execute(args[0], args[2]);
+            } else {
+                final int i = args[2].lastIndexOf(":", args[2].length());
+                final String ip = ( i < 0 ) ? null : args[2].substring(0, i);
+                final String port = args[2].substring(i + 1);
+                try {
+                    WebServer.start(args[0], ip, Integer.valueOf(port));
+                } catch (NumberFormatException e) {
+                    System.err.println("Error: Invalid port number: " + port);
+                    System.err.println("Usage:");
+                    System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
+                } catch (SocketException e) {
+                    System.err.println("Error: Invalid IP address: " + ip);
+                    e.printStackTrace(System.err);                    
+                }
+            }
         } else {
-            (new Main()).execute(args[0], args[1], (args.length == 3) ? args[2] : null, null);
+            Engine engine = getEngine(args[0]);
+            if (null != engine)
+                engine.execute(args[1], (args.length == 3) ? args[2] : null, null);
         }
     }
 }
