@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.net.URL;
 import java.lang.Character.UnicodeBlock;
+
 import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -95,48 +96,30 @@ class Match
     */
 };
 
-class FindTextSpec
+class FindTextSpec extends YamlSpec
 {
-    public String input;
     public Boolean yamlOutput;
     public ArrayList<Match> matches;
     public String stampedOutput;
 
     public PdfAdditionalInfo additionalInfo;
+    
+    static private ArrayList<TypeDescription> td = null;
 
+    static public ArrayList<TypeDescription> getTypeDescriptors() {
+        if (td == null) {
+            td = new ArrayList<TypeDescription>();
+            TypeDescription extractTextDesc = new TypeDescription(FindTextSpec.class);
+            extractTextDesc.putListPropertyType("matches", Match.class);
+            //sealSpecDesc.putMapPropertyType("staticTexts", String.class, String.class);
+            td.add(extractTextDesc);
 
-    /*
-     * YAML is compatible with JSON (at least with the JSON we generate).
-     *
-     * It was the simplest method to read in JSON values.
-     */
-    public static Yaml getYaml() {
-
-        Constructor constructor = new Constructor(FindTextSpec.class);
-        constructor.setPropertyUtils(constructor.getPropertyUtils());
-        constructor.getPropertyUtils().setSkipMissingProperties(true);
-        /*
-         * Java reflection is missing some crucial information about
-         * elements of containers.  Add this information here.
-         */
-        TypeDescription extractTextDesc = new TypeDescription(FindTextSpec.class);
-        extractTextDesc.putListPropertyType("matches", Match.class);
-        //sealSpecDesc.putMapPropertyType("staticTexts", String.class, String.class);
-        constructor.addTypeDescription(extractTextDesc);
-
-
-        //TypeDescription matchDesc = new TypeDescription(Match.class);
-        //matchDesc.putListPropertyType("pages", Integer.class);
-        //constructor.addTypeDescription(matchDesc);
-
-        Yaml yaml = new Yaml(constructor);
-        return yaml;
-    }
-
-    public static FindTextSpec loadFromFile(String fileName) throws IOException {
-        InputStream input = new FileInputStream(new File(fileName));
-        Yaml yaml = getYaml();
-        return (FindTextSpec)yaml.load(input);
+            //TypeDescription matchDesc = new TypeDescription(Match.class);
+            //matchDesc.putListPropertyType("pages", Integer.class);
+            //td.add(matchDesc);
+            td.add(extractTextDesc);
+        }
+        return td;
     }
 }
 
@@ -356,33 +339,28 @@ class MyRenderListener implements RenderListener
     }
 };
 
-public class FindTexts {
+public class FindTexts extends Engine {
 
-    public static void execute(String specFile, String inputOverride, String outputOverride)
-        throws IOException, DocumentException
-    {
-        FindTextSpec spec = FindTextSpec.loadFromFile(specFile);
+    FindTextSpec spec = null;
+    
+    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+        // TODO: it would be nice if ExtractTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
+        YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
+        spec = FindTextSpec.loadFromStream(specFile, FindTextSpec.class);
         if( inputOverride!=null ) {
             spec.input = inputOverride;
         }
         if( outputOverride!=null ) {
             spec.stampedOutput = outputOverride;
-        }
-
-        /*
-          DumperOptions options = new DumperOptions();
-          Yaml yaml = new Yaml(options);
-          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-          System.out.println(yaml.dump(spec));
-        */
-        execute(spec);
-
+        }       
     }
 
-    public static void execute(FindTextSpec spec)
+    public void execute(InputStream pdf, OutputStream out)
         throws IOException, DocumentException
     {
-        PdfReader reader = new PdfReader(spec.input);
+        if (pdf == null)
+            pdf = new FileInputStream(spec.input);
+        PdfReader reader = new PdfReader(pdf);
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
         PdfStamper stamper = null;
         if( spec.stampedOutput!=null ) {
@@ -469,6 +447,7 @@ public class FindTexts {
             stamper.close();
         }
         reader.close();
+        pdf.close();
 
         DumperOptions options = new DumperOptions();
         if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
@@ -491,7 +470,7 @@ public class FindTexts {
         String json = yaml.dump(spec);
 
         // We need to force utf-8 encoding here.
-        PrintStream out = new PrintStream(System.out, true, "utf-8");
-        out.println(json);
+        PrintStream ps = new PrintStream((out == null) ? System.out : out, true, "utf-8");
+        ps.println(json);
     }
 }

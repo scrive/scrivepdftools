@@ -21,12 +21,10 @@ import com.sun.net.httpserver.HttpServer;
 
 public class WebServer {
 
-    public static void execute(String specFile, String port)
+    public static void start(String specFile, String ip, int port)
             throws IOException
     {
-        int i = port.lastIndexOf(":", port.length());
-        InetSocketAddress address = ( i < 0 ) ? new InetSocketAddress(Integer.valueOf(port)) : new InetSocketAddress(port.substring(0, i), Integer.valueOf(port.substring(i + 1)));
-        System.out.println("HTTP server starting on " + address.getHostName() + ":" + address.getPort());
+        InetSocketAddress address = ((ip != null) && !ip.isEmpty()) ? new InetSocketAddress(ip, port) : new InetSocketAddress(port);  
         HttpServer server = HttpServer.create(address, 0);
         server.setExecutor(null); // use default
 
@@ -43,6 +41,7 @@ public class WebServer {
         for (String cmd: commands)
             server.createContext("/" + cmd, new ExecHandler(cmd));
 
+        System.out.println("HTTP server starting on " + address.getHostName() + ":" + address.getPort());
         server.start();
     }
 
@@ -55,27 +54,29 @@ public class WebServer {
     {
         public void handle(HttpExchange t) throws IOException
         {
+            int code = 200;
             String response = "";
             System.out.println("\n->[" + (new Date()).toString() + "] Request " + t.getProtocol().toString() + "/" + t.getRequestMethod() + " from " + t.getRemoteAddress().toString());
+            // load test HTML page
+            BufferedReader reader = null;
             try {
-                // load HTML from resources
-                BufferedReader reader = null;
-                try {
-                   reader = new BufferedReader(new InputStreamReader(WebServer.class.getResourceAsStream("assets/test-client.html")));
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                    reader = new BufferedReader(new FileReader("assets/test-client.html"));
-                }
-                String line = reader.readLine();
-                while (null != line) {
-                    response += line + "\r\n";
-                    line = reader.readLine();
-                }
-            } catch (IOException e) {
+               InputStream res = WebServer.class.getResourceAsStream("assets/test-client.html");
+               if (res != null)
+                   reader = new BufferedReader(new InputStreamReader(res)); // use JAR resources if possible
+               else
+                   reader = new BufferedReader(new FileReader("assets/test-client.html"));
+               String line = reader.readLine();
+               while (null != line) {
+                   response += line + "\r\n";
+                   line = reader.readLine();
+               }
+            } catch (Exception e) {
                 e.printStackTrace(System.err);
+                code = 500;
+                response = "Error: Failed to load test page..";
             }
             // send response            
-            t.sendResponseHeaders(200, response.length());
+            t.sendResponseHeaders(code, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes("UTF-8"));
             os.close();
@@ -205,55 +206,23 @@ public class WebServer {
                     code = 400;
                     response = "Error 400: Failed to parse request body"; 
                 } else {
-                    // TODO: skip temp files and connect I/O directly to processors
-                    final String path = "tmp/";
-                    FileOutputStream tmp = new FileOutputStream(path + configName);
-                    tmp.write(config);
-                    tmp.close();
-                    tmp = new FileOutputStream(path + pdfName);
-                    tmp.write(pdf);
-                    tmp.close();
-                    
                     // Dispatch processing
                     String outFileName = pdfName + ".result.pdf", mime = "application/pdf";
-                    boolean yaml = false;
                     if( command.equals("find-texts")) {
                         outFileName = pdfName + ".found-texts.yaml";
-                        yaml = true;
+                        mime = "text/yaml";
                     } else if( command.equals("extract-texts")) {
                         outFileName = pdfName + "extracted-texts.yaml";
-                        yaml = true;
-                    }
-                    ByteArrayOutputStream cap = new ByteArrayOutputStream();
-                    PrintStream original = System.out;
-                    System.setOut(new PrintStream(cap));
-                    (new Main()).execute(command, path + configName, path + pdfName, yaml ? null : (path + outFileName));
-                    System.setOut(original);
-
-                    // TODO: skip temp files and connect I/O directly to processors
-                    long size = cap.size();
-                    File oo = new File(path + outFileName);
-                    if (yaml)
                         mime = "text/yaml";
-                    else
-                        size = oo.length();
-                    t.getResponseHeaders().set("Content-Disposition", "attachment; filename=" + outFileName + "; size=" + size);
-                    t.getResponseHeaders().set("Content-Type", mime);
-                    t.sendResponseHeaders(code, size);
-                       OutputStream os = t.getResponseBody();
-                    if (yaml) {
-                        os.write(cap.toByteArray());
-                    } else {
-                        byte[] buf = new byte[32 * 1024];
-                        FileInputStream tmp2 = new FileInputStream(oo);
-                        for (;;) {
-                            int len = tmp2.read(buf);
-                            if (len < 0)
-                                break;
-                            os.write(buf, 0, len);
-                        }
-                        tmp2.close();
                     }
+
+                    byte[] out = (new Main()).execute(command, config, pdf);
+
+                    t.getResponseHeaders().set("Content-Disposition", "attachment; filename=" + outFileName + "; size=" + out.length);
+                    t.getResponseHeaders().set("Content-Type", mime);
+                    t.sendResponseHeaders(code, out.length);
+                    OutputStream os = t.getResponseBody();
+                    os.write(out);
                     os.close();
                 }
             } catch (Exception e) {

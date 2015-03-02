@@ -32,6 +32,7 @@ import java.util.Map;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.Character.UnicodeBlock;
+
 import org.yaml.snakeyaml.*;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -60,49 +61,30 @@ import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 
-class SelectAndClipSpec
+class SelectAndClipSpec extends YamlSpec
 {
-    public String input;
-    public String output;
-
     public ArrayList<Integer> pages; // pages to search, 1-based
     public ArrayList<Double> clip;   // pages to search, 1-based
-
-    /*
-     * YAML is compatible with JSON (at least with the JSON we generate).
-     *
-     * It was the simplest method to read in JSON values.
-     */
-    public static Yaml getYaml() {
-        Constructor constructor = new Constructor(SelectAndClipSpec.class);
-        constructor.getPropertyUtils().setSkipMissingProperties(true);
-
-        /*
-         * Java reflection is missing some crucial information about
-         * elements of containers.  Add this information here.
-         */
-        TypeDescription selectAndClipSpecDesc = new TypeDescription(SelectAndClipSpec.class);
-        constructor.addTypeDescription(selectAndClipSpecDesc);
-
-        Yaml yaml = new Yaml(constructor);
-        return yaml;
-    }
-
-    public static SelectAndClipSpec loadFromFile(String fileName) throws IOException {
-        InputStream input = new FileInputStream(new File(fileName));
-        Yaml yaml = getYaml();
-        return (SelectAndClipSpec)yaml.load(input);
-    }
 }
 
 
-public class SelectAndClip {
+public class SelectAndClip extends Engine {
 
-    public static void execute(SelectAndClipSpec spec)
+    SelectAndClipSpec spec = null;
+    
+    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+        spec = SelectAndClipSpec.loadFromStream(specFile, SelectAndClipSpec.class);
+        if( inputOverride!=null ) {
+            spec.input = inputOverride;
+        }
+        if( outputOverride!=null ) {
+            spec.output = outputOverride;
+        }
+    }
+
+    public void execute(InputStream is, OutputStream os)
         throws IOException, DocumentException
     {
-        FileOutputStream os = new FileOutputStream(spec.output);
-        FileInputStream is = new FileInputStream(spec.input);
         PdfReader reader = new PdfReader(is);
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document, os);
@@ -138,26 +120,5 @@ public class SelectAndClip {
         document.close();
         writer.close();
     }
-
-
-    public static void execute(String specFile, String inputOverride, String outputOverride)
-        throws IOException, DocumentException
-    {
-        SelectAndClipSpec spec = SelectAndClipSpec.loadFromFile(specFile);
-        if( inputOverride!=null ) {
-            spec.input = inputOverride;
-        }
-        if( outputOverride!=null ) {
-            spec.output = outputOverride;
-        }
-
-        /*
-          DumperOptions options = new DumperOptions();
-          Yaml yaml = new Yaml(options);
-          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-          System.out.println(yaml.dump(spec));
-        */
-        execute(spec);
-
-    }
+    
 }
