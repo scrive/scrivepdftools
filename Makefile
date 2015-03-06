@@ -4,7 +4,7 @@
 #
 #
 
-CLASSPATH=itextpdf-5.5.3.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar
+CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar
 
 ifeq ($(OS),Windows_NT)
 else
@@ -221,15 +221,16 @@ test/results/test-find-texts-sales-contract.find-output.yaml :\
     scrivepdftools.jar
 
 test-extract-texts : scrivepdftools.jar \
-                     test/results/test-extract-texts.extract-output.yaml				   \
-                     test/results/test-extract-test-document.extract-output.yaml		   \
+                     test/results/test-extract-texts.extract-output.yaml                   \
+                     test/results/test-extract-test-document.extract-output.yaml           \
                      test/results/test-extract-test-document-with-forms.extract-output.yaml\
-                     test/results/test-extract-texts-out-of-order.extract-output.yaml	   \
-                     test/results/test-extract-rotated.extract-output.yaml				   \
+                     test/results/test-extract-texts-out-of-order.extract-output.yaml      \
+                     test/results/test-extract-rotated.extract-output.yaml                 \
                      test/results/test-extract-texts-sales-contract.extract-output.yaml	   \
                      test/results/test-extract-cat-only.extract-output.yaml                \
                      test/results/test-extract-rotate-90.extract-output.yaml               \
-                     test/results/test-extract-poor-mans-bold.extract-output.yaml
+                     test/results/test-extract-poor-mans-bold.extract-output.yaml          \
+                     test/results/test-bB02_103_cerere.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -319,6 +320,12 @@ test/results/test-extract-poor-mans-bold.extract-output.yaml :          \
     test/extract-texts-whole-first-page.json                    \
     test/poor-mans-bold.pdf                                     \
     test/test-extract-poor-mans-bold.expect.yaml                \
+    scrivepdftools.jar
+
+test/results/test-bB02_103_cerere.extract-output.yaml :         \
+    test/extract-texts-whole-first-page.json                    \
+    test/bB02_103_cerere.pdf                                    \
+    test/test-extract-bB02_103_cerere.expect.yaml               \
     scrivepdftools.jar
 
 test-normalize : scrivepdftools.jar \
