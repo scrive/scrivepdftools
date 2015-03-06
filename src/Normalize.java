@@ -17,6 +17,7 @@
  */
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -227,6 +228,8 @@ public class Normalize extends Engine {
     public void execute(InputStream pdf, OutputStream os) throws IOException, DocumentException {
         if (pdf == null)
             pdf = new FileInputStream(spec.input);
+        if (os == null)
+            os = new FileOutputStream(spec.output);
         PdfReader reader = new PdfReader(pdf);
         PdfStamper stamper = new PdfStamper(reader, os);
 

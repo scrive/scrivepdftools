@@ -85,6 +85,10 @@ public class SelectAndClip extends Engine {
     public void execute(InputStream is, OutputStream os)
         throws IOException, DocumentException
     {
+        if (is == null)
+            is = new FileInputStream(spec.input);
+        if (os == null)
+            os = new FileOutputStream(spec.output);
         PdfReader reader = new PdfReader(is);
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document, os);

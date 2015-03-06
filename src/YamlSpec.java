@@ -38,6 +38,7 @@ public class YamlSpec {
     // TODO: calling this is too complicated... and one can forget about providing correct type descritors !
     public static <T extends YamlSpec> T loadFromStream(InputStream input, Class<T> specClass) throws IOException {
         Constructor constructor = new Constructor(specClass);
+        constructor.setPropertyUtils(constructor.getPropertyUtils()); // seems awkward but is necessary for setSkipMissingProperties() to work
         constructor.getPropertyUtils().setSkipMissingProperties(true);
 
         /*

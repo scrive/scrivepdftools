@@ -148,8 +148,6 @@ class FileDesc
 class SealSpec extends YamlSpec
 {
     public Boolean preseal;
-    public String input;
-    public String output;
     public String documentNumber;
     public String documentNumberText;
     public ArrayList<Person> persons;
@@ -1179,6 +1177,8 @@ public class AddVerificationPages extends Engine {
     {
         if (pdf == null)
             pdf = new FileInputStream(spec.input);
+        if (out == null)
+            out = new FileOutputStream(spec.output);
        
         initializeBaseFonts(spec.fonts);
         if( spec.preseal==null || !spec.preseal ) {
