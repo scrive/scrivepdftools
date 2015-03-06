@@ -1,5 +1,5 @@
 {"input": "test/with-solid-background.pdf",
- "output": "test/seal-images.pdf",
+ "output": "test/results/seal-images.pdf",
  "preseal": false,
  "documentNumber": "0000001234",
  "persons": [{"fullname": "XXXXXXXXXXXXXXXXXX",

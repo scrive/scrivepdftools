@@ -30,6 +30,6 @@
   "pages":
   - 1
   "text": "document"
-"stampedOutput": "test/test-find-texts-test-document.find-output.pdf"
+"stampedOutput": "test/results/test-find-texts-test-document.find-output.pdf"
 "yamlOutput": true
 

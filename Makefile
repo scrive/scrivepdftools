@@ -19,6 +19,11 @@ endif
 
 jar : scrivepdftools.jar
 
+clean :
+	rm -f scrivepdftools.jar Manifest.txt	
+	rm -f classes/*.class
+	rm -f test/results/*.*
+	rm -f test/*.ext
 
 classes/%.class : src/%.java
 	if [ ! -d classes ]; then mkdir classes; fi
@@ -51,7 +56,7 @@ test : test-add-verification-pages \
        test-normalize \
        test-select-and-clip
 
-test-add-verification-pages :\
+test-add-verification-pages : scrivepdftools.jar \
        test/seal-simplest.pdf \
        test/seal-simplest-verified.pdf \
        test/seal-filetypes.pdf \
@@ -160,12 +165,13 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-find-texts : test/test-find-texts.find-output.yaml \
-                  test/test-find-texts-test-document.find-output.yaml \
-                  test/test-find-texts-out-of-order.find-output.yaml \
-                  test/test-find-texts-json-encoding.find-output.yaml
+test-find-texts : scrivepdftools.jar \
+                  test/results/test-find-texts.find-output.yaml \
+                  test/results/test-find-texts-test-document.find-output.yaml \
+                  test/results/test-find-texts-out-of-order.find-output.yaml \
+                  test/results/test-find-texts-json-encoding.find-output.yaml
 
-test/%.find-output.yaml :
+test/results/%.find-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
           $< > $<.ext
 	java -jar scrivepdftools.jar find-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
@@ -184,45 +190,46 @@ else
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-find-texts.find-output.yaml :				 \
+test/results/test-find-texts.find-output.yaml :				 \
     test/find-texts.json							 \
     test/three-page-a4.pdf							 \
     test/test-find-texts.expect.yaml				 \
     scrivepdftools.jar
 
-test/test-find-texts-test-document.find-output.yaml :\
+test/results/test-find-texts-test-document.find-output.yaml :\
     test/find-texts-test-document.json				 \
     test/test-document.pdf							 \
     test/test-find-texts-test-document.expect.yaml	 \
     scrivepdftools.jar
 
-test/test-find-texts-out-of-order.find-output.yaml : \
+test/results/test-find-texts-out-of-order.find-output.yaml : \
     test/find-texts-out-of-order.json				 \
     test/text-out-of-order.pdf						 \
     test/test-find-texts-out-of-order.expect.yaml	 \
     scrivepdftools.jar
 
-test/test-find-texts-json-encoding.find-output.yaml :\
+test/results/test-find-texts-json-encoding.find-output.yaml :\
     test/find-text-json-encoding.json				 \
     test/three-page-a4.pdf							 \
     test/test-find-texts-json-encoding.expect.yaml	 \
     scrivepdftools.jar
 
-test/test-find-texts-sales-contract.find-output.yaml :\
+test/results/test-find-texts-sales-contract.find-output.yaml :\
     test/find-text-sales-contract.json	   			 \
     test/sales_contract.pdf							 \
     test/test-find-texts-sales-contract.expect.yaml	 \
     scrivepdftools.jar
 
-test-extract-texts : test/test-extract-texts.extract-output.yaml				   \
-                     test/test-extract-test-document.extract-output.yaml		   \
-	                 test/test-extract-test-document-with-forms.extract-output.yaml\
-                     test/test-extract-texts-out-of-order.extract-output.yaml	   \
-                     test/test-extract-rotated.extract-output.yaml				   \
-                     test/test-extract-texts-sales-contract.extract-output.yaml	   \
-                     test/test-extract-cat-only.extract-output.yaml                \
-                     test/test-extract-rotate-90.extract-output.yaml               \
-                     test/test-extract-poor-mans-bold.extract-output.yaml
+test-extract-texts : scrivepdftools.jar \
+                     test/results/test-extract-texts.extract-output.yaml				   \
+                     test/results/test-extract-test-document.extract-output.yaml		   \
+                     test/results/test-extract-test-document-with-forms.extract-output.yaml\
+                     test/results/test-extract-texts-out-of-order.extract-output.yaml	   \
+                     test/results/test-extract-rotated.extract-output.yaml				   \
+                     test/results/test-extract-texts-sales-contract.extract-output.yaml	   \
+                     test/results/test-extract-cat-only.extract-output.yaml                \
+                     test/results/test-extract-rotate-90.extract-output.yaml               \
+                     test/results/test-extract-poor-mans-bold.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -241,7 +248,7 @@ test-extract-texts : test/test-extract-texts.extract-output.yaml				   \
 #
 # The rule below knows how to use each dependency.  It is ok to have
 # more dependencies, but those will be ignored.
-test/%.extract-output.yaml :
+test/results/%.extract-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
           $< > $<.ext
 	java -jar scrivepdftools.jar extract-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
@@ -260,94 +267,94 @@ else
 endif
 	mv $(patsubst %.yaml,%-1.yaml,$@) $@
 
-test/test-extract-texts-sales-contract.extract-output.yaml :	\
+test/results/test-extract-texts-sales-contract.extract-output.yaml :	\
     test/extract-texts-sales-contract.json						\
     test/sales_contract.pdf										\
     test/test-extract-texts-sales-contract.expect.yaml			\
     scrivepdftools.jar
 
-test/test-extract-texts.extract-output.yaml :					\
+test/results/test-extract-texts.extract-output.yaml :					\
     test/extract-texts.json										\
     test/three-page-a4.pdf										\
     test/test-extract-texts.expect.yaml							\
     scrivepdftools.jar
 
-test/test-extract-test-document.extract-output.yaml :			\
+test/results/test-extract-test-document.extract-output.yaml :			\
     test/extract-test-document.json								\
     test/test-document.pdf										\
     test/test-extract-test-document.expect.yaml					\
     scrivepdftools.jar
 
-test/test-extract-test-document-with-forms.extract-output.yaml :\
+test/results/test-extract-test-document-with-forms.extract-output.yaml :\
     test/extract-test-document.json								\
     test/document-with-text-in-forms.pdf						\
     test/test-extract-test-document-with-forms.expect.yaml		\
     scrivepdftools.jar
 
-test/test-extract-texts-out-of-order.extract-output.yaml :		\
+test/results/test-extract-texts-out-of-order.extract-output.yaml :		\
     test/extract-texts-whole-first-page.json					\
     test/text-out-of-order.pdf									\
     test/test-extract-texts-out-of-order.expect.yaml			\
     scrivepdftools.jar
 
-test/test-extract-cat-only.extract-output.yaml :				\
+test/results/test-extract-cat-only.extract-output.yaml :				\
     test/extract-texts-cat-only.json							\
     test/cat-only.pdf											\
     test/test-extract-cat-only.expect.yaml						\
     scrivepdftools.jar
 
-test/test-extract-rotated.extract-output.yaml :\
+test/results/test-extract-rotated.extract-output.yaml :\
     test/extract-rotated.json				   \
     test/rotated-text.pdf					   \
     test/test-extract-rotated.expect.yaml	   \
     scrivepdftools.jar
 
-test/test-extract-rotate-90.extract-output.yaml :               \
+test/results/test-extract-rotate-90.extract-output.yaml :               \
     test/extract-texts-rotate-90.json                           \
     test/fuck3.pdf                                              \
     test/test-extract-rotate-90.expect.yaml                     \
     scrivepdftools.jar
 
-test/test-extract-poor-mans-bold.extract-output.yaml :          \
+test/results/test-extract-poor-mans-bold.extract-output.yaml :          \
     test/extract-texts-whole-first-page.json                    \
     test/poor-mans-bold.pdf                                     \
     test/test-extract-poor-mans-bold.expect.yaml                \
     scrivepdftools.jar
 
-test-normalize :                                   \
-    test/document-with-text-in-forms-flattened.pdf \
-    test/unrotated-text.pdf                        \
-    test/unrotated3.pdf
+test-normalize : scrivepdftools.jar \
+    test/results/document-with-text-in-forms-flattened.pdf \
+    test/results/unrotated-text.pdf                        \
+    test/results/unrotated3.pdf
                  
 
-test/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
+test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar
+test/results/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
+test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-select-and-clip : test/sealed-document-sealing-removed.pdf \
-                       test/signed-demo-contract-sealing-removed.pdf
+test-select-and-clip : test/results/sealed-document-sealing-removed.pdf \
+                       test/results/signed-demo-contract-sealing-removed.pdf
 
-test/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
+test/results/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar
+test/results/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@

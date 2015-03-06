@@ -1,5 +1,5 @@
 {"input": "test/three-page-a4.pdf",
- "output": "test/seal-simplest-verified.pdf",
+ "output": "test/results/seal-simplest-verified.pdf",
  "preseal": false,
  "documentNumber": "0000001234",
  "persons": [{"fullname": "Full Name X",

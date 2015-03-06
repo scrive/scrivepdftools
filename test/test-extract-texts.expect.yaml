@@ -44,6 +44,6 @@
   - 0.10293226148888224
   - 0.21413691143042224
   - 0.0886770937839485
-"stampedOutput": "test/test-extract-texts.extract-output.pdf"
+"stampedOutput": "test/results/test-extract-texts.extract-output.pdf"
 "yamlOutput": true
 

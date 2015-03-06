@@ -1,6 +1,6 @@
 { "input": "test/three-page-a4.pdf"
 , "yamlOutput": true
-, "stampedOutput": "test/three-page-a4-stamped.pdf"
+, "stampedOutput": "test/results/three-page-a4-stamped.pdf"
 , "rects": [ { "rect": [0,0,1,1], "page": 1 }
            , { "rect": [0,0,1,1], "page": 2 }
            , { "rect": [0,0,1,1], "page": 7 }

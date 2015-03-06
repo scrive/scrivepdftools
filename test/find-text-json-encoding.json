@@ -1,6 +1,6 @@
 { "input": "test/three-page-a4.pdf"
 , "yamlOutput": true
-, "stampedOutput": "test/three-page-a4-find-texts-stamped.pdf"
+, "stampedOutput": "test/results/three-page-a4-find-texts-stamped.pdf"
 , "matches": [ { "text": "\n", "pages": [1] }
              , { "text": "\r", "pages": [1] }
              , { "text": "\u0085", "pages": [1] }

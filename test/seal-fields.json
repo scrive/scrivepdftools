@@ -1,5 +1,5 @@
 {"input": "test/three-page-a4.pdf",
- "output": "test/seal-fields.pdf",
+ "output": "test/results/seal-fields.pdf",
  "preseal": false,
  "fonts": ["assets/SourceSansPro-Light.ttf", "assets/NotoSans-Regular.ttf"],
  "documentNumber": "should not be visible",

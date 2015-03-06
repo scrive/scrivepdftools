@@ -1,5 +1,5 @@
 {"input": "test/three-page-a4.pdf",
- "output": "test/field-positions.pdf",
+ "output": "test/results/field-positions.pdf",
  "preseal": true,
   # A4 page size in points is 595x842
  "documentNumber": "0000001234",

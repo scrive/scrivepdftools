@@ -1,5 +1,5 @@
 {"input": "test/three-page-a4.pdf",
- "output": "test/seal-filetypes-preseal.pdf",
+ "output": "test/results/seal-filetypes-preseal.pdf",
  "preseal": true,
  "documentNumber": "0000001234",
  "persons": [{"fullname": "Full Name",

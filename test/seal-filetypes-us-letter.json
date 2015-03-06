@@ -1,5 +1,5 @@
 {"input": "test/one-page-us-letter.pdf",
- "output": "test/seal-filetypes-us-letter.pdf",
+ "output": "test/results/seal-filetypes-us-letter.pdf",
  "preseal": false,
  "documentNumber": "0000001234",
  "persons": [{"fullname": "Full Name",

@@ -58,6 +58,6 @@
   - 0.0
   - 1.0
   - 1.0
-"stampedOutput": "test/test-extract-texts-out-of-order.extract-output.pdf"
+"stampedOutput": "test/results/test-extract-texts-out-of-order.extract-output.pdf"
 "yamlOutput": true
 
