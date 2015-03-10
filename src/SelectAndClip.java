@@ -16,50 +16,20 @@
  *
  */
 
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Map;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.lang.Character.UnicodeBlock;
 
-import org.yaml.snakeyaml.*;
-import org.yaml.snakeyaml.constructor.Constructor;
-
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfSmartCopy;
-import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.CMYKColor;
-import com.itextpdf.text.pdf.PdfPTableEvent;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfWriter;
 
 class SelectAndClipSpec extends YamlSpec
 {

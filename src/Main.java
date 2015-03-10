@@ -23,7 +23,7 @@ import java.net.SocketException;
 
 import com.itextpdf.text.DocumentException;
 
-class Main
+public class Main
 {
     public static Engine getEngine(String command) {
         if( command.equals("add-verification-pages"))
@@ -53,7 +53,6 @@ class Main
     }
 
     public static void main(String[] args)
-        throws IOException, DocumentException
     {
         com.itextpdf.text.pdf.PdfReader.unethicalreading = true;
         if( args.length!=2 && args.length!=3) {
@@ -88,12 +87,18 @@ class Main
                 } catch (SocketException e) {
                     System.err.println("Error: Invalid IP address: " + ip);
                     e.printStackTrace(System.err);                    
+                } catch (IOException e) {
+                    e.printStackTrace(System.err);                    
                 }
             }
         } else {
-            Engine engine = getEngine(args[0]);
-            if (null != engine)
-                engine.execute(args[1], (args.length == 3) ? args[2] : null, null);
+            try {
+                Engine engine = getEngine(args[0]);
+                if (null != engine)
+                    engine.execute(args[1], (args.length == 3) ? args[2] : null, null);
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
         }
     }
 }

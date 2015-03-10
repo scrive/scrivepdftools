@@ -1,15 +1,10 @@
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.util.Date;
 
@@ -120,50 +115,7 @@ public class WebServer {
                 pdfName = fname;
             }
         }
-        
-        /**
-         * This method extracts useful data from multipart POST form fields
-         * @param disp  Content-Disposition
-         * @param ctype Content-Type
-         * @param data  field content
-         */
-        private void onFormField(String disp, String ctype, String data) throws UnsupportedEncodingException
-        {
-            if (data.isEmpty() || disp.isEmpty())
-                return;
-            disp = getVal(disp, "form-data; name=\"");
-            String fname = getVal(disp, "filename=\"");
-            if ((fname != null) && (0 < fname.indexOf('"'))) {
-                fname = fname.substring(0, fname.indexOf('"'));
-            }
-            if (disp.startsWith("config")) {
-                config = data.getBytes("UTF-8");
-                configName = fname;                    
-            } else if (disp.startsWith("pdf")) {
-                pdf = data.getBytes("UTF-8");
-                pdfName = fname;
-            }
-        }
 
-        /**
-         * byte version of String.indexOf(...)
-         */        
-        static private int indexOf(byte[] data, byte[] seq, int start)
-        {
-            final int n = data.length, m = seq.length;
-            for (int i = start; i + m < n; ++i) {
-                boolean found = true;
-                for (int j = 0; j < m; ++j)
-                    if (data[i + j] != seq[j]) {
-                        found = false;
-                        break;
-                    }
-                if (found)
-                    return i;
-            }
-            return -1;
-        }
-        
         /**
          * This method parses multipart form encapsulated in HTTP 1.1 POST request
          */

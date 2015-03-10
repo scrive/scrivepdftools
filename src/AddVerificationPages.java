@@ -16,54 +16,54 @@
  *
  */
 
-import com.drew.metadata.*;
-import com.drew.imaging.*;
-import com.drew.metadata.exif.*;
-
-import java.awt.image.*;
-import java.awt.Color;
-
-import javax.imageio.*;
-
-import java.io.*;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Map;
-import java.net.URL;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
-import java.lang.Character.UnicodeBlock;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import org.yaml.snakeyaml.*;
-import org.yaml.snakeyaml.constructor.Constructor;
+import javax.imageio.ImageIO;
 
+import org.bouncycastle.util.encoders.Base64;
+import org.yaml.snakeyaml.TypeDescription;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfCopy;
+import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfSmartCopy;
-import com.itextpdf.text.pdf.PdfCopy;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.CMYKColor;
-import com.itextpdf.text.pdf.PdfPTableEvent;
-
-import org.bouncycastle.util.encoders.Base64;
 
 /*
  * Class that directly serve deserialization of JSON data.
@@ -403,7 +403,6 @@ public class AddVerificationPages extends Engine {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Image image = Image.getInstance(filepath);
         Document document = new Document();
-        PdfWriter writer = PdfWriter.getInstance(document, os);
 
         document.open();
         document.newPage();
@@ -454,9 +453,6 @@ public class AddVerificationPages extends Engine {
 
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
-
-        PdfReader sealMarker = getSealMarker();
-        PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
         int count = reader.getNumberOfPages();
         for( int i=1; i<=count; i++ ) {
@@ -954,13 +950,9 @@ public class AddVerificationPages extends Engine {
         throws IOException, DocumentException, Base64DecodeException
     {
         Document document = new Document();
-        PdfWriter writer = PdfWriter.getInstance(document, os);
-
         document.open();
 
         PdfPTableDrawFrameAroundTable drawFrame = new PdfPTableDrawFrameAroundTable();
-
-        Font font;
 
         document.setMargins(document.leftMargin(),
                             document.rightMargin(),
@@ -1098,8 +1090,8 @@ public class AddVerificationPages extends Engine {
         Document document = new Document();
         document.open();
 
-        float printableWidth = 567f;
-        float printableMargin = 23f;
+//        float printableWidth = 567f;
+//        float printableMargin = 23f;
         Rectangle pageSize = document.getPageSize();
 
         Rectangle footerFrame = new Rectangle(document.leftMargin(), document.bottomMargin(),
