@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,7 +43,6 @@ import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.PdfContentStreamProcessor;
 import com.itextpdf.text.pdf.parser.RenderListener;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 public class Normalize extends Engine {
 
@@ -238,9 +238,9 @@ public class Normalize extends Engine {
         if ((os == null) && (spec.output != null))
             os = new FileOutputStream(spec.output);
         PdfReader reader = new PdfReader(pdf);
-        ByteOutputStream buf = null;
+        ByteArrayOutputStream buf = null;
         if (spec.dumpPath != null) {
-            buf = new ByteOutputStream();
+            buf = new ByteArrayOutputStream();
             os = (os == null) ? buf : new TeeOutputStream(os, buf);
         }
         if (os == null)
@@ -260,7 +260,7 @@ public class Normalize extends Engine {
         // Create page text dumps
         if (buf != null) {
             ObjectOutputStream dump = new ObjectOutputStream(new FileOutputStream(spec.dumpPath));
-            TextDump text = new TextDump(new PdfReader(buf.getBytes()));
+            TextDump text = new TextDump(new PdfReader(buf.toByteArray()));
             dump.writeObject(text);
             dump.close();
         }

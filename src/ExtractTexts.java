@@ -103,8 +103,8 @@ public class ExtractTexts extends TextEngine {
         }
         ArrayList<String> foundText = new ArrayList<String>();
 
-        PageText.CharPos last = null;
-        for (PageText.CharPos cp: text.getChars()) {
+        CharPos last = null;
+        for (CharPos cp: text.getChars()) {
             // check if the middle of baseline
             final float xm = cp.getX() + 0.5f * cp.getBaseX();
             final float ym = cp.getY() + 0.5f * cp.getBaseY();

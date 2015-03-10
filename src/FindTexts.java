@@ -97,16 +97,16 @@ public class FindTexts extends TextEngine
 {
     private PdfContentByte canvas = null;
     
-     public ArrayList<PageText.CharPos> find(PageText text, String needle, int index) {
+     public ArrayList<CharPos> find(PageText text, String needle, int index) {
          String cc = "";
-         ArrayList<PageText.CharPos> foundText = new ArrayList<PageText.CharPos>();
-         ArrayList<PageText.CharPos> all = text.getChars();
-         for( PageText.CharPos c: all)
+         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
+         ArrayList<CharPos> all = text.getChars();
+         for( CharPos c: all)
              cc += c.c;
          for (int i = cc.indexOf(needle, 0); i >= 0; i = cc.indexOf(needle,  i + 1)) {
-             PageText.CharPos c0 = all.get(i);
+             CharPos c0 = all.get(i);
              LineSegment line = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
-             foundText.add(text.new CharPos(needle, line));
+             foundText.add(new CharPos(needle, line));
              if( index == 1 )
                  return foundText;
              else
@@ -114,7 +114,7 @@ public class FindTexts extends TextEngine
          }
          // mark all glyphs
          if (stamper != null) {
-             for( PageText.CharPos c: all) {
+             for( CharPos c: all) {
                  final float x = c.getX(), y = c.getY();
                  Rectangle frame = new Rectangle(x - 1, y - 1, x + 1, y + 1);
                  frame.setBorderColor(new BaseColor(1f, 0f, 1f));
@@ -175,8 +175,8 @@ public class FindTexts extends TextEngine
                         if (stamper != null) {
                             canvas = stamper.getOverContent(i);
                         }
-                        ArrayList<PageText.CharPos> found = find(text.text[i-1], textNoSpaces, index);
-                        PageText.CharPos foundText = ((found == null) || found.isEmpty()) ? null : found.get(found.size() - 1);
+                        ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
+                        CharPos foundText = ((found == null) || found.isEmpty()) ? null : found.get(found.size() - 1);
                         if( foundText!=null ) {
                             match.page = i;
                             PageText.Rect crop = text.text[i-1].pageSizeRotated;
