@@ -26,12 +26,13 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 public class YamlSpec {
-    public String input;
-    public String output;
+    public String input = null;
+    public String output = null;
+    public String dumpPath = null;
 
-    static HashMap<Class, ArrayList<TypeDescription>> td = new HashMap<Class, ArrayList<TypeDescription>>();
+    static HashMap<Class<?>, ArrayList<TypeDescription>> td = new HashMap<Class<?>, ArrayList<TypeDescription>>();
 
-    static void setTypeDescriptors(Class c, ArrayList<TypeDescription> t) {
+    static void setTypeDescriptors(Class<?> c, ArrayList<TypeDescription> t) {
         td.put(c, t);
     }
     

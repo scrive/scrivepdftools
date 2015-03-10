@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /*
  *  Copyright (C) 2014 Scrive AB
  *
@@ -16,12 +18,17 @@
  *
  */
 
-class PdfAdditionalInfo
+class PdfAdditionalInfo implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5173587408097084981L;
+
     /**
      * Number of pages.
      */
-    public int numberOfPages;
+    public int numberOfPages = 0;
 
     /**
      * Printers have a setting to 'print as image'. If that is set all
@@ -30,7 +37,7 @@ class PdfAdditionalInfo
      *
      * True if PDF has any text rendering operators used anywhere.
      */
-    public boolean containsGlyphs;
+    public boolean containsGlyphs = false;
 
     /**
      * Some PDF generation software does not embed ToUnicode mapping
@@ -44,7 +51,7 @@ class PdfAdditionalInfo
      * Control code is a code in the range 0-31 except CR, LF and
      * TAB.
      */
-    public boolean containsControlCodes;
+    public boolean containsControlCodes = false;
 
     /**
      * First page Crop Box size in printer points. Useful to detect

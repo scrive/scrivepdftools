@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2015 Scrive AB
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,6 +24,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.LineSegment;
@@ -14,8 +33,25 @@ import com.itextpdf.text.pdf.parser.RenderListener;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
 import com.itextpdf.text.pdf.parser.Vector;
 
+class VectorUtils {
+
+//  public static Vector add(Vector v1, Vector v2) {
+//      return new Vector(v1.get(Vector.I1) + v2.get(Vector.I1), v1.get(Vector.I2) + v2.get(Vector.I2), v1.get(Vector.I3) + v2.get(Vector.I3));
+//  }
+
+    public static float crossProduct(Vector v1, Vector v2) {
+        return v1.get(Vector.I1) * v2.get(Vector.I2) - v1.get(Vector.I2) * v2.get(Vector.I1);
+    }
+
+}
+
+/**
+ * Responsible for text processing and storage.
+ *
+ */
 class CharPos implements Serializable
 {
+    private static final long serialVersionUID = 6875877776978057339L;
     /*
      * This is Unicode code point as used by java.String, so it
      * may be a surrogate pair or some other crap. As soon as we
@@ -97,7 +133,7 @@ class CharPos implements Serializable
     }
 
     // Comparison tool, gives 0 for zero, -1 for negatives and 1 for positives
-    private static int cmp(float v) {
+    private /*static*/ int cmp(float v) {
         if (Math.abs(v) < 0.001) // NOTE: adjust tolerance for 0
             return 0;
         return (v < 0.0) ? -1 : 1;
@@ -166,13 +202,40 @@ class CharPos implements Serializable
     }
 };
 
-public class PageText
+public class PageText implements Serializable
 {
-    public interface PageTextListener
-    {
-        public void OnChar(CharPos c);
+    private static final long serialVersionUID = -7658415439714179901L;
+
+    /**
+     * Plain 2D rectangle
+     * @author wizzard
+     *
+     */
+    public class Rect implements Serializable {
+        private static final long serialVersionUID = -1267272873159187043L;
+        private float x, y, w, h;
+        
+        public Rect(float x, float y, float w, float h) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+        }
+        
+        public float getLeft() {
+            return x;
+        }
+        public float getBottom() {
+            return y;
+        }
+        public float getWidth() {
+            return w;
+        }
+        public float getHeight() {
+            return h;
+        }
     }
-    
+
     private class CharPosComparator implements Comparator<CharPos> {
 
         @Override
@@ -212,17 +275,23 @@ public class PageText
         }
     }
 
+    Rect pageSize = null;
+    Rect pageSizeRotated = null;
+    int pageRotation = 0;
     private ArrayList<CharPos> allChars = new ArrayList<CharPos>();
     private boolean hasGlyphs = false;
     private boolean hasControlCodes = false;
-    private PageTextListener listener = null;     
 
-    public PageText(PdfReader reader, int iPage, PageTextListener l) throws IOException {
-        if (l != null)
-            listener = l;
+    public PageText(PdfReader reader, int iPage) throws IOException {
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
         parser.processContent(iPage, new PageTextRenderListener(this));
         Collections.sort(allChars, new CharPosComparator());
+        // geometry
+        pageRotation = reader.getPageRotation(iPage);
+        Rectangle r = reader.getPageSize(iPage);
+        pageSize = new Rect(r.getLeft(), r.getBottom(), r.getWidth(), r.getHeight());
+        r = reader.getPageSizeWithRotation(iPage);
+        pageSizeRotated = new Rect(r.getLeft(), r.getBottom(), r.getWidth(), r.getHeight());
     }
 
     public boolean containsGlyphs() { return hasGlyphs; }
@@ -243,8 +312,6 @@ public class PageText
         CharPos cp = new CharPos(c, base);
         if( cp.isHorizontal() || cp.isVertical()) {
             allChars.add(cp);
-            if (listener != null)
-                listener.OnChar(cp);
         }
 
     }

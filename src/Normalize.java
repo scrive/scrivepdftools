@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,9 +42,53 @@ import com.itextpdf.text.pdf.parser.ImageRenderInfo;
 import com.itextpdf.text.pdf.parser.PdfContentStreamProcessor;
 import com.itextpdf.text.pdf.parser.RenderListener;
 import com.itextpdf.text.pdf.parser.TextRenderInfo;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 public class Normalize extends Engine {
 
+    public final class TeeOutputStream extends OutputStream {
+
+        private final OutputStream out;
+        private final OutputStream tee;
+
+        public TeeOutputStream(OutputStream out, OutputStream tee) {
+          if ((out == null) || (tee == null))
+            throw new NullPointerException();
+          this.out = out;
+          this.tee = tee;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+          out.write(b);
+          tee.write(b);
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+          out.write(b);
+          tee.write(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+          out.write(b, off, len);
+          tee.write(b, off, len);
+        }
+
+        @Override
+        public void flush() throws IOException {
+          out.flush();
+          tee.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+          out.close();
+          tee.close();
+        }
+      }
+    
     YamlSpec spec = null;
 
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
@@ -137,7 +182,7 @@ public class Normalize extends Engine {
         final int n = reader.getNumberOfPages();
         for (int i = 1; i <= n; i++) {
             PdfDictionary page = reader.getPageN(i);
-            final int rot = -(new PageText(reader, i, null)).detectRotate();
+            final int rot = -(new PageText(reader, i)).detectRotate();
             page.put(PdfName.ROTATE, null);
             if (rot == 0)
                 continue; // no need to rotate
@@ -190,9 +235,17 @@ public class Normalize extends Engine {
     public void execute(InputStream pdf, OutputStream os) throws IOException, DocumentException {
         if (pdf == null)
             pdf = new FileInputStream(spec.input);
-        if (os == null)
+        if ((os == null) && (spec.output != null))
             os = new FileOutputStream(spec.output);
         PdfReader reader = new PdfReader(pdf);
+        ByteOutputStream buf = null;
+        if (spec.dumpPath != null) {
+            buf = new ByteOutputStream();
+            os = (os == null) ? buf : new TeeOutputStream(os, buf);
+        }
+        if (os == null)
+            return; // no result expected, cancel
+
         PdfStamper stamper = new PdfStamper(reader, os);
 
         stamper.setFormFlattening(true);
@@ -203,5 +256,13 @@ public class Normalize extends Engine {
         stamper.close();
         reader.close();
         pdf.close();
+        
+        // Create page text dumps
+        if (buf != null) {
+            ObjectOutputStream dump = new ObjectOutputStream(new FileOutputStream(spec.dumpPath));
+            TextDump text = new TextDump(new PdfReader(buf.getBytes()));
+            dump.writeObject(text);
+            dump.close();
+        }
     }
 }

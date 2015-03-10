@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -39,9 +35,6 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.parser.Vector;
 
 /*
  * Class that directly serve deserialization of JSON data.
@@ -74,13 +67,6 @@ class ExtractTextSpec extends YamlSpec
 
     public ArrayList<MatchedTemplate> listOfTemplates;
 
-    HashSet<Integer> getPages() {
-        HashSet<Integer> pages = new HashSet<Integer>();
-        for ( Rect r: rects )
-            pages.add(r.page);
-        return pages;
-    }
-    
     public PdfAdditionalInfo additionalInfo;
 
     static private ArrayList<TypeDescription> td = null;
@@ -97,19 +83,7 @@ class ExtractTextSpec extends YamlSpec
     }
 }
 
-class VectorUtils {
-
-//	public static Vector add(Vector v1, Vector v2) {
-//		return new Vector(v1.get(Vector.I1) + v2.get(Vector.I1), v1.get(Vector.I2) + v2.get(Vector.I2), v1.get(Vector.I3) + v2.get(Vector.I3));
-//	}
-
-	public static float crossProduct(Vector v1, Vector v2) {
-		return v1.get(Vector.I1) * v2.get(Vector.I2) - v1.get(Vector.I2) * v2.get(Vector.I1);
-	}
-
-}
-
-public class ExtractTexts extends Engine {
+public class ExtractTexts extends TextEngine {
 
     /*
      * Params l, b, r, t are in PDF points coordinates. Those take
@@ -129,8 +103,8 @@ public class ExtractTexts extends Engine {
         }
         ArrayList<String> foundText = new ArrayList<String>();
 
-        CharPos last = null;
-        for (CharPos cp: text.getChars()) {
+        PageText.CharPos last = null;
+        for (PageText.CharPos cp: text.getChars()) {
             // check if the middle of baseline
             final float xm = cp.getX() + 0.5f * cp.getBaseX();
             final float ym = cp.getY() + 0.5f * cp.getBaseY();
@@ -185,7 +159,7 @@ public class ExtractTexts extends Engine {
     }
     
 
-    public static Rectangle getRectInRotatedCropBoxCoordinates(Rectangle crop, int rotate, ArrayList<Double> rect) {
+    public static Rectangle getRectInRotatedCropBoxCoordinates(PageText.Rect crop, int rotate, ArrayList<Double> rect) {
         /*
          * Here we fight in two coordinate spaces:
          * 1. Content coordinate space (the one when /Rotate is 0)
@@ -235,27 +209,25 @@ public class ExtractTexts extends Engine {
         return rect2;
     }
 
-    public static void stampRects(PdfReader reader, ExtractTextSpec spec)
+    public void stampRects()
         throws IOException, DocumentException
     {
-        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
-
         stamper.setRotateContents(false);
 
         int i;
-        for (i = 1; i <= reader.getNumberOfPages(); i++) {
+        for (i = 1; i <= text.info.numberOfPages; i++) {
             for(Rect rect : spec.rects) {
                 if( rect.page==i ) {
 
-                    Rectangle frame = getRectInRotatedCropBoxCoordinates(reader.getPageSize(rect.page), reader.getPageRotation(rect.page), rect.rect);
+                    PageText rl = text.text[rect.page-1];
+                    Rectangle frame = getRectInRotatedCropBoxCoordinates(rl.pageSize, rl.pageRotation, rect.rect);
                     /*
-                    Rectangle crop = reader.getPageSizeWithRotation(rect.page);
+                    Rectangle crop = text.text[i-1].pageSizeRotated;
                     double l = rect.rect.get(0)*crop.getWidth() + crop.getLeft();
                     double t = (1-rect.rect.get(1))*crop.getHeight() + crop.getBottom();
                     double r = rect.rect.get(2)*crop.getWidth() + crop.getLeft();
                     double b = (1-rect.rect.get(3))*crop.getHeight() + crop.getBottom();
                     */
-
 
                     PdfContentByte canvas = stamper.getOverContent(i);
                     frame.setBorderColor(colorFromArrayListFloat(rect.color));
@@ -277,7 +249,8 @@ public class ExtractTexts extends Engine {
 
             while(true) {
                 // Add a new page
-                stamper.insertPage(i, reader.getPageSize(1));
+                PageText.Rect media = text.text[0].pageSize;
+                stamper.insertPage(i, new Rectangle(media.getLeft(), media.getBottom(), media.getLeft() + media.getWidth(), media.getBottom() + media.getHeight(), text.text[0].pageRotation ));
 
                 // Add as much content of the column as possible
                 PdfContentByte canvas = stamper.getOverContent(i);
@@ -292,37 +265,21 @@ public class ExtractTexts extends Engine {
         stamper.close();
     }
 
-    public void execute(InputStream pdf, OutputStream out)
-        throws IOException, DocumentException
-    {
-        /* This is here to flatten forms so that texts in them can be read
-         */
-        if (pdf == null)
-            pdf = new FileInputStream(spec.input);
-        PdfReader reader = new PdfReader(pdf);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PdfStamper stamper = new PdfStamper(reader, os);
+    @Override
+    public YamlSpec getSpec() {
+        return spec;
+    }
+    @Override
+    public String getStampedOutput() {
+        return spec.stampedOutput;
+    }
 
-        spec.additionalInfo = new PdfAdditionalInfo();
-        spec.additionalInfo.numberOfPages = reader.getNumberOfPages();
-        Rectangle rx = reader.getPageSizeWithRotation(1);
-        spec.additionalInfo.firstPageWidth = rx.getWidth();
-        spec.additionalInfo.firstPageHeight = rx.getHeight();
+    @Override
+    public void execute(OutputStream out) throws IOException, DocumentException {
 
-        stamper.setFormFlattening(true);
-        stamper.setFreeTextFlattening(true);
 
-        stamper.close();
-        reader.close();
-        pdf.close();
-
-        reader = new PdfReader(os.toByteArray());
-
-        int npages = reader.getNumberOfPages();
-
-        spec.numberOfPages = npages;
-
-        PageText charsForPages[] = new PageText[npages];
+        spec.additionalInfo = text.info;
+        final int npages = spec.numberOfPages = text.info.numberOfPages;
 
         /*
          * Some pages may have no rectangles to find text in. This
@@ -333,15 +290,8 @@ public class ExtractTexts extends Engine {
 
             if( rect.page>=1 && rect.page<=npages) {
 
-                PageText rl = charsForPages[rect.page-1];
-                if( rl == null ) {
-                    rl = new PageText(reader, rect.page, null);
-                    charsForPages[rect.page-1] = rl;
-                    spec.additionalInfo.containsControlCodes = spec.additionalInfo.containsControlCodes || rl.containsControlCodes();
-                    spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || rl.containsGlyphs();
-                }
-
-                Rectangle frame = getRectInRotatedCropBoxCoordinates(reader.getPageSize(rect.page), reader.getPageRotation(rect.page), rect.rect);
+                PageText rl = text.text[rect.page-1];
+                Rectangle frame = getRectInRotatedCropBoxCoordinates(rl.pageSize, rl.pageRotation, rect.rect);
                 double l = frame.getLeft();
                 double t = frame.getTop();
                 double r = frame.getRight();
@@ -375,12 +325,9 @@ public class ExtractTexts extends Engine {
             }
         }
 
-
-        if( spec.stampedOutput != null ) {
-            stampRects(reader, spec);
+        if( stamper != null ) {
+            stampRects();
         }
-
-        reader.close();
 
         DumperOptions options = new DumperOptions();
         if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
