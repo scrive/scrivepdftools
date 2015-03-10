@@ -15,55 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.File;
 import java.io.PrintStream;
-import java.util.*;
-import java.net.URL;
-import java.lang.Character.UnicodeBlock;
+import java.util.ArrayList;
 
-import org.yaml.snakeyaml.*;
-import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.TypeDescription;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
-import org.yaml.snakeyaml.nodes.*;
-import org.yaml.snakeyaml.introspector.Property;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.RenderListener;
-import com.itextpdf.text.pdf.parser.ImageRenderInfo;
-import com.itextpdf.text.pdf.parser.TextRenderInfo;
-import com.itextpdf.text.pdf.parser.Vector;
 import com.itextpdf.text.pdf.parser.LineSegment;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfSmartCopy;
-import com.itextpdf.text.pdf.PdfCopy;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.CMYKColor;
-import com.itextpdf.text.pdf.PdfPTableEvent;
+import com.itextpdf.text.pdf.parser.Vector;
 
 /*
  * Class that directly serve deserialization of JSON data.
@@ -94,7 +67,7 @@ class Match
     /*
     public ArrayList<Double> bbox;
     */
-};
+}
 
 class FindTextSpec extends YamlSpec
 {
@@ -103,7 +76,7 @@ class FindTextSpec extends YamlSpec
     public String stampedOutput;
 
     public PdfAdditionalInfo additionalInfo;
-    
+
     static private ArrayList<TypeDescription> td = null;
 
     static public ArrayList<TypeDescription> getTypeDescriptors() {
@@ -121,230 +94,53 @@ class FindTextSpec extends YamlSpec
         }
         return td;
     }
-}
+ }
 
-class MyRenderListener implements RenderListener
+
+public class FindTexts extends Engine implements PageText.PageTextListener
 {
-    /*
-     * Java does not support multiple results from functions, so treat
-     * these as results from 'find'.
-     *
-     * foundText is not null if text was found (taking into account
-     * requested index). If this is null then foundTextCount should
-     * say how many texts were found on the page. This should be less
-     * than index. It should be substracted from index and used on the
-     * next page as limit.
+    PdfContentByte canvas = null;
+
+    /**
+     * Marks characters (stamping)
+     * @param c
      */
-    public CharPos foundText;
-    public int foundTextCount;
-
-    private PdfStamper stamper;
-    private int page;
-
-    public boolean containsGlyphs;
-    public boolean containsControlCodes;
-
-    public class CharPos {
-        /*
-         * This is Unicode code point as used by java.String, so it
-         * may be a surrogate pair or some other crap. As soon as we
-         * enter markets that need this we need to move to full
-         * Unicode support. This requires involed changes everywhere
-         * so beware to test this properly once we are there.
-         */
-        String c;
-        /*
-         * Coordinates as returned by iText. We know that y is font
-         * baseline coordinate.
-         */
-        double x, y;
-
-         /*
-          * Due to bugs in iText 5.4.5 this part isn't working
-          * yet. The bx, by are coordinates of lower left corner. ex,
-          * ey are coordinates of upper right corner. [bx by ex ey] is
-          * the bounding box for this character.
-          */
-        /*
-        double bx, by, ex, ey;
-        */
-        public String toString() {
-            return c + "," + x + "," + y;
-        }
-    };
-
-    public ArrayList<CharPos> allCharacters;
-
-    MyRenderListener(PdfStamper stamper, int page)
-    {
-        this.stamper = stamper;
-        this.page = page;
-        allCharacters = new ArrayList<CharPos>();
-    }
-    public void beginTextBlock() {
-    }
-    public void endTextBlock() {
-    }
-    public void renderImage(ImageRenderInfo renderInfo) {
-    }
-    public void renderText(TextRenderInfo renderInfo) {
-
-        List<TextRenderInfo> individualCharacters = renderInfo.getCharacterRenderInfos();
-
-        for( TextRenderInfo tri: individualCharacters ) {
-            String text = tri.getText();
-            /*
-             * We deliberatelly ignore spaces as those are not
-             * reliable in PDFs.
-             */
-            if( !text.equals(" ") && !text.equals("\t") &&
-                !text.equals("\n")  && !text.equals("\r") &&
-                !text.equals("\u00A0")) {
-
-                containsGlyphs = true;
-                int codePoint = text.codePointAt(0);
-                // 0x20000 marks beginning of unassigned planes,
-                // 0xE0000 and 0xF0000 are special purpose planes, no
-                // useful glyphs in that range.
-                containsControlCodes = containsControlCodes || codePoint<32 || codePoint>=0x20000;
-
-                CharPos cp = new CharPos();
-                cp.c = text;
-                LineSegment line = tri.getBaseline();
-                Vector p1 = line.getStartPoint();
-                cp.x = p1.get(Vector.I1);
-                cp.y = p1.get(Vector.I2);
-                Vector p2 = line.getEndPoint();
-
-                if( p1.get(Vector.I2) == p2.get(Vector.I2)) {
-                    /*
-                     * We read only horizontal text, ignore things across
-                     */
-                    Vector p;
-                    line = tri.getDescentLine();
-                    p = line.getStartPoint();
-                    float bx = p.get(Vector.I1);
-                    float by = p.get(Vector.I2);
-
-                    line = tri.getAscentLine();
-                    p = line.getEndPoint();
-                    float ex = p.get(Vector.I1);
-                    float ey = p.get(Vector.I2);
-
-                    allCharacters.add(cp);
-
-                    if( stamper!=null ) {
-                        PdfContentByte canvas = stamper.getOverContent(page);
-                        Rectangle frame = new Rectangle((float)cp.x-1,
-                                                        (float)cp.y-1,
-                                                        (float)cp.x+1,
-                                                        (float)cp.y+1);
-                        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                        frame.setBorderWidth(1f);
-                        frame.setBorder(15);
-                        canvas.rectangle(frame);
-
-                        frame = new Rectangle((float)bx,
-                                              (float)by,
-                                              (float)ex,
-                                              (float)ey);
-                        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                        frame.setBorderWidth(0.1f);
-                        frame.setBorder(15);
-                        canvas.rectangle(frame);
-                    }
-
-                    /*
-                     * Y coordinate postfixup. It seems that all
-                     * coordinates here are moved down by half of the
-                     * difference between baseline and descent. Strange.
-                     */
-                    /*
-                      double fixup = cp.y - cp.by;
-                      System.err.println("cp: " + cp);
-                      cp.y += fixup/2;
-                      cp.by += fixup/2;
-                      cp.ey += fixup/2;
-                    */
-                }
-            }
-        }
-    }
-    public void find(String needle, int index) {
-
-        foundTextCount = 0;
-        foundText = null;
-
-        int i, k;
-        for( i=0; i<allCharacters.size(); i++ ) {
-            for( k=0; k<needle.length(); k++ ) {
-                if( !allCharacters.get(i+k).c.equals(needle.substring(k,k+1))) {
-                    break;
-                }
-            }
-            if( k==needle.length()) {
-                // found!
-                foundTextCount = foundTextCount + 1;
-
-                if( index == 1 ) {
-                    CharPos cp = new CharPos();
-                    cp.c = needle;
-                    cp.x = allCharacters.get(i).x;
-                    cp.y = allCharacters.get(i).y;
-                    /*
-                    cp.bx = allCharacters.get(i).bx;
-                    cp.by = allCharacters.get(i).by;
-                    cp.ex = allCharacters.get(i+k-1).ex;
-                    cp.ey = allCharacters.get(i+k-1).ey;
-                    */
-                    foundText = cp;
-                    return;
-                }
-                index = index - 1;
-            }
-        }
+    public void OnChar(CharPos c) {
+        final float x = c.getX(), y = c.getY();
+        Rectangle frame = new Rectangle(x - 1, y - 1, x + 1, y + 1);
+        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+        frame.setBorderWidth(1f);
+        frame.setBorder(15);
+        canvas.rectangle(frame);
+        frame = new Rectangle(x, y, c.getX2(), c.getY2());
+        frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+        frame.setBorderWidth(0.1f);
+        frame.setBorder(15);
+        canvas.rectangle(frame);
     }
 
-    static double roundForCompare(double v) {
-        // 8pt font as smallest font supported
-        return Math.round(v/8.0) * 8.0;
-    }
+     public ArrayList<CharPos> find(PageText text, String needle, int index) {
+         String cc = "";
+         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
+         ArrayList<CharPos> all = text.getChars();
+         for( CharPos c: all)
+             cc += c.c;
+         for (int i = cc.indexOf(needle, 0); i >= 0; i = cc.indexOf(needle,  i + 1)) {
+             CharPos c0 = all.get(i);
+             LineSegment line = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
+             foundText.add(new CharPos(needle, line));
+             if( index == 1 )
+                 return foundText;
+             else
+                 --index;
+         }
+         return null;
+     }
 
-    public void finalizeSearch()
-    {
-        // we need to sort all characters top to bottom and left to right
-
-        CharPosComparator comparator = new CharPosComparator();
-        Collections.sort(allCharacters, comparator);
-    }
-
-    class CharPosComparator implements Comparator<CharPos> {
-
-        @Override
-        public int compare(CharPos cp1, CharPos cp2) {
-            if (roundForCompare(cp1.y)==roundForCompare(cp2.y)) {
-                if( cp1.x < cp2.x )
-                    return -1;
-                else if( cp1.x > cp2.x )
-                    return 1;
-                else return 0;
-
-            } else if (cp1.y < cp2.y ) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
-        }
-    }
-};
-
-public class FindTexts extends Engine {
-
-    FindTextSpec spec = null;
+     FindTextSpec spec = null;
     
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
-        // TODO: it would be nice if ExtractTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
+        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
         YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
         spec = FindTextSpec.loadFromStream(specFile, FindTextSpec.class);
         if( inputOverride!=null ) {
@@ -361,14 +157,10 @@ public class FindTexts extends Engine {
         if (pdf == null)
             pdf = new FileInputStream(spec.input);
         PdfReader reader = new PdfReader(pdf);
-        PdfReaderContentParser parser = new PdfReaderContentParser(reader);
         PdfStamper stamper = null;
         if( spec.stampedOutput!=null ) {
             stamper = new PdfStamper(reader, new FileOutputStream(spec.stampedOutput));
         }
-
-        ArrayList<MyRenderListener> charsForPages =
-            new ArrayList<MyRenderListener>();
 
         spec.additionalInfo = new PdfAdditionalInfo();
         spec.additionalInfo.numberOfPages = reader.getNumberOfPages();
@@ -376,21 +168,9 @@ public class FindTexts extends Engine {
         spec.additionalInfo.firstPageWidth = r.getWidth();
         spec.additionalInfo.firstPageHeight = r.getHeight();
 
-        /*
-         * Some pages may not require searching because for example
-         * nobody requested any text positions from them. We could
-         * skip those here.
-         */
+        PageText charsForPages[] = new PageText[reader.getNumberOfPages()];
 
-        for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-            MyRenderListener collectCharacters = new MyRenderListener(stamper, i);
-            parser.processContent(i, collectCharacters);
-            collectCharacters.finalizeSearch();
-            charsForPages.add(collectCharacters);
-            spec.additionalInfo.containsControlCodes = spec.additionalInfo.containsControlCodes || collectCharacters.containsControlCodes;
-            spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || collectCharacters.containsGlyphs;
-        }
-
+        // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
             if( match.pages!= null ) {
@@ -401,17 +181,25 @@ public class FindTexts extends Engine {
                     int i = ip;
                     if( i<0 ) {
                         // -1 is last page, -2 is second to the last
-                        i = charsForPages.size() + i + 1;
+                        i = charsForPages.length + i + 1;
                     }
-                    if( i>=1 && i<=charsForPages.size() && match.text!=null && !match.text.equals("")) {
-                        MyRenderListener rl = charsForPages.get(i-1);
-                        rl.find(textNoSpaces, index);
-                        if( rl.foundText!=null ) {
+                    if( i>=1 && i<=charsForPages.length && match.text!=null && !match.text.equals("")) {
+                        if (charsForPages[i-1] == null) {
+                            if (stamper != null)
+                                canvas = stamper.getOverContent(i);
+                            charsForPages[i-1] = new PageText(reader, i, (stamper != null) ? this : null);
+                            spec.additionalInfo.containsControlCodes = spec.additionalInfo.containsControlCodes || charsForPages[i-1].containsControlCodes();
+                            spec.additionalInfo.containsGlyphs = spec.additionalInfo.containsGlyphs || charsForPages[i-1].containsGlyphs();
+                        }
+                        ArrayList<CharPos> found = find(charsForPages[i-1], textNoSpaces, index);
+                        CharPos foundText = ((found == null) || found.isEmpty()) ? null : found.get(found.size() - 1);
+                        if( foundText!=null ) {
                             match.page = i;
                             Rectangle crop = reader.getPageSizeWithRotation(i);
+                            //Rectangle crop = bounds;
                             match.coords = new ArrayList<Double>();
-                            match.coords.add(new Double((rl.foundText.x - crop.getLeft())/crop.getWidth()));
-                            match.coords.add(new Double(1 - (rl.foundText.y - crop.getBottom())/crop.getHeight()));
+                            match.coords.add(new Double((foundText.getX() - crop.getLeft())/crop.getWidth()));
+                            match.coords.add(new Double(1 - (foundText.getY() - crop.getBottom())/crop.getHeight()));
                             /*
                               See note about bbox field in the struct Match.
 
@@ -424,10 +212,10 @@ public class FindTexts extends Engine {
 
                             if( stamper!=null ) {
                                 PdfContentByte canvas = stamper.getOverContent(i);
-                                Rectangle frame = new Rectangle((float)rl.foundText.x-1,
-                                                                (float)rl.foundText.y-1,
-                                                                (float)rl.foundText.x+1,
-                                                                (float)rl.foundText.y+1);
+                                Rectangle frame = new Rectangle((float)foundText.getX()-1,
+                                                                (float)foundText.getY()-1,
+                                                                (float)foundText.getX()+1,
+                                                                (float)foundText.getY()+1);
                                 frame.setBorderColor(new BaseColor(0f, 1f, 0f));
                                 frame.setBorderWidth(2f);
                                 frame.setBorder(15);
@@ -435,8 +223,8 @@ public class FindTexts extends Engine {
                             }
                             break;
                         }
-                        else {
-                            index = index - rl.foundTextCount;
+                        else if (found != null) {
+                            index = index - found.size();
                         }
                     }
                 }
@@ -446,26 +234,27 @@ public class FindTexts extends Engine {
         if( stamper!=null ) {
             stamper.close();
         }
-        reader.close();
-        pdf.close();
+        if ( reader!=null ) {
+            reader.close();
+        }
+        if ( pdf != null ) {
+            pdf.close();
+        }
 
         DumperOptions options = new DumperOptions();
         if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
             // output in yaml mode, useful for testing
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        }
-        else {
+        } else {
             // output in json mode
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
         }
         options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN );
         options.setPrettyFlow(false);
         options.setWidth(Integer.MAX_VALUE);
-        //Yaml yaml = new Yaml(options);
         Representer representer = new MyRepresenter();
         representer.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
         representer.addClassTag(FindTextSpec.class,Tag.MAP);
-
         Yaml yaml = new Yaml(representer, options);
         String json = yaml.dump(spec);
 

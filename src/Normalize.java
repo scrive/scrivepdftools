@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,22 +74,9 @@ public class Normalize extends Engine {
 
             DetectEmptyPage() {
                 ops = new HashSet<String>();
-                ops.add("f");
-                ops.add("F");
-                ops.add("S");
-                ops.add("s");
-                ops.add("f*");
-                ops.add("B");
-                ops.add("B*");
-                ops.add("b");
-                ops.add("b*");
-                ops.add("Tj");
-                ops.add("TJ");
-                ops.add("'");
-                ops.add("\"");
-                ops.add("Do");
-                ops.add("BI");
-                ops.add("sh");
+                final String [] oplist = {"f", "F", "S", "s", "f*", "B", "B*", "b", "b*", "Tj", "TJ", "'", "\"", "Do", "BI", "sh"};
+                for (String o: oplist)
+                    ops.add(o);
             }
 
             public void invoke(PdfContentStreamProcessor processor, PdfLiteral operator, ArrayList<PdfObject> operands)
@@ -137,30 +123,6 @@ public class Normalize extends Engine {
         reader.selectPages(keep);
     }
 
-    private static boolean isEmptyPage(PdfReader reader, PdfDictionary page) throws IOException {
-        PdfObject content = PdfReader.getPdfObject(page.get(PdfName.CONTENTS), page);
-        PdfArray a = null;
-        if (content == null)
-            return true;
-        else if (content.isStream()) {
-            a = new PdfArray();
-            a.add(page.get(PdfName.CONTENTS));
-        } else if (content.isArray()) {
-            a = (PdfArray) content;
-        }
-        for (int i = 0; i < a.size(); ++i) {
-            PdfStream stream = a.getAsStream(i);
-            if ((stream == null) || (stream.length() == 0))
-                continue;
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
-            stream.writeContent(buf);
-            if (buf.size() == 0)
-                continue;
-            return false; // content detected
-        }
-        return true;
-    }
-
     /**
      * This method detects text direction and 'Rotate' flag on each page and
      * applies auto-rotation to output horizontal text. 'Rotate' flag is
@@ -175,7 +137,7 @@ public class Normalize extends Engine {
         final int n = reader.getNumberOfPages();
         for (int i = 1; i <= n; i++) {
             PdfDictionary page = reader.getPageN(i);
-            final int rot = ExtractTexts.detectPageRotation(reader, i);
+            final int rot = -(new PageText(reader, i, null)).detectRotate();
             page.put(PdfName.ROTATE, null);
             if (rot == 0)
                 continue; // no need to rotate
