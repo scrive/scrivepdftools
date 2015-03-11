@@ -32,13 +32,8 @@ classes/%.class : src/%.java
 FONTS=assets/SourceSansPro-Light.ttf \
       assets/NotoSans-Regular.ttf
 
-Manifest.txt :
-	echo "Main-Class: Main" > $@
-	echo "Class-Path: $(subst :, ,$(CLASSPATH))" >> $@
 
-
-scrivepdftools.jar : Manifest.txt \
-                     classes/Main.class \
+scrivepdftools.jar : classes/Main.class \
                      classes/AddVerificationPages.class \
                      classes/FindTexts.class \
                      classes/ExtractTexts.class \
@@ -48,6 +43,8 @@ scrivepdftools.jar : Manifest.txt \
                      assets/sealmarker.pdf \
                      assets/test-client.html \
 	                 $(FONTS)
+	echo "Main-Class: Main" > Manifest.txt
+	echo "Class-Path: $(subst :, ,$(CLASSPATH))" >> Manifest.txt
 	jar cfm $@ Manifest.txt assets/sealmarker.pdf assets/test-client.html $(FONTS) -C classes .
 
 test : test-add-verification-pages \
