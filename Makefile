@@ -57,68 +57,68 @@ test : test-add-verification-pages \
        test-select-and-clip
 
 test-add-verification-pages : scrivepdftools.jar \
-       test/seal-simplest.pdf \
-       test/seal-simplest-verified.pdf \
-       test/seal-filetypes.pdf \
-       test/seal-filetypes-preseal.pdf \
-       test/seal-filetypes-us-letter.pdf \
-       test/seal-many-people.pdf \
-       test/seal-images.pdf \
-       test/seal-images-preseal.pdf \
-       test/seal-fields.pdf \
-       test/seal-fields-preseal.pdf \
-       test/example_spec.pdf
+       test/results/seal-simplest.pdf \
+       test/results/seal-simplest-verified.pdf \
+       test/results/seal-filetypes.pdf \
+       test/results/seal-filetypes-preseal.pdf \
+       test/results/seal-filetypes-us-letter.pdf \
+       test/results/seal-many-people.pdf \
+       test/results/seal-images.pdf \
+       test/results/seal-images-preseal.pdf \
+       test/results/seal-fields.pdf \
+       test/results/seal-fields-preseal.pdf \
+       test/results/example_spec.pdf
 
 
-test/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
+test/results/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/example_spec.pdf : test/example_spec.json scrivepdftools.jar
+test/results/example_spec.pdf : test/example_spec.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/field-positions.pdf : test/field_positions.json scrivepdftools.jar
+test/results/field-positions.pdf : test/field_positions.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
+test/results/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-filetypes.pdf : test/seal-filetypes.json scrivepdftools.jar
+test/results/seal-filetypes.pdf : test/seal-filetypes.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json scrivepdftools.jar
+test/results/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json scrivepdftools.jar
+test/results/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
+test/results/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-images.pdf : test/seal-images.json scrivepdftools.jar
+test/results/seal-images.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
         -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
@@ -133,7 +133,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
+test/results/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
         -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \
         -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g \
@@ -150,13 +150,13 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-fields.pdf : test/seal-fields.json scrivepdftools.jar
+test/results/seal-fields.pdf : test/seal-fields.json scrivepdftools.jar
 	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
+test/results/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	sed -e 's!"preseal": false!"preseal": true!g' \
         -e 's!"test/seal-fields.pdf"!"test/seal-fields-preseal.pdf"!g' \
          $< > $<.ext

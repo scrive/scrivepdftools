@@ -8,6 +8,7 @@
 "numberOfPages": 7
 "rects":
 - "lines":
+  - "received a copy of"
   - "Car Rental Contract at Rental End"
   - "Rental Agreement Number : 820582696"
   - "Contact Details"
@@ -30,7 +31,6 @@
   - "Fuel Type Unleaded 0"
   - "Miles at Start/End 1234/1235"
   - "Miles Driven 1"
-  - "received a copy of"
   "page": 1
   "rect":
   - 0.0

@@ -19,8 +19,6 @@
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -67,11 +65,6 @@ class CharPos implements Serializable
     private float x0, y0, bx, by;  
 //    private Vector origin;
 //    private Vector base; // baseline = glyph direction + length
-
-    /*
-     *  Maximum vertical distance between two glyphs that can be assigned to the same line
-     */
-    public static final float LINE_TOL = 4.0f;
 
     public CharPos(String text, LineSegment base)
     {
@@ -132,50 +125,48 @@ class CharPos implements Serializable
         return Math.abs(bx) < 0.0001;
     }
 
-    // Comparison tool, gives 0 for zero, -1 for negatives and 1 for positives
-    private /*static*/ int cmp(float v) {
-        if (Math.abs(v) < 0.001) // NOTE: adjust tolerance for 0
-            return 0;
-        return (v < 0.0) ? -1 : 1;
-    }
-
     /*
      * Compares text direction of two glyphs (0=same direction)
      */
-    public int cmpDir(CharPos c) {
-        return cmp(x0 * c.getY() - y0 * c.getX());
+    public float cmpDir(CharPos c) {
+        
+        return bx * c.getBaseY() - by * c.getBaseX();
     }
 
     /*
      * Compares vertical position of two glyphs (0=same line)
      */
-    public int cmpLine(CharPos c) {
-        if (isHorizontal()) {
-            final float d = c.getY() - y0; // simple Y2 - Y1 for horizontal text
-//            if ((Math.abs(d) > 0) && (Math.abs(d) < LINE_TOL))
-//                return 0;
-            return cmp(d);
-//          return (Math.abs(d) < LINE_TOL) ? 0 : cmp(d);
-        }
+    public float cmpLine(CharPos c) {
+        if (isHorizontal())
+            return (bx >= 0.0f) ? (y0 - c.getY()) : (c.getY() - y0); // simple Y2 - Y1 for horizontal text
+        else if (isVertical())
+            return (by > 0.0f) ? (c.getX() - x0) : (x0 - c.getX()); // simple X2 - X1 for vertical text
+
         Vector p = new Vector(c.getX() - x0, c.getY() - y0, 0.0f);
         final float l0 = getBase().length();
         Vector pp = getBase().multiply(p.dot(getBase()) / (l0 * l0));
         Vector d = p.subtract(pp);
-        if (Math.abs(d.length()) < LINE_TOL)
-            return 0;
-        return cmp(VectorUtils.crossProduct(getBase(), d));
+        return VectorUtils.crossProduct(getBase(), d);
     }
 
     /*
      * Compares horizontal position of two glyphs
      */
-    public int cmpOrder(CharPos c) {
+    public float cmpOrder(CharPos c) {
         if (isHorizontal())
-            return cmp(x0 - c.getX());
-        final float x = -getBase().dot(new Vector(c.getX() - x0, c.getY() - y0, 0.0f));
-        return cmp(x);
+            return (bx >= 0.0f) ? (c.getX() - x0) : (x0 - c.getX()); // simple X2 - X1 for horizontal text
+        else if (isVertical())
+            return (by > 0.0f) ? (c.getY() - y0) : (y0 - c.getY()); // simple Y2 - Y1 for vertical text
+        
+        return -getBase().dot(new Vector(c.getX() - x0, c.getY() - y0, 0.0f));
     }
 
+    public boolean detectSpace(CharPos prev) {
+        final float d0 = 0.1f * (getWidth() + prev.getWidth());
+        final float dx = getX() - prev.getX2(), dy = getY() - prev.getY2();   
+        return dx * dx + dy * dy > d0 * d0;
+    }
+    
     /*
      * Checks if two characters occupy the same location. Returns cover length % (0-100)
      */
@@ -206,6 +197,18 @@ public class PageText implements Serializable
 {
     private static final long serialVersionUID = -7658415439714179901L;
 
+    /*
+     *  Maximum vertical distance between two glyphs that can be assigned to the same line
+     */
+    public static final float LINE_TOL = 4.0f;
+
+    // Comparison tool, gives 0 for zero, -1 for negatives and 1 for positives
+    private /*static*/ int cmp(float v, float tol) {
+        if (Math.abs(v) < tol) // NOTE: adjust tolerance for 0
+            return 0;
+        return (v < 0.0) ? -1 : 1;
+    }
+    
     /**
      * Plain 2D rectangle
      * @author wizzard
@@ -236,18 +239,6 @@ public class PageText implements Serializable
         }
     }
 
-    private class CharPosComparator implements Comparator<CharPos> {
-
-        @Override
-        public int compare(CharPos cp1, CharPos cp2) {
-            final int dir = cp1.cmpDir(cp2);
-            if(dir != 0)
-                return dir;
-            final int cy = cp1.cmpLine(cp2);
-            return (cy != 0) ? cy : cp1.cmpOrder(cp2);
-        }
-    }
-
     private class PageTextRenderListener implements RenderListener
     {
         PageText pageText;
@@ -265,10 +256,8 @@ public class PageText implements Serializable
         }
         public void renderText(TextRenderInfo renderInfo) {
             for( TextRenderInfo tri: renderInfo.getCharacterRenderInfos() ) {
-                String text = tri.getText();
-                if( !text.equals(" ") && !text.equals("\t") &&
-                    !text.equals("\n")  && !text.equals("\r") &&
-                    !text.equals("\u00A0")) {
+                String text = tri.getText().replaceAll("( |\t|\r|\n|\u00A0)", "");
+                if( !text.isEmpty() ) {
                     pageText.addChar(text, tri.getBaseline());
                 }
             }
@@ -278,14 +267,25 @@ public class PageText implements Serializable
     Rect pageSize = null;
     Rect pageSizeRotated = null;
     int pageRotation = 0;
-    private ArrayList<CharPos> allChars = new ArrayList<CharPos>();
     private boolean hasGlyphs = false;
     private boolean hasControlCodes = false;
+    private TreeMap<Integer, ArrayList<ArrayList<CharPos>>> lines = new TreeMap<Integer, ArrayList<ArrayList<CharPos>>>();
 
     public PageText(PdfReader reader, int iPage) throws IOException {
         PdfReaderContentParser parser = new PdfReaderContentParser(reader);
         parser.processContent(iPage, new PageTextRenderListener(this));
-        Collections.sort(allChars, new CharPosComparator());
+        fixPoorMansBold();
+
+//        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> all: lines.entrySet()) {
+//            System.out.println("Text (rot = " + (double)(all.getKey() / 1000.0) + "):");
+//            for (ArrayList<CharPos> line: all.getValue()) {
+//                String txt = "";
+//                for (CharPos cp: line)
+//                    txt += cp.c;
+//                System.out.println("\t(" + line.get(0).getX() + ", " + line.get(0).getY() + "): " + txt);
+//            }
+//        }
+
         // geometry
         pageRotation = reader.getPageRotation(iPage);
         Rectangle r = reader.getPageSize(iPage);
@@ -297,6 +297,36 @@ public class PageText implements Serializable
     public boolean containsGlyphs() { return hasGlyphs; }
     public boolean containsControlCodes() { return hasControlCodes; }
 
+    private boolean addChar(CharPos cp) {
+        // select direction
+        final int dir = (int)(1000.0 * Math.atan2(cp.getBaseY(), cp.getBaseX()) + 0.5);
+        ArrayList<ArrayList<CharPos>> lines = this.lines.get(dir);
+        if (lines == null) {
+            lines = new ArrayList<ArrayList<CharPos>>();
+            this.lines.put(dir, lines);
+        }
+
+        // select line
+        ArrayList<CharPos> best = null;
+        int i = 0, p = 1;
+        for (; (i < lines.size()) && (p > 0); ++i) {
+            p = cmp(lines.get(i).get(0).cmpLine(cp), LINE_TOL);
+        }
+        if (p == 0) {
+            best = lines.get(i - 1);
+        } else {
+            best = new ArrayList<CharPos>();
+            lines.add((p < 0) ? i - 1 : i, best);
+        }
+        // select char
+        p = 1;
+        for (i = 0; (i < best.size()) && (p > 0); ++i) {
+            p = cmp(best.get(i).cmpOrder(cp), 0.0f);
+        }
+        best.add((p < 0) ? i - 1 : i, cp);
+
+        return true;
+    }
     /**
      * IMPORTANT: filters skewed text (non-vertical and non-horizontal)
      */
@@ -308,65 +338,47 @@ public class PageText implements Serializable
         // 0xE0000 and 0xF0000 are special purpose planes, no
         // useful glyphs in that range.
         hasControlCodes = hasControlCodes || codePoint<32 || codePoint>=0x20000;
-        
-        CharPos cp = new CharPos(c, base);
-        if( cp.isHorizontal() || cp.isVertical()) {
-            allChars.add(cp);
-        }
 
+        CharPos cp = new CharPos(c, base);
+        if( cp.isHorizontal() || cp.isVertical() )
+            addChar(cp);
+    }
+
+    // detect duplicated glyphs (poor man's bold)
+    private void fixPoorMansBold() {        
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> all: lines.entrySet())
+            for (ArrayList<CharPos> line: all.getValue()) {
+                CharPos prev = null;
+                for (int i = 0; i < line.size(); ) {
+                    if ((prev != null) && (prev.c.equals(line.get(i).c)) && (0.5 < line.get(i).covers(prev))) {
+                        line.remove(i);                   
+                    } else {
+                        prev = line.get(i);
+                        ++i;
+                    }
+                }
+            }
     }
 
     public Vector getTextDir()
     {
-        class Dir implements Comparable<Dir> {
-            private static final float SCALE = 1000.0f;
-            private int x, y;
-            Dir(Vector v) {
-                v = v.normalize();
-                x = (int)(v.get(Vector.I1) * SCALE + 0.5);
-                y = (int)(v.get(Vector.I2) * SCALE + 0.5);
-            }
-            public int compareTo(Dir o) {
-                return (y == o.y) ? x - o.x : y - o.y;
-            }
-            Vector toVector() {
-                return new Vector(x / SCALE, y / SCALE, 0.0f);
+        // select dominating direction
+        int best = 0, c = 0, c2 = 0;
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> l: lines.entrySet()) {
+            int count = 0;
+            for (ArrayList<CharPos> line: l.getValue())
+                count += line.size();
+            if (count > c) {
+                best = l.getKey();
+                c2 = c;
+                c = count;
             }
         }
-        int kh = 0, kv = 0, ks = 0;
-        Map<Dir, Integer> map = new TreeMap<Dir, Integer>();
-        for( CharPos i: allChars ) {
-            if (i.isHorizontal() && (i.getBaseX() > 0.0f))
-                ++kh; // horizontal text
-            else if (i.isVertical() && (i.getBaseY() > 0.0f))
-                ++kv; // vertical text
-            else {
-                final Dir d = new Dir(i.getBase());
-                final Integer c = map.get(d), c1 = 1 + ((c == null) ? 0 : c);
-                map.put(d, c1);
-                if (c1 > ks)
-                    ks = c1;
-            }
-        }
-        if ((kh > kv) && (kh > ks)) // horizontal text dominates
-            return new Vector(1, 0, 0);
-       if ((kv > kh) && (kv > ks)) // vertical text dominates
-            return new Vector(0, 1, 0);
-
-       // Select dominating skewed text direction
-        Dir best = null;
-        int k = -1, k1 = -1;
-        for( Dir d: map.keySet() ) {
-            final int c = map.get(d);
-            if ((best == null) || (c > k)) {
-                k1 = k; // keep second to most popular direction
-                best = d; k = c;
-            }
-        }
-        if ((best == null ) || (k == k1)) // check for two or more directions with same number of glyphs
+        if (c == c2) // two or more directions with same number of glyphs
             return null;
-        else
-            return best.toVector();
+
+        double a = best / 1000.0;
+        return new Vector((float)Math.cos(a), (float)Math.sin(a), 0);
     }
 
     /**
@@ -382,7 +394,7 @@ public class PageText implements Serializable
         return (int)Math.round(-Math.atan2(dir.get(Vector.I2), dir.get(Vector.I1)) * 180 / Math.PI);
     }
 
-    public ArrayList<CharPos> getChars() {
-        return allChars;
+    public TreeMap<Integer, ArrayList<ArrayList<CharPos>>> getChars() {
+        return lines;
     }
 }

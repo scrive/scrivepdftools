@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -103,40 +104,31 @@ public class ExtractTexts extends TextEngine {
         }
         ArrayList<String> foundText = new ArrayList<String>();
 
-        CharPos last = null;
-        for (CharPos cp: text.getChars()) {
-            // check if the middle of baseline
-            final float xm = cp.getX() + 0.5f * cp.getBaseX();
-            final float ym = cp.getY() + 0.5f * cp.getBaseY();
-            if((xm >= l) && (xm <= r) && (((ym >= b) && (ym <= t)) || ((ym >= t) && (ym <= b)))
-                && cp.c.codePointAt(0)>=32 ) {
-
-                String txt = cp.c;
-
-                if ((last != null) && (last.c.equals(cp.c))) { // detect duplicated glyphs (poor man's bold)
-                    if (0.5 < cp.covers(last))
-                        continue;
-                }
-                if( last==null || (0 != last.cmpDir(cp)) || (0 != last.cmpLine(cp))) {
-                    foundText.add("");
-                }
-                else {
-                    final float d0 = 0.1f * (cp.getWidth() + last.getWidth());
-                    final float dx = cp.getX() - last.getX2(), dy = cp.getY() - last.getY2(), dist2 = dx * dx + dy * dy;   
-                    if (dist2 > d0 * d0) { // need to put a space in here
-                        txt = " " + txt;
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
+            for (ArrayList<CharPos> line: lines.getValue()) {
+                String txt = "";
+                CharPos last = null;
+                for (CharPos cp: line) {
+                    // check if the middle of baseline
+                    final float xm = cp.getX() + 0.5f * cp.getBaseX();
+                    final float ym = cp.getY() + 0.5f * cp.getBaseY();
+                    if((xm >= l) && (xm <= r) && (((ym >= b) && (ym <= t)) || ((ym >= t) && (ym <= b)))
+                            && cp.c.codePointAt(0)>=32 ) {
+                        if ((last != null) && cp.detectSpace(last)) { // need to put a space in here
+                            txt += " ";
+                        }                        
+                        txt += cp.c;
+                        last = cp;
                     }
                 }
-                int idx = foundText.size()-1;
-                foundText.set(idx, foundText.get(idx) + txt);
-                last = cp;
+                foundText.add(txt);
             }
-        }
         return foundText;
     }
     
     ExtractTextSpec spec = null;
     
+    @Override
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
         // TODO: it would be nice if ExtractTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
         YamlSpec.setTypeDescriptors(ExtractTextSpec.class, ExtractTextSpec.getTypeDescriptors());

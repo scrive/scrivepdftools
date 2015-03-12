@@ -21,6 +21,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -97,42 +100,54 @@ public class FindTexts extends TextEngine
 {
     private PdfContentByte canvas = null;
     
-     public ArrayList<CharPos> find(PageText text, String needle, int index) {
-         String cc = "";
-         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
-         ArrayList<CharPos> all = text.getChars();
-         for( CharPos c: all)
-             cc += c.c;
-         for (int i = cc.indexOf(needle, 0); i >= 0; i = cc.indexOf(needle,  i + 1)) {
-             CharPos c0 = all.get(i);
-             LineSegment line = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
-             foundText.add(new CharPos(needle, line));
-             if( index == 1 )
-                 return foundText;
-             else
-                 --index;
-         }
-         // mark all glyphs
-         if (stamper != null) {
-             for( CharPos c: all) {
-                 final float x = c.getX(), y = c.getY();
-                 Rectangle frame = new Rectangle(x - 1, y - 1, x + 1, y + 1);
-                 frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                 frame.setBorderWidth(1f);
-                 frame.setBorder(15);
-                 canvas.rectangle(frame);
-                 frame = new Rectangle(x, y, c.getX2(), c.getY2());
-                 frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                 frame.setBorderWidth(0.1f);
-                 frame.setBorder(15);
-                 canvas.rectangle(frame);
-             }
-         }
-         return null;
+    public ArrayList<CharPos> find(PageText text, String needle, int index) {
+        if (needle.isEmpty())
+            return null;
+        ArrayList<CharPos> foundText = new ArrayList<CharPos>();
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
+            for (ArrayList<CharPos> line: lines.getValue()) {
+                String txt = "";
+                for (CharPos cp: line)
+                    txt += cp.c;
+                for (int i = txt.indexOf(needle, 0); i >= 0; i = txt.indexOf(needle,  i + 1)) {
+                    CharPos c0 = line.get(i);
+                    LineSegment base = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
+                    foundText.add(new CharPos(needle, base));
+                    if( index == 1 )
+                        return foundText;
+                    else
+                        --index;
+                }
+            }
+         return foundText;
      }
 
-     FindTextSpec spec = null;
+    public void stampText(PageText text) {
+        // mark all glyphs
+        if (canvas == null)
+            return;
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet()) {
+            for (ArrayList<CharPos> line: lines.getValue()) {
+                for (CharPos c: line) {
+                    final float x = c.getX(), y = c.getY();
+                    Rectangle frame = new Rectangle(x - 1, y - 1, x + 1, y + 1);
+                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                    frame.setBorderWidth(1f);
+                    frame.setBorder(15);
+                    canvas.rectangle(frame);
+                    frame = new Rectangle(x, y, c.getX2(), c.getY2());
+                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
+                    frame.setBorderWidth(0.1f);
+                    frame.setBorder(15);
+                    canvas.rectangle(frame);
+                }
+            }
+        }
+    }
+
+    FindTextSpec spec = null;
     
+    @Override
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
         // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
         YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
@@ -158,6 +173,22 @@ public class FindTexts extends TextEngine
     public void execute(OutputStream out) {
         spec.additionalInfo = text.info;
 
+        // mark all glyphs in all searched pages
+        if (stamper != null) {
+            Set<Integer> stamped = new HashSet<Integer>();
+            for(Match match : spec.matches )
+                for (Integer ip : match.pages) {
+                    final int i = (ip < 0) ? text.info.numberOfPages + ip + 1 : ip; // -1 is last page, -2 is second to the last 
+                    if (!stamped.contains(i)) {
+                        stamped.add(i);
+                        if (text.text.length >= i) {
+                            canvas = stamper.getOverContent(i);
+                            stampText(text.text[i - 1]);
+                        }
+                    }
+                }
+        }
+        
         // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
@@ -171,12 +202,9 @@ public class FindTexts extends TextEngine
                         // -1 is last page, -2 is second to the last
                         i = text.info.numberOfPages + i + 1;
                     }
-                    if( i>=1 && i<=text.info.numberOfPages && match.text!=null && !match.text.equals("")) {
-                        if (stamper != null) {
-                            canvas = stamper.getOverContent(i);
-                        }
+                    if( i>=1 && i<=text.info.numberOfPages && match.text!=null && !textNoSpaces.isEmpty() && (index>0)) {
                         ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
-                        CharPos foundText = ((found == null) || found.isEmpty()) ? null : found.get(found.size() - 1);
+                        CharPos foundText = ((found != null) &&  (found.size() >= index)) ? found.get(index - 1) : null;
                         if( foundText!=null ) {
                             match.page = i;
                             PageText.Rect crop = text.text[i-1].pageSizeRotated;
@@ -206,7 +234,7 @@ public class FindTexts extends TextEngine
                             }
                             break;
                         }
-                        else if (found != null) {
+                        else {
                             index = index - found.size();
                         }
                     }

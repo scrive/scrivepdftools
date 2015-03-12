@@ -50,6 +50,7 @@ abstract class TextEngine extends Engine {
      */
     public abstract void execute(OutputStream out) throws IOException, DocumentException;
 
+    @Override
     public void execute(InputStream pdf, OutputStream out) throws IOException, DocumentException
     {
         YamlSpec spec = getSpec();
