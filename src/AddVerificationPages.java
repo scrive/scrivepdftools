@@ -230,6 +230,7 @@ class PdfPTableDrawFrameAroundTable implements PdfPTableEvent
 
 class Base64DecodeException extends IOException
 {
+    private static final long serialVersionUID = -4863901814975446459L;
 }
 
 /*
@@ -403,6 +404,7 @@ public class AddVerificationPages extends Engine {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Image image = Image.getInstance(filepath);
         Document document = new Document();
+        PdfWriter writer = PdfWriter.getInstance(document, os);
 
         document.open();
         document.newPage();
@@ -453,6 +455,9 @@ public class AddVerificationPages extends Engine {
 
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
+
+        PdfReader sealMarker = getSealMarker();
+        PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
         int count = reader.getNumberOfPages();
         for( int i=1; i<=count; i++ ) {
@@ -950,6 +955,8 @@ public class AddVerificationPages extends Engine {
         throws IOException, DocumentException, Base64DecodeException
     {
         Document document = new Document();
+        PdfWriter writer = PdfWriter.getInstance(document, os);
+
         document.open();
 
         PdfPTableDrawFrameAroundTable drawFrame = new PdfPTableDrawFrameAroundTable();
