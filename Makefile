@@ -30,7 +30,8 @@ classes/%.class : src/%.java
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
 FONTS=assets/SourceSansPro-Light.ttf \
-      assets/NotoSans-Regular.ttf
+      assets/NotoSans-Regular.ttf    \
+      assets/NotoSansThai-Regular.ttf
 
 
 scrivepdftools.jar : classes/Main.class \
