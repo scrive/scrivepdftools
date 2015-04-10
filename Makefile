@@ -65,7 +65,8 @@ test-add-verification-pages : scrivepdftools.jar \
        test/results/seal-images-preseal.pdf \
        test/results/seal-fields.pdf \
        test/results/seal-fields-preseal.pdf \
-       test/results/example_spec.pdf
+       test/results/example_spec.pdf \
+       test/results/missing-xmpcore.pdf
 
 
 test/results/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
@@ -127,6 +128,12 @@ test/results/seal-images.pdf : test/seal-images.json scrivepdftools.jar
         -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g \
           $< > $<.ext
 	java -jar scrivepdftools.jar add-verification-pages $<.ext
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/results/missing-xmpcore.pdf : test/missing-xmpcore.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
