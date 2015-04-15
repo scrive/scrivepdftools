@@ -1,0 +1,6 @@
+{ "input": "test/glas-skadeanmalan-ryds-bilglas.pdf"
+, "yamlOutput": true
+, "stampedOutput": "test/results/glas-skadeanmalan-ryds-bilglas.stamped.pdf"
+, "matches": [ { "text": "Denna", "index": 1, "pages": [1] }
+             ]
+}

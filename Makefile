@@ -166,7 +166,8 @@ test-find-texts : scrivepdftools.jar \
                   test/results/test-find-texts.find-output.yaml \
                   test/results/test-find-texts-test-document.find-output.yaml \
                   test/results/test-find-texts-out-of-order.find-output.yaml \
-                  test/results/test-find-texts-json-encoding.find-output.yaml
+                  test/results/test-find-texts-json-encoding.find-output.yaml \
+                  test/results/test-find-texts-crop-box.find-output.yaml
 
 test/results/%.find-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g' \
@@ -215,6 +216,12 @@ test/results/test-find-texts-sales-contract.find-output.yaml :\
     test/find-text-sales-contract.json	   			 \
     test/sales_contract.pdf							 \
     test/test-find-texts-sales-contract.expect.yaml	 \
+    scrivepdftools.jar
+
+test/results/test-find-texts-crop-box.find-output.yaml:\
+    test/find-texts-crop-box.json               \
+    test/glas-skadeanmalan-ryds-bilglas.pdf    \
+    test/test-find-texts-crop-box.expect.yaml  \
     scrivepdftools.jar
 
 test-extract-texts : scrivepdftools.jar \

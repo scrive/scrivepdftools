@@ -1,0 +1,19 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 842.0
+  "firstPageWidth": 595.0
+  "numberOfPages": 1
+"input": "test/glas-skadeanmalan-ryds-bilglas.pdf"
+"matches":
+- "coords":
+  - 0.09696286171674728
+  - 0.960386335849762
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "Denna"
+"stampedOutput": "test/results/test-find-texts-crop-box.find-output.pdf"
+"yamlOutput": true
+
