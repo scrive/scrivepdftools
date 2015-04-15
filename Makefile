@@ -4,7 +4,7 @@
 #
 #
 
-CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar
+CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar:xmpcore.jar
 
 ifeq ($(OS),Windows_NT)
 else
@@ -30,7 +30,8 @@ classes/%.class : src/%.java
 	javac -source 1.5 -target 1.5 -cp $(CLASSPATH) $< -sourcepath src -d classes
 
 FONTS=assets/SourceSansPro-Light.ttf \
-      assets/NotoSans-Regular.ttf
+      assets/NotoSans-Regular.ttf    \
+      assets/NotoSansThai-Regular.ttf
 
 
 scrivepdftools.jar : classes/Main.class \

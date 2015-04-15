@@ -1260,7 +1260,7 @@ public class AddVerificationPages extends Engine {
                 // it should be
 
                 BaseFont baseFont;
-                baseFonts = new BaseFont[2];
+                baseFonts = new BaseFont[3];
 
                 baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
                                                 BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -1268,6 +1268,9 @@ public class AddVerificationPages extends Engine {
                 baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/NotoSans-Regular.ttf").toString(),
                                                 BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
                 baseFonts[1] = baseFont;
+                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/NotoSansThai-Regular.ttf").toString(),
+                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                baseFonts[2] = baseFont;
             }
         }
     }
