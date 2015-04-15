@@ -288,9 +288,10 @@ public class PageText implements Serializable
 
         // geometry
         pageRotation = reader.getPageRotation(iPage);
-        Rectangle r = reader.getPageSize(iPage);
+        Rectangle r = reader.getCropBox(iPage);
         pageSize = new Rect(r.getLeft(), r.getBottom(), r.getWidth(), r.getHeight());
-        r = reader.getPageSizeWithRotation(iPage);
+        for ( int rot = pageRotation; rot > 0; rot -= 90)
+            r = r.rotate();
         pageSizeRotated = new Rect(r.getLeft(), r.getBottom(), r.getWidth(), r.getHeight());
     }
 
