@@ -41,6 +41,7 @@ scrivepdftools.jar : classes/Main.class \
                      classes/Normalize.class \
                      classes/SelectAndClip.class \
                      classes/WebServer.class \
+                     classes/PageText.class \
                      assets/sealmarker.pdf \
                      assets/test-client.html \
 	                 $(FONTS)
