@@ -42,6 +42,12 @@ scrivepdftools.jar : classes/Main.class \
                      classes/SelectAndClip.class \
                      classes/WebServer.class \
                      classes/PageText.class \
+                     classes/Engine.class \
+                     classes/TextEngine.class \
+                     classes/PdfAdditionalInfo.class \
+                     classes/TextDump.class \
+                     classes/YamlSpec.class \
+                     classes/MyRepresenter.class \
                      assets/sealmarker.pdf \
                      assets/test-client.html \
 	                 $(FONTS)
