@@ -242,7 +242,8 @@ test-extract-texts : scrivepdftools.jar \
                      test/results/test-extract-cat-only.extract-output.yaml                \
                      test/results/test-extract-rotate-90.extract-output.yaml               \
                      test/results/test-extract-poor-mans-bold.extract-output.yaml          \
-                     test/results/test-bB02_103_cerere.extract-output.yaml
+                     test/results/test-bB02_103_cerere.extract-output.yaml                 \
+                     test/results/test-glas.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -338,6 +339,12 @@ test/results/test-bB02_103_cerere.extract-output.yaml :         \
     test/extract-texts-whole-first-page.json                    \
     test/bB02_103_cerere.pdf                                    \
     test/test-extract-bB02_103_cerere.expect.yaml               \
+    scrivepdftools.jar
+
+test/results/test-glas.extract-output.yaml :         \
+    test/extract-texts-skadeanmalan.json                    \
+    test/glas-skadeanmalan-ryds-bilglas.pdf                                    \
+    test/test-extract-texts-skadeanmalan.expect.yaml               \
     scrivepdftools.jar
 
 test-normalize : scrivepdftools.jar \

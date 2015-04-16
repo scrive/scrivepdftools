@@ -1,0 +1,5 @@
+{ "input": "test/glas-skadeanmalan-ryds-bilglas.pdf"
+, "yamlOutput": true
+, "rects": [ { "rect": [0.369035,0.0554307,0.51961825,0.085393247], "page": 1 }
+           ]
+}
