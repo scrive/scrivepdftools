@@ -133,7 +133,7 @@ ifdef OPEN
 endif
 
 test/results/missing-xmpcore.pdf : test/missing-xmpcore.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+	java -Xmx512M -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
