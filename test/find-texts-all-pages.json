@@ -1,0 +1,10 @@
+{ "input": "test/text-out-of-order.pdf"
+, "yamlOutput": true
+, "stampedOutput": "test/results/texts-out-of-order-stamped.pdf"
+, "matches": [ { "text": "1 av 1", "index": 3 },
+               { "text": "1 av 1", "index": 4 },
+               { "text": "Sid 1 (2)", "index": 1 },
+               { "text": "Sid 1 (2)", "index": 2 },
+               { "text": "Sid 1 (2)", "index": 3 }
+             ]
+}

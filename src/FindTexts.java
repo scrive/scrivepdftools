@@ -98,8 +98,6 @@ class FindTextSpec extends YamlSpec
 
 public class FindTexts extends TextEngine
 {
-    private PdfContentByte canvas = null;
-    
     public ArrayList<CharPos> find(PageText text, String needle, int index) {
         if (needle.isEmpty())
             return null;
@@ -122,11 +120,13 @@ public class FindTexts extends TextEngine
          return foundText;
      }
 
-    public void stampText(PageText text) {
-        // mark all glyphs
-        if (canvas == null)
+    // mark all glyphs
+    public void stampText(Set<Integer> stamped, int iPage) {
+        if ((stamper == null) || (text.text.length < iPage) || stamped.contains(iPage))
             return;
-        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet()) {
+        stamped.add(iPage);
+        PdfContentByte canvas = stamper.getOverContent(iPage);
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.text[iPage - 1].getChars().entrySet()) {
             for (ArrayList<CharPos> line: lines.getValue()) {
                 for (CharPos c: line) {
                     final float x = c.getX(), y = c.getY();
@@ -169,79 +169,75 @@ public class FindTexts extends TextEngine
         return spec.stampedOutput;
     }
 
+    private void onTextFound(Match match, CharPos foundText)
+    {
+        PageText.Rect crop = text.text[match.page - 1].pageSizeRotated;
+        match.coords = new ArrayList<Double>();
+        match.coords.add(new Double((foundText.getX() - crop.getLeft()) / crop.getWidth()));
+        match.coords.add(new Double(1 - (foundText.getY() - crop.getBottom()) / crop.getHeight()));
+
+        /* See note about bbox field in the struct Match.
+        match.bbox = new ArrayList<Double>();
+        match.bbox.add(new Double((rl.foundText.bx - crop.getLeft())/crop.getWidth()));
+        match.bbox.add(new Double(1 - (rl.foundText.by - crop.getBottom())/crop.getHeight()));
+        match.bbox.add(new Double((rl.foundText.ex - crop.getLeft())/crop.getWidth()));
+        match.bbox.add(new Double(1 - (rl.foundText.ey - crop.getBottom())/crop.getHeight()));
+        */
+        if( stamper!=null ) {
+            Rectangle frame = new Rectangle((float)foundText.getX()-1,
+                                            (float)foundText.getY()-1,
+                                            (float)foundText.getX()+1,
+                                            (float)foundText.getY()+1);
+            frame.setBorderColor(new BaseColor(0f, 1f, 0f));
+            frame.setBorderWidth(2f);
+            frame.setBorder(15);
+            stamper.getOverContent(match.page).rectangle(frame);
+        }
+    }
+
     @Override
     public void execute(OutputStream out) {
         spec.additionalInfo = text.info;
-
+        final int pageCount = text.info.numberOfPages;
+        ArrayList<Integer> pages0 = new ArrayList<Integer>(pageCount);
+        for ( int i = 0; i < pageCount; ++i )
+            pages0.add(i + 1);
+        
         // mark all glyphs in all searched pages
         if (stamper != null) {
             Set<Integer> stamped = new HashSet<Integer>();
-            for(Match match : spec.matches )
-                for (Integer ip : match.pages) {
-                    final int i = (ip < 0) ? text.info.numberOfPages + ip + 1 : ip; // -1 is last page, -2 is second to the last 
-                    if (!stamped.contains(i)) {
-                        stamped.add(i);
-                        if (text.text.length >= i) {
-                            canvas = stamper.getOverContent(i);
-                            stampText(text.text[i - 1]);
-                        }
-                    }
-                }
+            for(Match match : spec.matches ) {
+                ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0; 
+                for (Integer ip : pages)
+                    stampText(stamped, (ip < 0) ? pageCount + ip + 1 : ip); // -1 is last page, -2 is second to the last
+            }
         }
         
         // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
-            if( match.pages!= null ) {
-                String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
-                    replace("\r","").replace("\u00A0","");
+            String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
+                replace("\r","").replace("\u00A0","");
 
-                for (Integer ip : match.pages) {
-                    int i = ip;
-                    if( i<0 ) {
-                        // -1 is last page, -2 is second to the last
-                        i = text.info.numberOfPages + i + 1;
-                    }
-                    if( i>=1 && i<=text.info.numberOfPages && match.text!=null && !textNoSpaces.isEmpty() && (index>0)) {
-                        ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
-                        CharPos foundText = ((found != null) &&  (found.size() >= index)) ? found.get(index - 1) : null;
-                        if( foundText!=null ) {
-                            match.page = i;
-                            PageText.Rect crop = text.text[i-1].pageSizeRotated;
-                            //Rectangle crop = bounds;
-                            match.coords = new ArrayList<Double>();
-                            match.coords.add(new Double((foundText.getX() - crop.getLeft())/crop.getWidth()));
-                            match.coords.add(new Double(1 - (foundText.getY() - crop.getBottom())/crop.getHeight()));
-                            /*
-                              See note about bbox field in the struct Match.
-
-                            match.bbox = new ArrayList<Double>();
-                            match.bbox.add(new Double((rl.foundText.bx - crop.getLeft())/crop.getWidth()));
-                            match.bbox.add(new Double(1 - (rl.foundText.by - crop.getBottom())/crop.getHeight()));
-                            match.bbox.add(new Double((rl.foundText.ex - crop.getLeft())/crop.getWidth()));
-                            match.bbox.add(new Double(1 - (rl.foundText.ey - crop.getBottom())/crop.getHeight()));
-                            */
-
-                            if( canvas!=null ) {
-                                Rectangle frame = new Rectangle((float)foundText.getX()-1,
-                                                                (float)foundText.getY()-1,
-                                                                (float)foundText.getX()+1,
-                                                                (float)foundText.getY()+1);
-                                frame.setBorderColor(new BaseColor(0f, 1f, 0f));
-                                frame.setBorderWidth(2f);
-                                frame.setBorder(15);
-                                canvas.rectangle(frame);
-                            }
-                            break;
-                        }
-                        else {
-                            index = index - found.size();
-                        }
-                    }
+            ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0; 
+            for (Integer ip : pages) {
+                final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last 
+                if( i>=1 && i<=pageCount && match.text!=null && !textNoSpaces.isEmpty() && (index>0)) {
+                    ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
+                    if (index <= found.size()) {
+                        match.page = i;
+                        onTextFound(match, found.get(index - 1));
+                        break;
+                    } else if (found != null)
+                        index = index - found.size();
                 }
             }
         }
+        printYaml(out);
+    }
 
+    private void printYaml(OutputStream out)
+    {
         DumperOptions options = new DumperOptions();
         if( spec.yamlOutput!=null && spec.yamlOutput.equals(true)) {
             // output in yaml mode, useful for testing

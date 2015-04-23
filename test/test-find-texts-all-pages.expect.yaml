@@ -1,0 +1,33 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 841.89
+  "firstPageWidth": 595.276
+  "numberOfPages": 5
+"input": "test/text-out-of-order.pdf"
+"matches":
+- "coords":
+  - 0.8901417255401611
+  - 0.9722291231155396
+  "index": 3
+  "page": 3
+  "text": "1 av 1"
+- "index": 4
+  "text": "1 av 1"
+- "coords":
+  - 0.9082292914390564
+  - 0.9732867479324341
+  "index": 1
+  "page": 4
+  "text": "Sid 1 (2)"
+- "coords":
+  - 0.9082292914390564
+  - 0.9732867479324341
+  "index": 2
+  "page": 5
+  "text": "Sid 1 (2)"
+- "index": 3
+  "text": "Sid 1 (2)"
+"stampedOutput": "test/results/test-find-texts-all-pages.find-output.pdf"
+"yamlOutput": true
+
