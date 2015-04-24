@@ -146,10 +146,10 @@ public class FindTexts extends TextEngine
     }
 
     FindTextSpec spec = null;
-    
+
     @Override
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
-        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
+        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/
         YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
         spec = FindTextSpec.loadFromStream(specFile, FindTextSpec.class);
         if( inputOverride!=null ) {
@@ -157,7 +157,7 @@ public class FindTexts extends TextEngine
         }
         if( outputOverride!=null ) {
             spec.stampedOutput = outputOverride;
-        }       
+        }
     }
 
     @Override
@@ -202,26 +202,26 @@ public class FindTexts extends TextEngine
         ArrayList<Integer> pages0 = new ArrayList<Integer>(pageCount);
         for ( int i = 0; i < pageCount; ++i )
             pages0.add(i + 1);
-        
+
         // mark all glyphs in all searched pages
         if (stamper != null) {
             Set<Integer> stamped = new HashSet<Integer>();
             for(Match match : spec.matches ) {
-                ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0; 
+                ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0;
                 for (Integer ip : pages)
                     stampText(stamped, (ip < 0) ? pageCount + ip + 1 : ip); // -1 is last page, -2 is second to the last
             }
         }
-        
+
         // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
             String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
                 replace("\r","").replace("\u00A0","");
 
-            ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0; 
+            ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0;
             for (Integer ip : pages) {
-                final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last 
+                final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last
                 if( i>=1 && i<=pageCount && match.text!=null && !textNoSpaces.isEmpty() && (index>0)) {
                     ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
                     if (index <= found.size()) {
