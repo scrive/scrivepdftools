@@ -28,6 +28,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import com.itextpdf.awt.geom.Rectangle2D;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
@@ -106,22 +107,29 @@ public class ExtractTexts extends TextEngine {
 
         for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
             for (ArrayList<CharPos> line: lines.getValue()) {
-                String txt = "";
-                CharPos last = null;
-                for (CharPos cp: line) {
-                    // check if the middle of baseline
-                    final float xm = cp.getX() + 0.5f * cp.getBaseX();
-                    final float ym = cp.getY() + 0.5f * cp.getBaseY();
-                    if((xm >= l) && (xm <= r) && (((ym >= b) && (ym <= t)) || ((ym >= t) && (ym <= b)))
-                            && cp.c.codePointAt(0)>=32 ) {
-                        if ((last != null) && cp.detectSpace(last)) { // need to put a space in here
-                            txt += " ";
-                        }                        
-                        txt += cp.c;
-                        last = cp;
-                    }
+                final boolean horizontal = line.get(0).isHorizontal(); // IMPORTANT: assume !horizontal => vertical, since only H/V text is allowed
+                Rectangle2D b1 = line.get(0).getBounds();
+                final float req = 0.2f * (float)b1.getHeight();
+                if (horizontal) {
+                    if ((b1.getMinY() + req > t) || (b1.getMaxY() - req < b))
+                        continue;
+                } else {
+                    if ((b1.getMinX() + req > r) || (b1.getMaxX() - req < l))
+                        continue;
                 }
-                foundText.add(txt);
+                String txt = "";
+                for (CharPos cp: line) {
+                    if (horizontal) {
+                        if ((cp.getBounds().getMinX() + req > r) || (cp.getBounds().getMaxX() - req < l))
+                            continue;
+                    } else {
+                        if ((cp.getBounds().getMinY() + req > t) || (cp.getBounds().getMaxY() - req < b))
+                            continue;
+                    }
+                    txt += cp.c + " ";
+                }
+                if (!txt.isEmpty())
+                    foundText.add(txt.substring(0,  txt.length() - 1));
             }
         return foundText;
     }
@@ -224,7 +232,7 @@ public class ExtractTexts extends TextEngine {
                     PdfContentByte canvas = stamper.getOverContent(i);
                     frame.setBorderColor(colorFromArrayListFloat(rect.color));
                     frame.setBorderWidth(0.3f);
-                    frame.setBorder(15);
+                    frame.setBorder(Rectangle.BOX);
                     canvas.rectangle(frame);
                 }
             }
@@ -291,16 +299,16 @@ public class ExtractTexts extends TextEngine {
 
                 rect.lines = new ArrayList<String>();
                 for( String line : find(rl,l,b,r,t) ) {
-                    line = line.replaceAll("[ \t\n\u000B\f\r\u00A0\uFEFF\u200B]+"," ");
+                    line = line.replaceAll(PageText.WHITE_SPACE + "+"," ");
                     if( !line.equals("")) {
                         int beginIndex = 0;
                         int endIndex = line.length();
                         char c = line.charAt(beginIndex);
-                        if( " \t\n\u000B\f\r\u00A0\uFEFF\u200B".indexOf(c)>=0 ) {
+                        if( PageText.WHITE_SPACE.indexOf(c)>=0 ) {
                             beginIndex = 1;
                         }
                         c = line.charAt(endIndex-1);
-                        if( " \t\n\u000B\f\r\u00A0\uFEFF\u200B".indexOf(c)>=0 ) {
+                        if( PageText.WHITE_SPACE.indexOf(c)>=0 ) {
                             endIndex = endIndex - 1;
                         }
                         if( beginIndex < endIndex ) {

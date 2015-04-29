@@ -31,6 +31,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import com.itextpdf.awt.geom.Rectangle2D;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
@@ -98,27 +99,44 @@ class FindTextSpec extends YamlSpec
 
 public class FindTexts extends TextEngine
 {
-    public ArrayList<CharPos> find(PageText text, String needle, int index) {
-        if (needle.isEmpty())
-            return null;
+    public ArrayList<CharPos> find(PageText text, String[] needle, int index) {
         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
+        if ((needle == null) || (needle.length < 1))
+            return foundText;
         for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
             for (ArrayList<CharPos> line: lines.getValue()) {
-                String txt = "";
-                for (CharPos cp: line)
-                    txt += cp.c;
-                for (int i = txt.indexOf(needle, 0); i >= 0; i = txt.indexOf(needle,  i + 1)) {
-                    CharPos c0 = line.get(i);
-                    LineSegment base = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
-                    foundText.add(new CharPos(needle, base));
-                    if( index == 1 )
-                        return foundText;
-                    else
-                        --index;
+                for (int i1 = line.size() - needle.length + 1, i = 0; i < i1; ++i) {
+                    String found = cmpWords(line,  i,  needle); 
+                    if (found != null) {
+                        CharPos c0 = line.get(i);
+                        LineSegment base = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
+                        Rectangle2D bbox = c0.getBounds();
+                        for (int j1 = i + needle.length, j = i; j < j1; ++j)
+                            bbox.add(line.get(j).getBounds());
+                        foundText.add(new CharPos(found, base, bbox));
+                        if( index == 1 )
+                            return foundText;
+                        else
+                            --index;
+                    }
                 }
             }
          return foundText;
      }
+
+    // Compare array of string and sub-array of strings 
+    private String cmpWords(ArrayList<CharPos> line, int offset, String[] nwords) {
+        final int m = nwords.length;
+        String str = "";
+        if (offset + m > line.size())
+            return null;
+        for (int i = 0; i < m; ++i)
+            if (!line.get(offset + i).c.equals(nwords[i]))
+                return null;
+            else
+                str = str.isEmpty() ? line.get(offset + i).c : str + " " + line.get(offset + i).c;
+        return str;
+    }
 
     // mark all glyphs
     public void stampText(Set<Integer> stamped, int iPage) {
@@ -129,16 +147,20 @@ public class FindTexts extends TextEngine
         for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.text[iPage - 1].getChars().entrySet()) {
             for (ArrayList<CharPos> line: lines.getValue()) {
                 for (CharPos c: line) {
-                    final float x = c.getX(), y = c.getY();
-                    Rectangle frame = new Rectangle(x - 1, y - 1, x + 1, y + 1);
+                    Rectangle frame = new Rectangle(c.getBounds().getBounds());
                     frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                    frame.setBorderWidth(1f);
-                    frame.setBorder(15);
+                    frame.setBorderWidth(0.5f);
+                    frame.setBorder(Rectangle.BOX);
                     canvas.rectangle(frame);
-                    frame = new Rectangle(x, y, c.getX2(), c.getY2());
-                    frame.setBorderColor(new BaseColor(1f, 0f, 1f));
-                    frame.setBorderWidth(0.1f);
-                    frame.setBorder(15);
+                    frame = new Rectangle(c.getX() - 1, c.getY() - 1, c.getX() + 1, c.getY() + 1);
+                    frame.setBorderColor(new BaseColor(0.2f, 0f, 1f));
+                    frame.setBorderWidth(0.3f);
+                    frame.setBorder(Rectangle.BOX);
+                    canvas.rectangle(frame);
+                    frame = new Rectangle(c.getX(), c.getY(), c.getX2(), c.getY2());
+                    frame.setBorderColor(new BaseColor(0.2f, 0f, 1f));
+                    frame.setBorderWidth(0.5f);
+                    frame.setBorder(Rectangle.BOX);
                     canvas.rectangle(frame);
                 }
             }
@@ -146,10 +168,10 @@ public class FindTexts extends TextEngine
     }
 
     FindTextSpec spec = null;
-
+    
     @Override
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
-        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/
+        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
         YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
         spec = FindTextSpec.loadFromStream(specFile, FindTextSpec.class);
         if( inputOverride!=null ) {
@@ -157,7 +179,7 @@ public class FindTexts extends TextEngine
         }
         if( outputOverride!=null ) {
             spec.stampedOutput = outputOverride;
-        }
+        }       
     }
 
     @Override
@@ -184,10 +206,7 @@ public class FindTexts extends TextEngine
         match.bbox.add(new Double(1 - (rl.foundText.ey - crop.getBottom())/crop.getHeight()));
         */
         if( stamper!=null ) {
-            Rectangle frame = new Rectangle((float)foundText.getX()-1,
-                                            (float)foundText.getY()-1,
-                                            (float)foundText.getX()+1,
-                                            (float)foundText.getY()+1);
+            Rectangle frame = new Rectangle(foundText.getBounds().getBounds());
             frame.setBorderColor(new BaseColor(0f, 1f, 0f));
             frame.setBorderWidth(2f);
             frame.setBorder(15);
@@ -216,14 +235,14 @@ public class FindTexts extends TextEngine
         // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
-            String textNoSpaces = match.text.replace(" ","").replace("\t","").replace("\n","").
-                replace("\r","").replace("\u00A0","");
-
+            final String[] needle = (match.text == null) ? null : match.text.split(PageText.WHITE_SPACE);
+            if ((needle == null) || (needle.length < 1))
+                continue;
             ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0;
             for (Integer ip : pages) {
                 final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last
-                if( i>=1 && i<=pageCount && match.text!=null && !textNoSpaces.isEmpty() && (index>0)) {
-                    ArrayList<CharPos> found = find(text.text[i-1], textNoSpaces, index);
+                if( i>=1 && i<=pageCount && (index>0)) {
+                    ArrayList<CharPos> found = find(text.text[i-1], needle, index);
                     if (index <= found.size()) {
                         match.page = i;
                         onTextFound(match, found.get(index - 1));

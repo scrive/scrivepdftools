@@ -8,12 +8,13 @@
 "numberOfPages": 1
 "rects":
 - "lines":
-  - "Skadean"
+  - "Skadeanmälan"
   "page": 1
   "rect":
   - 0.369035
   - 0.0554307
   - 0.51961825
   - 0.085393247
+"stampedOutput": "test/results/test-glas.extract-output.pdf"
 "yamlOutput": true
 
