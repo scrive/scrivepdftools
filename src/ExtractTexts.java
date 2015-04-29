@@ -299,25 +299,7 @@ public class ExtractTexts extends TextEngine {
 
                 rect.lines = new ArrayList<String>();
                 for( String line : find(rl,l,b,r,t) ) {
-                    line = line.replaceAll(PageText.WHITE_SPACE + "+"," ");
-                    if( !line.equals("")) {
-                        int beginIndex = 0;
-                        int endIndex = line.length();
-                        char c = line.charAt(beginIndex);
-                        if( PageText.WHITE_SPACE.indexOf(c)>=0 ) {
-                            beginIndex = 1;
-                        }
-                        c = line.charAt(endIndex-1);
-                        if( PageText.WHITE_SPACE.indexOf(c)>=0 ) {
-                            endIndex = endIndex - 1;
-                        }
-                        if( beginIndex < endIndex ) {
-                            line = line.substring(beginIndex,endIndex);
-                        }
-                        else {
-                            line = "";
-                        }
-                    }
+                    line = line.replaceAll(PageText.WHITE_SPACE + "+"," ").trim();
                     if( !line.equals("")) {
                         rect.lines.add(line);
                     }
