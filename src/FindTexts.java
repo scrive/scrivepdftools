@@ -99,44 +99,47 @@ class FindTextSpec extends YamlSpec
 
 public class FindTexts extends TextEngine
 {
-    public ArrayList<CharPos> find(PageText text, String[] needle, int index) {
+    public ArrayList<CharPos> find(PageText text, String needle, int index) {
         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
-        if ((needle == null) || (needle.length < 1))
+        if ((needle == null) || (needle.isEmpty()))
             return foundText;
         for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
             for (ArrayList<CharPos> line: lines.getValue()) {
-                for (int i1 = line.size() - needle.length + 1, i = 0; i < i1; ++i) {
-                    String found = cmpWords(line,  i,  needle); 
-                    if (found != null) {
-                        CharPos c0 = line.get(i);
-                        LineSegment base = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
-                        Rectangle2D bbox = c0.getBounds();
-                        for (int j1 = i + needle.length, j = i; j < j1; ++j)
-                            bbox.add(line.get(j).getBounds());
-                        foundText.add(new CharPos(found, base, bbox));
-                        if( index == 1 )
-                            return foundText;
-                        else
-                            --index;
+                // 1. match the needle against the current line 
+                String str = "";
+                for (CharPos c: line)
+                    str += c.c;
+                int i = str.indexOf(needle), j = 0, k = 0;
+                final int k1 = line.size();
+                while (i >= 0) {
+                    // 2. skip the words before the match
+                    while (k < k1) {
+                        final int j1 = j + line.get(k).c.length();
+                        if (j1 > i)
+                            break;
+                        j = j1;
+                        ++k;
                     }
+                    // 3. collect all the words that made the match
+                    CharPos c0 = line.get(k);
+                    LineSegment base = new LineSegment(new Vector(c0.getX(), c0.getY(), 0.0f), new Vector(c0.getX2(), c0.getY2(), 0.0f));
+                    Rectangle2D bbox = c0.getBounds();
+                    final int j1 = i + needle.length();
+                    for (int jj = j, kk = k; (jj < j1) && (kk < k1); ++kk) {
+                        bbox.add(line.get(kk).getBounds());
+                        jj += line.get(kk).c.length();
+                    }
+                    foundText.add(new CharPos(needle, base, bbox));
+                    if( index == 1 )
+                        return foundText;
+                    else
+                        --index;
+                    // 4. check for the next match
+                    i = str.indexOf(needle, i + 1);
                 }
             }
          return foundText;
      }
-
-    // Compare array of string and sub-array of strings 
-    private String cmpWords(ArrayList<CharPos> line, int offset, String[] nwords) {
-        final int m = nwords.length;
-        String str = "";
-        if (offset + m > line.size())
-            return null;
-        for (int i = 0; i < m; ++i)
-            if (!line.get(offset + i).c.equals(nwords[i]))
-                return null;
-            else
-                str = str.isEmpty() ? line.get(offset + i).c : str + " " + line.get(offset + i).c;
-        return str;
-    }
 
     // mark all glyphs
     public void stampText(Set<Integer> stamped, int iPage) {
@@ -235,8 +238,8 @@ public class FindTexts extends TextEngine
         // Search for text
         for(Match match : spec.matches ) {
             int index = match.index;
-            final String[] needle = (match.text == null) ? null : match.text.split(PageText.WHITE_SPACE);
-            if ((needle == null) || (needle.length < 1))
+            final String needle = (match.text == null) ? null : match.text.replaceAll(PageText.WHITE_SPACE, "");
+            if ((needle == null) || (needle.isEmpty()))
                 continue;
             ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0;
             for (Integer ip : pages) {
