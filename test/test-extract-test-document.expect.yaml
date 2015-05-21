@@ -81,6 +81,18 @@
   - 0.0
   - 1.0
   - 1.0
+- "color":
+  - 1.0
+  - 0.0
+  - 0.0
+  "lines":
+  - "use"
+  "page": 1
+  "rect":
+  - 0.3
+  - 0.6
+  - 0.31
+  - 0.57
 "stampedOutput": "test/results/test-extract-test-document.extract-output.pdf"
 "yamlOutput": true
 

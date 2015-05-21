@@ -108,22 +108,21 @@ public class ExtractTexts extends TextEngine {
         for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
             for (ArrayList<CharPos> line: lines.getValue()) {
                 final boolean horizontal = line.get(0).isHorizontal(); // IMPORTANT: assume !horizontal => vertical, since only H/V text is allowed
-                Rectangle2D b1 = line.get(0).getBounds();
-                final float req = 0.2f * (float)b1.getHeight();
+                Rectangle2D b1 = line.get(0).getBaseLineBounds();
                 if (horizontal) {
-                    if ((b1.getMinY() + req > t) || (b1.getMaxY() - req < b))
+                    if ((b1.getMinY() > t) || (b1.getMaxY() < b))
                         continue;
                 } else {
-                    if ((b1.getMinX() + req > r) || (b1.getMaxX() - req < l))
+                    if ((b1.getMinX() > r) || (b1.getMaxX() < l))
                         continue;
                 }
                 String txt = "";
                 for (CharPos cp: line) {
                     if (horizontal) {
-                        if ((cp.getBounds().getMinX() + req > r) || (cp.getBounds().getMaxX() - req < l))
+                        if ((cp.getBaseLineBounds().getMinX() > r) || (cp.getBaseLineBounds().getMaxX() < l))
                             continue;
                     } else {
-                        if ((cp.getBounds().getMinY() + req > t) || (cp.getBounds().getMaxY() - req < b))
+                        if ((cp.getBaseLineBounds().getMinY() > t) || (cp.getBaseLineBounds().getMaxY() < b))
                             continue;
                     }
                     txt += cp.c + " ";

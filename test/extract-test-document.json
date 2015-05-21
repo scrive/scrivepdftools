@@ -1,12 +1,13 @@
 { "input": "test/test-document.pdf"
 , "yamlOutput": true
 , "extra_top_level": "please ignore me"
-, "stampedOutput": "test/test-document-stamped.pdf"
+, "stampedOutput": "test/results/test-document-stamped.pdf"
 , "rects": [ { "rect": [0,  0,  1,  1  ], "page": 1 }
            , { "rect": [0,  0,  1,  0.5], "page": 1 }
            , { "rect": [0,  0.5,1,  1  ], "page": 1 }
            , { "rect": [0,  0,  0.5,1  ], "page": 1, "color": [1,0,0] }
            , { "rect": [0.5,0,  1,  1  ], "page": 1, "extra": "a key that should be ignored" }
+           , { "rect": [0.3, 0.6,0.31,0.57], "page": 1, "color": [1,0,0] }
            ]
 , "listOfTemplates": [ { "title": "First of matched templates", "color": [0.5,1,1] }
                      , { "title": "Second of matched templates", "color": [0.5,1,0] }

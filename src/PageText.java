@@ -53,7 +53,7 @@ class CharPos implements Serializable
      * baseline coordinate.
      */
     private float x0, y0, bx, by;
-    private Rectangle2D bbox = null;
+    private Rectangle2D bbox = null, bbox2 = null;
 
     public CharPos(String text, LineSegment base, Rectangle2D bbox)
     {
@@ -66,6 +66,8 @@ class CharPos implements Serializable
         Vector b = base.getEndPoint().subtract(origin);
         bx = b.get(Vector.I1);
         by = b.get(Vector.I2);
+        final float xc = x0 + 0.5f * bx, yc = y0 + 0.5f * by; // base line center
+        bbox2 = new Rectangle2D.Float(xc, yc, 0.0f, 0.0f); 
     }
 
     public float getX() {
@@ -92,6 +94,10 @@ class CharPos implements Serializable
 
     public Rectangle2D getBounds() {
         return bbox;
+    }
+
+    public Rectangle2D getBaseLineBounds() {
+        return bbox2;
     }
 
     /*
@@ -189,6 +195,7 @@ class CharPos implements Serializable
         if (!isHorizontal())
             by = Math.max(by, other.getY2() - y0);
         bbox.add(other.bbox);
+        bbox2.add(other.bbox2);
     }
     
     public String toString() {
