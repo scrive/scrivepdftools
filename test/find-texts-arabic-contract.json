@@ -1,0 +1,10 @@
+{ "input": "test/arabic_contract.pdf"
+, "yamlOutput": true
+, "stampedOutput": "test/results/arabic_contract.stamped.pdf"
+, "matches": [ { "text": "ﻝﻮﻤﺤﻤﻟﺍ", "index": 1, "pages": [1] }
+             , { "text": "ﺔـﻣﺪـﺧ ﺐـﻠﻃ", "index": 1, "pages": [1] }
+             , { "text": "ﺦﻳﺭﺎﺘﻟﺍ", "index": 1, "pages": [3] }
+             , { "text": "New Customer Info", "index": 1, "pages": [1] }
+             , { "text": "sit Installation Fees", "index": 1, "pages": [1] }
+             ]
+}

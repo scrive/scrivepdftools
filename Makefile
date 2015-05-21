@@ -183,6 +183,7 @@ test-find-texts : scrivepdftools.jar \
                   test/results/test-find-texts-out-of-order.find-output.yaml \
                   test/results/test-find-texts-json-encoding.find-output.yaml \
                   test/results/test-find-texts-crop-box.find-output.yaml \
+                  test/results/test-find-texts-arabic-contract.find-output.yaml \
                   test/results/test-find-texts-all-pages.find-output.yaml
 
 test/results/%.find-output.yaml :
@@ -240,6 +241,12 @@ test/results/test-find-texts-crop-box.find-output.yaml:\
     test/test-find-texts-crop-box.expect.yaml  \
     scrivepdftools.jar
 
+test/results/test-find-texts-arabic-contract.find-output.yaml: \
+    test/find-texts-arabic-contract.json                       \
+    test/arabic_contract.pdf    \
+    test/test-find-texts-arabic-contract.expect.yaml  \
+    scrivepdftools.jar
+
 test/results/test-find-texts-all-pages.find-output.yaml:\
     test/find-texts-all-pages.json             \
     test/text-out-of-order.pdf                 \
@@ -257,6 +264,7 @@ test-extract-texts : scrivepdftools.jar \
                      test/results/test-extract-rotate-90.extract-output.yaml               \
                      test/results/test-extract-poor-mans-bold.extract-output.yaml          \
                      test/results/test-bB02_103_cerere.extract-output.yaml                 \
+                     test/results/test-extract-arabic-contract.extract-output.yaml         \
                      test/results/test-glas.extract-output.yaml
 
 #
@@ -353,6 +361,12 @@ test/results/test-bB02_103_cerere.extract-output.yaml :         \
     test/extract-texts-whole-first-page.json                    \
     test/bB02_103_cerere.pdf                                    \
     test/test-extract-bB02_103_cerere.expect.yaml               \
+    scrivepdftools.jar
+
+test/results/test-extract-arabic-contract.extract-output.yaml:  \
+    test/extract-texts-arabic-contract.json                     \
+    test/arabic_contract.pdf                                    \
+    test/test-extract-texts-arabic-contract.expect.yaml         \
     scrivepdftools.jar
 
 test/results/test-glas.extract-output.yaml :         \

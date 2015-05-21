@@ -1,0 +1,51 @@
+"additionalInfo":
+  "containsControlCodes": false
+  "containsGlyphs": true
+  "firstPageHeight": 792.0
+  "firstPageWidth": 612.0
+  "numberOfPages": 3
+"input": "test/arabic_contract.pdf"
+"matches":
+- "coords":
+  - 0.143398717045784
+  - 0.2130807638168335
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "ﻝﻮﻤﺤﻤﻟﺍ"
+- "coords":
+  - 0.7593137621879578
+  - 0.04505050182342529
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "ﺔـﻣﺪـﺧ ﺐـﻠﻃ"
+- "coords":
+  - 0.11254903674125671
+  - 0.763649046421051
+  "index": 1
+  "page": 3
+  "pages":
+  - 3
+  "text": "ﺦﻳﺭﺎﺘﻟﺍ"
+- "coords":
+  - 0.08132360875606537
+  - 0.16489887237548828
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "New Customer Info"
+- "coords":
+  - 0.637189507484436
+  - 0.46601009368896484
+  "index": 1
+  "page": 1
+  "pages":
+  - 1
+  "text": "sit Installation Fees"
+"stampedOutput": "test/results/test-find-texts-arabic-contract.find-output.pdf"
+"yamlOutput": true
+
