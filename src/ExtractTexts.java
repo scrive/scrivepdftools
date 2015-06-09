@@ -128,7 +128,7 @@ public class ExtractTexts extends TextEngine {
                     txt += cp.c + " ";
                 }
                 if (!txt.isEmpty())
-                    foundText.add(txt.substring(0,  txt.length() - 1));
+                    foundText.add(PageText.BiDiText.fixBiDiText(txt.substring(0,  txt.length() - 1)));
             }
         return foundText;
     }
