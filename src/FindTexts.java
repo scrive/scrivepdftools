@@ -109,7 +109,7 @@ public class FindTexts extends TextEngine
                 String str = "";
                 for (CharPos c: line)
                     str += c.c;
-                str = PageText.BiDiText.fixBiDiText(str).replaceAll(PageText.WHITE_SPACE, "");
+                str = PageText.fixBiDiText(str).replaceAll(PageText.WHITE_SPACE, "");
                 int i = str.indexOf(needle), j = 0, k = 0;
                 final int k1 = line.size();
                 while (i >= 0) {
