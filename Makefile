@@ -145,6 +145,12 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
+test/results/with-background.pdf : test/add-background.json scrivepdftools.jar
+	java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
 test/results/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g \
         -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g \

@@ -162,6 +162,7 @@ class SealSpec extends YamlSpec
     public ArrayList<FileDesc> filesList;
     public ArrayList<Field> fields;
     public ArrayList<String> fonts;
+    public String background;
 
     static {
         ArrayList<TypeDescription> td = new ArrayList<TypeDescription>();
@@ -452,6 +453,10 @@ public class AddVerificationPages extends Engine {
         throws DocumentException, IOException, Base64DecodeException
     {
         PdfStamper stamper = new PdfStamper(reader, os);
+        PdfReader background = null;
+        if( spec.background != null ) {
+            background = new PdfReader(spec.background);
+        }
 
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
@@ -467,6 +472,13 @@ public class AddVerificationPages extends Engine {
             while (rotate > 0) {
                 cropBox = cropBox.rotate();
                 rotate -= 90;
+            }
+            if( background!=null ) {
+                PdfImportedPage backgroundImported = stamper.getImportedPage(background, i);
+                if( backgroundImported!=null ) {
+                    PdfContentByte canvas = stamper.getUnderContent(i);
+                    canvas.addTemplate(backgroundImported, 0, 0);
+                }
             }
 
             PdfContentByte canvas = stamper.getOverContent(i);
