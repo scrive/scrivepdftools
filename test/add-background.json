@@ -1,0 +1,4 @@
+{"input": "test/good_avis.pdf",
+ "background": "test/avis_bg.pdf",
+ "output": "test/results/with-background.pdf",
+ "preseal": true}
