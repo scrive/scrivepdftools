@@ -1,0 +1,8 @@
+{
+    "input": "test/sealed.pdf",
+    "output": "test/results/unsealed.pdf",
+    "remove_footer": true,
+    "remove_verification_pages": true,
+    "remove_background": true,
+    "remove_evidence_attachments": true
+}

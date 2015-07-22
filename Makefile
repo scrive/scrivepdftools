@@ -59,6 +59,7 @@ test : test-add-verification-pages \
        test-find-texts \
        test-extract-texts \
        test-normalize \
+       test-remove-elements \
        test-select-and-clip
 
 test-add-verification-pages : scrivepdftools.jar \
@@ -401,6 +402,14 @@ endif
 
 test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
 	java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test-remove-elements : test/results/unsealed.pdf
+
+test/results/unsealed.pdf : test/remove-all-elements.json test/sealed.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar remove-scrive-elements $<
 ifdef OPEN
 	$(OPEN) $@
 endif
