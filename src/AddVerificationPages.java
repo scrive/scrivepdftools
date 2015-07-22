@@ -58,6 +58,7 @@ import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
@@ -259,6 +260,8 @@ public class AddVerificationPages extends Engine {
     static CMYKColor lightTextColor = new CMYKColor(0.597f, 0.512f, 0.508f, 0.201f);
     static CMYKColor frameColor = new CMYKColor(0f, 0f, 0f, 0.333f);
 
+    static PdfName scriveTag = new PdfName("ScriveTag");
+    
     SealSpec spec = null;
     
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
@@ -477,7 +480,20 @@ public class AddVerificationPages extends Engine {
                 PdfImportedPage backgroundImported = stamper.getImportedPage(background, i);
                 if( backgroundImported!=null ) {
                     PdfContentByte canvas = stamper.getUnderContent(i);
+                    canvas.beginMarkedContentSequence(new PdfName("ScriveBackground"));
                     canvas.addTemplate(backgroundImported, 0, 0);
+                    canvas.endMarkedContentSequence();
+
+                    /* Why this doesn't work ?? */
+                    /*
+                    backgroundImported.setRole(new PdfName("ScriveBackground"));
+                    PdfDictionary extra = new PdfDictionary();
+                    extra.put(scriveTag, new PdfName("ScriveBackground"));
+                    backgroundImported.setAdditional(extra);
+                    backgroundImported.setAccessibleAttribute(scriveTag, new PdfName("ScriveBackground"));
+                    System.out.println("# " + backgroundImported.getAccessibleAttributes().toString());
+                    System.out.println("## " + backgroundImported.getAdditional().getKeys().toString());
+                    */
                 }
             }
 
@@ -587,6 +603,7 @@ public class AddVerificationPages extends Engine {
 
         Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
 
+        canvas.beginMarkedContentSequence(new PdfName("ScriveFooter"));
         ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
                 para,
                 cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
@@ -624,6 +641,7 @@ public class AddVerificationPages extends Engine {
         rect.setBorderColor(color);
         rect.setBorder(Rectangle.BOTTOM);
         canvas.rectangle(rect);
+        canvas.endMarkedContentSequence();
     }
 
 
@@ -979,6 +997,7 @@ public class AddVerificationPages extends Engine {
                             document.bottomMargin() + 130);
 
         document.newPage();
+        writer.getPageDictEntries().put(scriveTag, new PdfName("srcive::VerificationPage"));
 
         document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
 
