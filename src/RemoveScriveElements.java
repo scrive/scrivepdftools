@@ -58,10 +58,28 @@ public class RemoveScriveElements extends Engine {
         PdfReader reader = new PdfReader(pdf);
         PdfStamper stamper = new PdfStamper(reader, os);
 
-        // TODO: remove verification pages, background and footers
+        // remove verification pages
+        final int n = reader.getNumberOfPages();
+        String keep = "";
+        for (int i = 1; i <= n; i++) {
+            PdfDictionary page = reader.getPageN(i);
+            if (page.contains(AddVerificationPages.scriveTag))
+            	continue; // remove the whole page
+            keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i;
+            byte[] content = reader.getPageContent(i);
+            byte[] content2 = checkContent(content, page.getAsDict(PdfName.RESOURCES));
+            if (content2 != content)
+            	reader.setPageContent(i,  content2);
+        }
+        reader.selectPages(keep);
 
         stamper.close();
         reader.close();
         pdf.close();
     }
+
+	private byte[] checkContent(byte[] content, PdfDictionary resources) throws IOException {
+		// TODO: find & remove BMC..EMC sections with Scrvie* tags
+		return content;
+	}
 }
