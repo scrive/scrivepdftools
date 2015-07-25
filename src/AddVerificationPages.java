@@ -260,8 +260,11 @@ public class AddVerificationPages extends Engine {
     static CMYKColor lightTextColor = new CMYKColor(0.597f, 0.512f, 0.508f, 0.201f);
     static CMYKColor frameColor = new CMYKColor(0f, 0f, 0f, 0.333f);
 
-    static PdfName scriveTag = new PdfName("ScriveTag");
-    
+	static PdfName scriveTag = new PdfName("Scrive:Tag");
+	static PdfName scriveTagBackground = new PdfName("Scrive:Background");
+	static PdfName scriveTagVerPage = new PdfName("Scrive:VerificationPage");
+	static PdfName scriveTagFooter = new PdfName("Scrive:Footer");
+
     SealSpec spec = null;
     
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
@@ -479,21 +482,10 @@ public class AddVerificationPages extends Engine {
             if( background!=null ) {
                 PdfImportedPage backgroundImported = stamper.getImportedPage(background, i);
                 if( backgroundImported!=null ) {
-                    PdfContentByte canvas = stamper.getUnderContent(i);
-                    canvas.beginMarkedContentSequence(new PdfName("ScriveBackground"));
+                	PdfContentByte canvas = stamper.getUnderContent(i);
+                    canvas.beginMarkedContentSequence(scriveTagBackground);
                     canvas.addTemplate(backgroundImported, 0, 0);
                     canvas.endMarkedContentSequence();
-
-                    /* Why this doesn't work ?? */
-                    /*
-                    backgroundImported.setRole(new PdfName("ScriveBackground"));
-                    PdfDictionary extra = new PdfDictionary();
-                    extra.put(scriveTag, new PdfName("ScriveBackground"));
-                    backgroundImported.setAdditional(extra);
-                    backgroundImported.setAccessibleAttribute(scriveTag, new PdfName("ScriveBackground"));
-                    System.out.println("# " + backgroundImported.getAccessibleAttributes().toString());
-                    System.out.println("## " + backgroundImported.getAdditional().getKeys().toString());
-                    */
                 }
             }
 
@@ -592,6 +584,7 @@ public class AddVerificationPages extends Engine {
         PdfReader sealMarker = getSealMarker();
         PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
+        canvas.beginMarkedContentSequence(scriveTagFooter);
 
         float requestedSealSize = 18f;
         canvas.addTemplate(sealMarkerImported,
@@ -603,7 +596,6 @@ public class AddVerificationPages extends Engine {
 
         Paragraph para = createParagraph(lefttext, 8, Font.NORMAL, lightTextColor);
 
-        canvas.beginMarkedContentSequence(new PdfName("ScriveFooter"));
         ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
                 para,
                 cropBox.getLeft() + cropBox.getWidth()/2 - requestedSealSize,
@@ -641,7 +633,7 @@ public class AddVerificationPages extends Engine {
         rect.setBorderColor(color);
         rect.setBorder(Rectangle.BOTTOM);
         canvas.rectangle(rect);
-        canvas.endMarkedContentSequence();
+        canvas.endMarkedContentSequence();        
     }
 
 
@@ -997,7 +989,7 @@ public class AddVerificationPages extends Engine {
                             document.bottomMargin() + 130);
 
         document.newPage();
-        writer.getPageDictEntries().put(scriveTag, new PdfName("srcive::VerificationPage"));
+        writer.getPageDictEntries().put(scriveTag, scriveTagVerPage);
 
         document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
 
@@ -1290,18 +1282,10 @@ public class AddVerificationPages extends Engine {
                 // be removed as soon as font list is propagated where
                 // it should be
 
-                BaseFont baseFont;
-                baseFonts = new BaseFont[3];
-
-                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/SourceSansPro-Light.ttf").toString(),
-                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                baseFonts[0] = baseFont;
-                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/NotoSans-Regular.ttf").toString(),
-                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                baseFonts[1] = baseFont;
-                baseFont = BaseFont.createFont( AddVerificationPages.class.getResource("assets/NotoSansThai-Regular.ttf").toString(),
-                                                BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                baseFonts[2] = baseFont;
+            	String [] res = new String[] {"assets/SourceSansPro-Light.ttf", "assets/NotoSans-Regular.ttf", "assets/NotoSansThai-Regular.ttf"};
+                baseFonts = new BaseFont[res.length];
+                for (int i = 0; i < res.length; ++i)
+                	baseFonts[i] = BaseFont.createFont(Main.getResource(res[i]), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             }
         }
     }
@@ -1384,7 +1368,7 @@ public class AddVerificationPages extends Engine {
         throws DocumentException, IOException
     {
         if( sealMarkerCached==null ) {
-            sealMarkerCached = new PdfReader(AddVerificationPages.class.getResource("assets/sealmarker.pdf"));
+            sealMarkerCached = new PdfReader(Main.getResource("assets/sealmarker.pdf"));
         }
         return sealMarkerCached;
     }

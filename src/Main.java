@@ -20,11 +20,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.URL;
 
 import com.itextpdf.text.DocumentException;
 
 public class Main
 {
+	public static String getResource(String res) {
+    	URL url = Main.class.getResource(res);
+    	return (null == url) ? res : url.toString();
+	}
+
     public static Engine getEngine(String command) {
         if( command.equals("add-verification-pages"))
             return new AddVerificationPages();
