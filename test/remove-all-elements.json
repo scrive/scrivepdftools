@@ -1,5 +1,5 @@
 {
-    "input": "test/results/with-background.pdf",
+    "input": "test/sealed.pdf",
     "output": "test/results/unsealed.pdf",
     "removeFooter": true,
     "removeVerificationPages": true,
