@@ -398,9 +398,9 @@ public class PageText implements Serializable
     /**
      * IMPORTANT: filters skewed text (non-vertical and non-horizontal)
      */
-    public void addChar(String c1, LineSegment base, Rectangle2D bbox) {
-
-        String c = Normalizer.normalize(c1, Normalizer.Form.NFC);
+    public void addChar(String c1, LineSegment base, Rectangle2D bbox)
+    {
+        String c = c1; //Normalizer.normalize(c1, Normalizer.Form.NFKC);
         hasGlyphs = true;
         int codePoint = c.codePointAt(0);
         // 0x20000 marks beginning of unassigned planes,
@@ -408,9 +408,12 @@ public class PageText implements Serializable
         // useful glyphs in that range.
         hasControlCodes = hasControlCodes || codePoint<32 || codePoint>=0x20000;
 
-        CharPos cp = new CharPos(c, base, bbox);
-        if( cp.isHorizontal() || cp.isVertical() )
-            addChar(cp);
+        if( codePoint>=32 ) {
+            CharPos cp = new CharPos(c, base, bbox);
+            if( cp.isHorizontal() || cp.isVertical() ) {
+                addChar(cp);
+            }
+        }
     }
 
     public Vector getTextDir()
