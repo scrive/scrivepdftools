@@ -19,6 +19,7 @@
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.Bidi;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -397,8 +398,9 @@ public class PageText implements Serializable
     /**
      * IMPORTANT: filters skewed text (non-vertical and non-horizontal)
      */
-    public void addChar(String c, LineSegment base, Rectangle2D bbox) {
+    public void addChar(String c1, LineSegment base, Rectangle2D bbox) {
 
+        String c = Normalizer.normalize(c1, Normalizer.Form.NFC);
         hasGlyphs = true;
         int codePoint = c.codePointAt(0);
         // 0x20000 marks beginning of unassigned planes,
