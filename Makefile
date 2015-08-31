@@ -271,7 +271,8 @@ test-extract-texts : scrivepdftools.jar \
                      test/results/test-extract-poor-mans-bold.extract-output.yaml          \
                      test/results/test-bB02_103_cerere.extract-output.yaml                 \
                      test/results/test-extract-arabic-contract.extract-output.yaml         \
-                     test/results/test-glas.extract-output.yaml
+                     test/results/test-glas.extract-output.yaml                            \
+                     test/results/test-extract-texts-ligatures.extract-output.yaml
 
 #
 # Note about organization of tests here.
@@ -319,6 +320,12 @@ test/results/test-extract-texts.extract-output.yaml :					\
     test/extract-texts.json										\
     test/three-page-a4.pdf										\
     test/test-extract-texts.expect.yaml							\
+    scrivepdftools.jar
+
+test/results/test-extract-texts-ligatures.extract-output.yaml :					\
+    test/extract-texts.json										\
+    test/ligatures.pdf										\
+    test/test-extract-texts-ligatures.expect.yaml							\
     scrivepdftools.jar
 
 test/results/test-extract-test-document.extract-output.yaml :			\
