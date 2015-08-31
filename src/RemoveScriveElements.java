@@ -88,21 +88,22 @@ public class RemoveScriveElements extends Engine {
                 continue; // remove the whole page
             keep = keep.isEmpty() ? String.valueOf(i) : keep + "," + i;
 
-            PdfDictionary res = page.getAsDict(PdfName.RESOURCES);
-            PdfDictionary xobj = (null == res) ? null : res.getAsDict(PdfName.XOBJECT);
-            if (null != xobj)
-                for (PdfName key: xobj.getKeys()) {
-                    PdfStream x = (PdfStream)reader.getPdfObject(xobj.getAsIndirectObject(key).getNumber());
-                    if ((null == x) || !PdfName.FORM.equals(x.get(PdfName.SUBTYPE)))
-                        continue;
-                }
-
+            // Remove background and footer (cut the content stream and delete resources)
             byte[] content = reader.getPageContent(i);
-            byte[] content2 = checkContent(content, res);
+            byte[] content2 = checkContent(content, page.getAsDict(PdfName.RESOURCES));
             if (content2 != content)
                 reader.setPageContent(i,  content2);
         }
         reader.selectPages(keep);
+
+        // Remove embedded files
+        PdfDictionary names = reader.getCatalog().getAsDict(PdfName.NAMES);
+        if (null != names) {
+            names.remove(PdfName.EMBEDDEDFILES);
+            if (names.size() < 1)
+                reader.getCatalog().remove(PdfName.NAMES);
+        }
+        reader.removeUnusedObjects();
 
         stamper.close();
         reader.close();
