@@ -32,7 +32,7 @@ public class WebServer {
         server.createContext("/index.htm", main);
 
         // Init PDF processing context for each command
-        final String[] commands = {"add-verification-pages", "find-texts", "extract-texts", "normalize", "select-and-clip"};
+        final String[] commands = {"add-verification-pages", "find-texts", "extract-texts", "normalize", "remove-scrive-elements", "select-and-clip"};
         for (String cmd: commands)
             server.createContext("/" + cmd, new ExecHandler(cmd));
 
@@ -53,13 +53,8 @@ public class WebServer {
             String response = "";
             System.out.println("\n->[" + (new Date()).toString() + "] Request " + t.getProtocol().toString() + "/" + t.getRequestMethod() + " from " + t.getRemoteAddress().toString());
             // load test HTML page
-            BufferedReader reader = null;
             try {
-               InputStream res = WebServer.class.getResourceAsStream("assets/test-client.html");
-               if (res != null)
-                   reader = new BufferedReader(new InputStreamReader(res)); // use JAR resources if possible
-               else
-                   reader = new BufferedReader(new FileReader("assets/test-client.html"));
+               BufferedReader reader = new BufferedReader(new FileReader(Main.getResource("assets/test-client.html"))); // use JAR resources if possible
                String line = reader.readLine();
                while (null != line) {
                    response += line + "\r\n";

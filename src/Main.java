@@ -20,11 +20,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.URL;
 
 import com.itextpdf.text.DocumentException;
 
 public class Main
 {
+	public static String getResource(String res) {
+    	URL url = Main.class.getResource(res);
+    	return (null == url) ? res : url.toString();
+	}
+
     public static Engine getEngine(String command) {
         if( command.equals("add-verification-pages"))
             return new AddVerificationPages();
@@ -36,6 +42,8 @@ public class Main
             return new Normalize();
         else if( command.equals("select-and-clip"))
             return new SelectAndClip();
+        else if( command.equals("remove-scrive-elements"))
+            return new RemoveScriveElements();
         System.err.println("Error: Uknown command: " + command);
         return null;
     }
@@ -64,6 +72,7 @@ public class Main
             System.err.println("    java -jar scrivepdftools.jar extract-texts config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar normalize config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json optional-input.pdf");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
