@@ -62,6 +62,9 @@ public class Main
 
     public static void main(String[] args)
     {
+        //do not show tray icon nor windows, popups, anything
+        System.setProperty("java.awt.headless", "true");
+
         com.itextpdf.text.pdf.PdfReader.unethicalreading = true;
         if( args.length!=2 && args.length!=3) {
             System.err.println("Usage:");
