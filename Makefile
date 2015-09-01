@@ -20,7 +20,7 @@ endif
 jar : scrivepdftools.jar
 
 clean :
-	rm -f scrivepdftools.jar Manifest.txt	
+	rm -f scrivepdftools.jar Manifest.txt
 	rm -f classes/*.class
 	rm -f test/results/*.*
 	rm -f test/*.ext
@@ -165,7 +165,7 @@ test/results/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	    -e s!colormap-8bit-2.png!`$(BASE64) test/colormap-8bit-2.png`!g			\
 	    -e s!png-with-alpha.png!`$(BASE64) test/png-with-alpha.png`!g			\
 	    -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g					\
-	    -e 's!"test/seal-images.pdf"!"test/seal-images-preseal.pdf"!g'			\
+	    -e 's!"test/results/seal-images.pdf"!"test/results/seal-images-preseal.pdf"!g'	\
           $< > $<.ext
 	java -Dapple.awt.UIElement=true -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
@@ -180,7 +180,7 @@ endif
 
 test/results/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
 	sed -e 's!"preseal": false!"preseal": true!g'						\
-        -e 's!"test/seal-fields.pdf"!"test/seal-fields-preseal.pdf"!g'				\
+        -e 's!"test/results/seal-fields.pdf"!"test/results/seal-fields-preseal.pdf"!g'		\
          $< > $<.ext
 	java -Dapple.awt.UIElement=true -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
@@ -396,7 +396,7 @@ test-normalize : scrivepdftools.jar								\
     test/results/document-with-text-in-forms-flattened.pdf					\
     test/results/unrotated-text.pdf								\
     test/results/unrotated3.pdf
-                 
+
 
 test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
 	java -Dapple.awt.UIElement=true -jar scrivepdftools.jar normalize $<
