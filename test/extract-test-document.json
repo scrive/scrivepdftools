@@ -1,4 +1,4 @@
-{ "input": "test/test-document.pdf"
+{ "input": "test/document-with-text-in-forms.pdf"
 , "yamlOutput": true
 , "extra_top_level": "please ignore me"
 , "stampedOutput": "test/results/test-document-stamped.pdf"

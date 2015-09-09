@@ -1,4 +1,4 @@
-{ "input": "rotated-text.pdf"
+{ "input": "test/rotated-text.pdf"
 , "yamlOutput": true
 , "rects": [ { "rect": [0,0,1,1], "page": 1 },
              { "rect": [0,0,1,1], "page": 3 },

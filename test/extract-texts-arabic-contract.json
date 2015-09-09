@@ -1,5 +1,4 @@
-{ "input": "test/three-page-a4.pdf"
-, "yamlOutput": true
+{ "yamlOutput": true
 , "stampedOutput": "test/results/arabic_contract.stamped.pdf"
 , "rects": [ { "rect": [0,0,1,1], "page": 1 }
            , { "rect": [0,0,1,1], "page": 2 }

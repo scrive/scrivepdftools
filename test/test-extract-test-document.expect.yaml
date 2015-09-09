@@ -4,7 +4,7 @@
   "firstPageHeight": 842.0
   "firstPageWidth": 595.0
   "numberOfPages": 1
-"input": "test/test-document.pdf"
+"input": "test/document-with-text-in-forms.pdf"
 "listOfTemplates":
 - "color":
   - 0.5
