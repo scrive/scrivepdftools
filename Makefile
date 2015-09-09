@@ -19,6 +19,11 @@ endif
 
 jar : scrivepdftools.jar
 
+server :
+	java -jar scrivepdftools.jar httpserver -p 12344 &
+
+.PHONY: server
+
 clean :
 	rm -f scrivepdftools.jar Manifest.txt
 	rm -f classes/*.class
@@ -62,7 +67,7 @@ test : test-add-verification-pages								\
        test-remove-elements									\
        test-select-and-clip
 
-test-add-verification-pages : scrivepdftools.jar						\
+test-add-verification-pages : 									\
        test/results/seal-simplest.pdf								\
        test/results/seal-simplest-verified.pdf							\
        test/results/seal-filetypes.pdf								\
@@ -80,55 +85,79 @@ test-add-verification-pages : scrivepdftools.jar						\
 # steals focus.  We disable that with `-Dapple.awt.UIElement=true`
 # command line option.
 
-test/results/seal-simplest.pdf : test/seal-simplest.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-simplest.pdf : test/seal-simplest.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/example_spec.pdf : test/example_spec.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/example_spec.pdf : test/example_spec.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/field-positions.pdf : test/field_positions.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/field-positions.pdf : test/field_positions.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-simplest-verified.pdf : test/seal-simplest-verified.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-simplest-verified.pdf : test/seal-simplest-verified.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-filetypes.pdf : test/seal-filetypes.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-filetypes.pdf : test/seal-filetypes.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
 test/results/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-many-people.pdf : test/seal-many-people.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-many-people.pdf : test/seal-many-people.json test/one-page-us-letter.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-images.pdf : test/seal-images.json scrivepdftools.jar
+test/results/seal-images.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g			\
 	    -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g			\
 	    -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g				\
@@ -138,24 +167,33 @@ test/results/seal-images.pdf : test/seal-images.json scrivepdftools.jar
 	    -e s!png-with-alpha.png!`$(BASE64) test/png-with-alpha.png`!g			\
 	    -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g					\
           $< > $<.ext
-	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	curl -s -F config=@$<.ext                                  \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/missing-xmpcore.pdf : test/missing-xmpcore.json scrivepdftools.jar
-	java -Xmx512M -jar scrivepdftools.jar add-verification-pages $<
+test/results/missing-xmpcore.pdf : test/missing-xmpcore.json test/with-solid-background.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -Xmx512M -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/with-background.pdf : test/add-background.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/with-background.pdf : test/add-background.json test/good_avis.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
+test/results/seal-images-preseal.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g			\
 	    -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g			\
 	    -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g				\
@@ -167,27 +205,36 @@ test/results/seal-images-preseal.pdf : test/seal-images.json scrivepdftools.jar
 	    -e s!8bit-rgba.png!`$(BASE64) test/8bit-rgba.png`!g					\
 	    -e 's!"test/results/seal-images.pdf"!"test/results/seal-images-preseal.pdf"!g'	\
           $< > $<.ext
-	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	curl -s -F config=@$<.ext                                  \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-fields.pdf : test/seal-fields.json scrivepdftools.jar
-	java -jar scrivepdftools.jar add-verification-pages $<
+test/results/seal-fields.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-fields-preseal.pdf : test/seal-fields.json scrivepdftools.jar
+test/results/seal-fields-preseal.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar
 	sed -e 's!"preseal": false!"preseal": true!g'						\
         -e 's!"test/results/seal-fields.pdf"!"test/results/seal-fields-preseal.pdf"!g'		\
          $< > $<.ext
-	java -jar scrivepdftools.jar add-verification-pages $<.ext
+	curl -s -F config=@$<.ext                                  \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<.ext
 ifdef OPEN
 	$(OPEN) $@
 endif
 
-test-find-texts : scrivepdftools.jar								\
+test-find-texts : 										\
                   test/results/test-find-texts.find-output.yaml					\
                   test/results/test-find-texts-test-document.find-output.yaml			\
                   test/results/test-find-texts-out-of-order.find-output.yaml			\
@@ -199,7 +246,10 @@ test-find-texts : scrivepdftools.jar								\
 test/results/%.find-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g'	\
           $< > $<.ext
-	java -jar scrivepdftools.jar find-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
+	curl -s -F config=@$<.ext                                  \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/find-texts -o $(patsubst %.yaml,%-1.yaml,$@)
+	#java -jar scrivepdftools.jar find-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
 ifdef OPEN
 	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
@@ -263,7 +313,7 @@ test/results/test-find-texts-all-pages.find-output.yaml:					\
     test/test-find-texts-all-pages.expect.yaml							\
     scrivepdftools.jar
 
-test-extract-texts : scrivepdftools.jar								\
+test-extract-texts : 										\
                      test/results/test-extract-texts.extract-output.yaml			\
                      test/results/test-extract-test-document.extract-output.yaml		\
                      test/results/test-extract-test-document-with-forms.extract-output.yaml	\
@@ -298,7 +348,10 @@ test-extract-texts : scrivepdftools.jar								\
 test/results/%.extract-output.yaml :
 	sed -e 's!"stampedOutput": ".*"!"stampedOutput": "'$(patsubst %.yaml,%.pdf,$@)'"!g'	\
           $< > $<.ext
-	java -jar scrivepdftools.jar extract-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
+	curl -s -F config=@$<.ext                                  \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/extract-texts -o $(patsubst %.yaml,%-1.yaml,$@)
+	#java -jar scrivepdftools.jar extract-texts $<.ext $(word 2,$^) > $(patsubst %.yaml,%-1.yaml,$@)
 ifdef OPEN
 	$(OPEN) $(patsubst %.yaml,%.pdf,$@)
 endif
@@ -399,19 +452,28 @@ test-normalize : scrivepdftools.jar								\
 
 
 test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar normalize $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/normalize -o $@
+	#java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
 test/results/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar normalize $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/normalize -o $@
+	#java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
 test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar normalize $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/normalize -o $@
+	#java -jar scrivepdftools.jar normalize $<
 ifdef OPEN
 	$(OPEN) $@
 endif
@@ -419,7 +481,10 @@ endif
 test-remove-elements : test/results/unsealed.pdf
 
 test/results/unsealed.pdf : test/remove-all-elements.json test/sealed.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar remove-scrive-elements $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/remove-scrive-elements -o $@
+	#java -jar scrivepdftools.jar remove-scrive-elements $<
 ifdef OPEN
 	$(OPEN) $@
 endif
@@ -428,13 +493,19 @@ test-select-and-clip : test/results/sealed-document-sealing-removed.pdf				\
                        test/results/signed-demo-contract-sealing-removed.pdf
 
 test/results/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar select-and-clip $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/select-and-clip -o $@
+	#java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@
 endif
 
 test/results/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar
-	java -jar scrivepdftools.jar select-and-clip $<
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/select-and-clip -o $@
+	#java -jar scrivepdftools.jar select-and-clip $<
 ifdef OPEN
 	$(OPEN) $@
 endif
