@@ -19,8 +19,22 @@ endif
 
 jar : scrivepdftools.jar
 
-server :
-	java -jar scrivepdftools.jar httpserver -p 12344 &
+server : scrivepdftools.jar
+	if [ -f server.pid ]; then							\
+	   kill $$(cat server.pid);							\
+	   echo "HTTP server pid $$(cat server.pid) instakilled";			\
+	   rm server.pid;								\
+	   sleep 1;                                                                     \
+	fi;										\
+	java -Xmx1024M -jar scrivepdftools.jar httpserver -p 12344 & pid=$$!;		\
+            { echo $$pid > server.pid;							\
+	      echo "HTTP server pid $$pid started";					\
+              sleep 60;									\
+              if [ -f server.pid -a $$(cat server.pid) -eq $$pid ]; then                \
+	          kill $$pid && rm server.pid && echo "HTTP server pid $$pid killed";	\
+              fi;                                                                       \
+	    } &										\
+	sleep 1
 
 .PHONY: server
 
@@ -85,7 +99,7 @@ test-add-verification-pages : 									\
 # steals focus.  We disable that with `-Dapple.awt.UIElement=true`
 # command line option.
 
-test/results/seal-simplest.pdf : test/seal-simplest.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-simplest.pdf : test/seal-simplest.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -94,7 +108,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/example_spec.pdf : test/example_spec.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/example_spec.pdf : test/example_spec.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -103,7 +117,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/field-positions.pdf : test/field_positions.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/field-positions.pdf : test/field_positions.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -112,7 +126,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-simplest-verified.pdf : test/seal-simplest-verified.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-simplest-verified.pdf : test/seal-simplest-verified.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -121,7 +135,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-filetypes.pdf : test/seal-filetypes.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-filetypes.pdf : test/seal-filetypes.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -130,7 +144,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-filetypes-preseal.pdf : test/seal-filetypes-preseal.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -139,7 +153,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json scrivepdftools.jar
+test/results/seal-filetypes-us-letter.pdf : test/seal-filetypes-us-letter.json test/one-page-us-letter.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -148,7 +162,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-many-people.pdf : test/seal-many-people.json test/one-page-us-letter.pdf scrivepdftools.jar
+test/results/seal-many-people.pdf : test/seal-many-people.json test/one-page-us-letter.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -157,7 +171,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-images.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar
+test/results/seal-images.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar | server
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g			\
 	    -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g			\
 	    -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g				\
@@ -175,7 +189,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/missing-xmpcore.pdf : test/missing-xmpcore.json test/with-solid-background.pdf scrivepdftools.jar
+test/results/missing-xmpcore.pdf : test/missing-xmpcore.json test/with-solid-background.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -184,7 +198,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/with-background.pdf : test/add-background.json test/good_avis.pdf scrivepdftools.jar
+test/results/with-background.pdf : test/add-background.json test/good_avis.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -193,7 +207,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-images-preseal.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar
+test/results/seal-images-preseal.pdf : test/seal-images.json test/with-solid-background.pdf scrivepdftools.jar | server
 	sed -e s!16bit-gray-alpha.png!`$(BASE64) test/16bit-gray-alpha.png`!g			\
 	    -e s!grayscale-8bit.png!`$(BASE64) test/grayscale-8bit.png`!g			\
 	    -e s!jpeg-image.jpg!`$(BASE64) test/jpeg-image.jpg`!g				\
@@ -213,7 +227,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-fields.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-fields.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
@@ -222,7 +236,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/seal-fields-preseal.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar
+test/results/seal-fields-preseal.pdf : test/seal-fields.json test/three-page-a4.pdf scrivepdftools.jar | server
 	sed -e 's!"preseal": false!"preseal": true!g'						\
         -e 's!"test/results/seal-fields.pdf"!"test/results/seal-fields-preseal.pdf"!g'		\
          $< > $<.ext
@@ -269,49 +283,49 @@ test/results/test-find-texts.find-output.yaml :							\
     test/find-texts.json									\
     test/three-page-a4.pdf									\
     test/test-find-texts.expect.yaml								\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-test-document.find-output.yaml :					\
     test/find-texts-test-document.json								\
     test/test-document.pdf									\
     test/test-find-texts-test-document.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-out-of-order.find-output.yaml :					\
     test/find-texts-out-of-order.json								\
     test/text-out-of-order.pdf									\
     test/test-find-texts-out-of-order.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-json-encoding.find-output.yaml :					\
     test/find-text-json-encoding.json								\
     test/three-page-a4.pdf									\
     test/test-find-texts-json-encoding.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-sales-contract.find-output.yaml :					\
     test/find-text-sales-contract.json								\
     test/sales_contract.pdf									\
     test/test-find-texts-sales-contract.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-crop-box.find-output.yaml:						\
     test/find-texts-crop-box.json								\
     test/glas-skadeanmalan-ryds-bilglas.pdf							\
     test/test-find-texts-crop-box.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-arabic-contract.find-output.yaml:					\
     test/find-texts-arabic-contract.json							\
     test/arabic_contract.pdf									\
     test/test-find-texts-arabic-contract.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-find-texts-all-pages.find-output.yaml:					\
     test/find-texts-all-pages.json								\
     test/text-out-of-order.pdf									\
     test/test-find-texts-all-pages.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test-extract-texts : 										\
                      test/results/test-extract-texts.extract-output.yaml			\
@@ -371,79 +385,79 @@ test/results/test-extract-texts-sales-contract.extract-output.yaml :				\
     test/extract-texts-sales-contract.json							\
     test/sales_contract.pdf									\
     test/test-extract-texts-sales-contract.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-texts.extract-output.yaml :						\
     test/extract-texts.json									\
     test/three-page-a4.pdf									\
     test/test-extract-texts.expect.yaml								\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-texts-ligatures.extract-output.yaml :					\
     test/extract-texts.json									\
     test/ligatures.pdf										\
     test/test-extract-texts-ligatures.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-test-document.extract-output.yaml :					\
     test/extract-test-document.json								\
     test/test-document.pdf									\
     test/test-extract-test-document.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-test-document-with-forms.extract-output.yaml :			\
     test/extract-test-document.json								\
     test/document-with-text-in-forms.pdf							\
     test/test-extract-test-document-with-forms.expect.yaml					\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-texts-out-of-order.extract-output.yaml :				\
     test/extract-texts-whole-first-page.json							\
     test/text-out-of-order.pdf									\
     test/test-extract-texts-out-of-order.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-cat-only.extract-output.yaml :					\
     test/extract-texts-cat-only.json								\
     test/cat-only.pdf										\
     test/test-extract-cat-only.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-rotated.extract-output.yaml :						\
     test/extract-rotated.json									\
     test/rotated-text.pdf									\
     test/test-extract-rotated.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-rotate-90.extract-output.yaml :					\
     test/extract-texts-rotate-90.json								\
     test/fuck3.pdf										\
     test/test-extract-rotate-90.expect.yaml							\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-poor-mans-bold.extract-output.yaml :					\
     test/extract-texts-whole-first-page.json							\
     test/poor-mans-bold.pdf									\
     test/test-extract-poor-mans-bold.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-bB02_103_cerere.extract-output.yaml :						\
     test/extract-texts-whole-first-page.json							\
     test/bB02_103_cerere.pdf									\
     test/test-extract-bB02_103_cerere.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-extract-arabic-contract.extract-output.yaml:					\
     test/extract-texts-arabic-contract.json							\
     test/arabic_contract.pdf									\
     test/test-extract-texts-arabic-contract.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test/results/test-glas.extract-output.yaml :							\
     test/extract-texts-skadeanmalan.json							\
     test/glas-skadeanmalan-ryds-bilglas.pdf							\
     test/test-extract-texts-skadeanmalan.expect.yaml						\
-    scrivepdftools.jar
+    scrivepdftools.jar | server
 
 test-normalize : scrivepdftools.jar								\
     test/results/document-with-text-in-forms-flattened.pdf					\
@@ -451,7 +465,7 @@ test-normalize : scrivepdftools.jar								\
     test/results/unrotated3.pdf
 
 
-test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar
+test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/normalize -o $@
@@ -460,7 +474,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar
+test/results/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/normalize -o $@
@@ -469,7 +483,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar
+test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/normalize -o $@
@@ -480,7 +494,7 @@ endif
 
 test-remove-elements : test/results/unsealed.pdf
 
-test/results/unsealed.pdf : test/remove-all-elements.json test/sealed.pdf scrivepdftools.jar
+test/results/unsealed.pdf : test/remove-all-elements.json test/sealed.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/remove-scrive-elements -o $@
@@ -492,7 +506,7 @@ endif
 test-select-and-clip : test/results/sealed-document-sealing-removed.pdf				\
                        test/results/signed-demo-contract-sealing-removed.pdf
 
-test/results/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar
+test/results/sealed-document-sealing-removed.pdf : test/select-and-clip.json test/document-sealed.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/select-and-clip -o $@
@@ -501,7 +515,7 @@ ifdef OPEN
 	$(OPEN) $@
 endif
 
-test/results/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar
+test/results/signed-demo-contract-sealing-removed.pdf : test/select-and-clip-signed-demo-contract.json test/signed-demo-contract.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/select-and-clip -o $@
