@@ -4,7 +4,7 @@
 #
 #
 
-CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar:xmpcore.jar
+CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1.48.jar:bcprov-jdk15on-1.48.jar:metadata-extractor-2.6.4.jar:commons-fileupload-1.3.1.jar:commons-io-2.4.jar:xmpcore.jar:json-20090211.jar
 
 ifeq ($(OS),Windows_NT)
 else
@@ -66,6 +66,7 @@ scrivepdftools.jar : classes/Main.class								\
                      classes/PdfAdditionalInfo.class						\
                      classes/TextDump.class							\
                      classes/YamlSpec.class							\
+                     classes/SealSpec.class							\
                      classes/MyRepresenter.class						\
                      assets/sealmarker.pdf							\
                      assets/test-client.html							\

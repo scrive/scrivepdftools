@@ -35,7 +35,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.yaml.snakeyaml.TypeDescription;
+import org.json.JSONException;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -65,124 +65,6 @@ import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
-
-/*
- * Class that directly serve deserialization of JSON data.
- */
-class HistEntry
-{
-    public String date;
-    public String comment;
-    public String address;
-}
-
-class Person
-{
-    public String fullname;
-    public String company;
-    public String personalnumber;
-    public String companynumber;
-    public String email;
-    public String phone;
-    public Boolean fullnameverified;
-    public Boolean companyverified;
-    public Boolean numberverified;
-    public Boolean emailverified;
-    public Boolean phoneverified;
-    public ArrayList<Field> fields;
-    public String signtime;
-    public String signedAtText;
-    public String personalNumberText;
-    public String companyNumberText;
-}
-
-class Field
-{
-    public String valueBase64;
-    public String value;
-    public float x, y;
-    public int page;
-    public float image_w;
-    public float image_h;
-    public Boolean includeInSummary;
-    public Boolean onlyForSummary;
-    public float fontSize;
-    public Boolean greyed;
-    public ArrayList<Integer> keyColor;
-}
-
-class SealingTexts
-{
-    public String verificationTitle;
-    public String docPrefix;
-    public String signedText;
-    public String partnerText;
-    public String initiatorText;
-    public String documentText;
-    public String orgNumberText;
-    public String personalNumberText;
-    public String eventsText;
-    public String dateText;
-    public String historyText;
-    public String verificationFooter;
-    public String hiddenAttachmentText;
-    public String onePageText;
-    public String signedAtText;
-}
-
-class SealAttachment
-{
-    public String fileName;
-    public String mimeType;
-    public String fileBase64Content;
-}
-
-class FileDesc
-{
-    public String title;
-    public String role;
-    public String pagesText;
-    public String attachedBy;
-    public String input;
-}
-
-class SealSpec extends YamlSpec
-{
-    public Boolean preseal;
-    public String documentNumber;
-    public String documentNumberText;
-    public ArrayList<Person> persons;
-    public ArrayList<Person> secretaries;
-    public Person initiator;
-    public ArrayList<HistEntry> history;
-    public String initials;
-    public String initialsText;
-    public String hostpart;
-    public SealingTexts staticTexts;
-    public ArrayList<SealAttachment> attachments;
-    public ArrayList<FileDesc> filesList;
-    public ArrayList<Field> fields;
-    public ArrayList<String> fonts;
-    public String background;
-
-    static {
-        ArrayList<TypeDescription> td = new ArrayList<TypeDescription>();
-        TypeDescription sealSpecDesc = new TypeDescription(SealSpec.class);
-        sealSpecDesc.putListPropertyType("persons", Person.class);
-        sealSpecDesc.putListPropertyType("secretaries", Person.class);
-        sealSpecDesc.putListPropertyType("history", HistEntry.class);
-        sealSpecDesc.putMapPropertyType("staticTexts", String.class, String.class);
-        sealSpecDesc.putListPropertyType("attachments", SealAttachment.class);
-        sealSpecDesc.putListPropertyType("filesList", FileDesc.class);
-
-        TypeDescription personDesc = new TypeDescription(Person.class);
-        personDesc.putListPropertyType("fields", Field.class);
-
-        td.add(sealSpecDesc);
-        td.add(personDesc);
-        YamlSpec.setTypeDescriptors(SealSpec.class, td);
-    }
-}
 
 class FileAttachment
 {
@@ -268,7 +150,11 @@ public class AddVerificationPages extends Engine {
     SealSpec spec = null;
     
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
-        spec = SealSpec.loadFromStream(specFile, SealSpec.class);
+        try {
+            spec = SealSpec.FromJSON(specFile);
+        } catch (JSONException e) {
+            throw new IOException(e);
+        }
         if( inputOverride!=null ) {
             spec.input = inputOverride;
         }
@@ -327,16 +213,9 @@ public class AddVerificationPages extends Engine {
             }
 
             PdfContentByte canvas = stamper.getOverContent(i);
-            if(spec.preseal == null || !spec.preseal) {
-                String documentNumberText = spec.documentNumberText;
-                if( documentNumberText==null || documentNumberText.equals("")) {
-                    if( spec.staticTexts.docPrefix!=null ) {
-                        documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
-                    }
-                }
+            if(!spec.preseal) {
                 addPaginationFooter(spec, stamper, canvas, cropBox,
-                        documentNumberText,
-                        file.role);
+                        spec.documentNumberText, file.role);
             }
         }
         stamper.close();
@@ -491,8 +370,7 @@ public class AddVerificationPages extends Engine {
 
             PdfContentByte canvas = stamper.getOverContent(i);
             for( Field field : fields ) {
-                if( field.page==i &&
-                    (field.onlyForSummary == null || !field.onlyForSummary)) {
+                if(field.page==i && !field.onlyForSummary) {
 
                     if( field.value != null ) {
                         float fs = field.fontSize * cropBox.getWidth();
@@ -554,21 +432,9 @@ public class AddVerificationPages extends Engine {
                     }
                 }
             }
-            if(spec.preseal == null || !spec.preseal) {
-                String documentNumberText = spec.documentNumberText;
-                if( documentNumberText==null || documentNumberText.equals("")) {
-                    if( spec.staticTexts.docPrefix!=null ) {
-                        documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
-                    }
-                }
-                String initialsText = spec.initialsText;
-                if( initialsText==null || initialsText.equals("")) {
-                    if( spec.staticTexts.signedText!=null ) {
-                        initialsText = spec.staticTexts.signedText + ": " + spec.initials;
-                    }
-                }
+            if(!spec.preseal) {
                 addPaginationFooter(spec, stamper, canvas, cropBox,
-                        documentNumberText, initialsText);
+                        spec.documentNumberText, spec.initialsText);
             }
         }
         stamper.close();
@@ -643,23 +509,13 @@ public class AddVerificationPages extends Engine {
     public static ArrayList<Field> getAllFields(SealSpec spec)
     {
         ArrayList<Field> result = new ArrayList<Field>();
-        if( spec.persons!=null ) {
-            for( Person person : spec.persons ) {
-                if( person.fields!=null ) {
-                    result.addAll(person.fields);
-                }
-            }
+        for(Person person : spec.persons) {
+            result.addAll(person.fields);
         }
-        if( spec.secretaries!=null ) {
-            for( Person person : spec.secretaries ) {
-                if( person.fields!=null ) {
-                    result.addAll(person.fields);
-                }
-            }
+        for(Person person : spec.secretaries) {
+            result.addAll(person.fields);
         }
-        if( spec.fields!=null ) {
-            result.addAll(spec.fields);
-        }
+        result.addAll(spec.fields);
         return result;
     }
 
@@ -825,14 +681,14 @@ public class AddVerificationPages extends Engine {
             cell.setPaddingBottom(12);
             cell.setBorderWidth(1f);
 
-            if( person.fullname!=null && !person.fullname.equals("") ) {
+            if(!person.fullname.equals("")) {
                 para = createParagraph(person.fullname, 10,
                                        person.fullnameverified ? Font.BOLDITALIC : Font.BOLD,
                                        lightTextColor );
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
-            if( person.company!=null && !person.company.equals("") ) {
+            if(!person.company.equals("")) {
                 para = createParagraph(person.company, 10,
                                        person.companyverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor);
@@ -844,14 +700,7 @@ public class AddVerificationPages extends Engine {
              */
             cell.addElement(new Paragraph(""));
             String personalNumberText = person.personalNumberText;
-            if( personalNumberText==null || personalNumberText.equals("")) {
-                if( person.personalnumber!=null &&
-                    !person.personalnumber.equals("") &&
-                    spec.staticTexts.personalNumberText!=null ) {
-                    personalNumberText = spec.staticTexts.personalNumberText + " " + person.personalnumber;
-                }
-            }
-            if( personalNumberText!=null && !personalNumberText.equals("")) {
+            if(!personalNumberText.equals("")) {
                 para = createParagraph(personalNumberText, 10,
                                        person.numberverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor );
@@ -859,28 +708,21 @@ public class AddVerificationPages extends Engine {
                 cell.addElement(para);
             }
             String companyNumberText = person.companyNumberText;
-            if( companyNumberText==null || companyNumberText.equals("")) {
-                if( person.companynumber!=null &&
-                    !person.companynumber.equals("") &&
-                    spec.staticTexts.orgNumberText!=null ) {
-                    companyNumberText = spec.staticTexts.orgNumberText + " " + person.companynumber;
-                }
-            }
-            if( companyNumberText!=null && !companyNumberText.equals("")) {
+            if(!companyNumberText.equals("")) {
                 para = createParagraph(companyNumberText, 10,
                                        person.companyverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor);
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
-            if( person.email!=null && !person.email.equals("") ) {
+            if(!person.email.equals("")) {
                 para = createParagraph(person.email, 10,
                                        person.emailverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor);
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
             }
-            if( person.phone!=null && !person.phone.equals("") ) {
+            if(!person.phone.equals("")) {
                 para = createParagraph(person.phone, 10,
                                        person.phoneverified ? Font.ITALIC : Font.NORMAL,
                                        lightTextColor);
@@ -929,14 +771,7 @@ public class AddVerificationPages extends Engine {
                 }
             }
             String signedAtText = person.signedAtText;
-            if( signedAtText==null || signedAtText.equals("") ) {
-                if( spec.staticTexts.signedAtText!=null &&
-                    person.signtime!=null &&
-                    !person.signtime.equals("") ) {
-                    signedAtText = spec.staticTexts.signedAtText + " " + person.signtime;
-                }
-            }
-            if( signedAtText!=null && !signedAtText.equals("")) {
+            if(!signedAtText.equals("")) {
                 para = createParagraph(signedAtText, 10, Font.ITALIC, lightTextColor);
                 para.setLeading(0f, 1.2f);
                 cell.addElement(para);
@@ -993,13 +828,7 @@ public class AddVerificationPages extends Engine {
 
         document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
 
-        String documentNumberText = spec.documentNumberText;
-        if( documentNumberText==null || documentNumberText.equals("")) {
-            if( spec.staticTexts.docPrefix!=null ) {
-                documentNumberText = spec.staticTexts.docPrefix + " " + spec.documentNumber;
-            }
-        }
-        Paragraph para = createParagraph(documentNumberText, 12, Font.NORMAL, lightTextColor);
+        Paragraph para = createParagraph(spec.documentNumberText, 12, Font.NORMAL, lightTextColor);
         para.setSpacingAfter(50);
         document.add(para);
 
@@ -1055,7 +884,7 @@ public class AddVerificationPages extends Engine {
         /*
          * Initiator part
          */
-        if( spec.initiator!=null) {
+        if(spec.initiator != null) {
             addSubtitle(document, spec.staticTexts.initiatorText);
             addPersonsTable(Arrays.asList(spec.initiator), document, spec);
         }
@@ -1203,7 +1032,7 @@ public class AddVerificationPages extends Engine {
             out = new FileOutputStream(spec.output);
        
         initializeBaseFonts(spec.fonts);
-        if( spec.preseal==null || !spec.preseal ) {
+        if(!spec.preseal) {
 
             ByteArrayOutputStream sealPagesRaw = new ByteArrayOutputStream();
             ByteArrayOutputStream sealPages = new ByteArrayOutputStream();
