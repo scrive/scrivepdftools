@@ -28,6 +28,12 @@
   - -3
   - -4
   "text": "1 av 1"
+- "coords":
+  - 0.8901417255401611
+  - 0.9722291231155396
+  "index": -1
+  "page": 3
+  "text": "1 av 1"
 "stampedOutput": "test/results/test-find-texts-out-of-order.find-output.pdf"
 "yamlOutput": true
 

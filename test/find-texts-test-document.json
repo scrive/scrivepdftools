@@ -3,6 +3,7 @@
 , "stampedOutput": "test/results/test-document-find-texts-stamped.pdf"
 , "matches": [ { "text": "Test", "index": 1, "pages": [1] }
              , { "text": "SkrivaPa", "index": 3, "pages": [1] }
+             , { "text": "SkrivaPa", "index": -4, "pages": [1] }
              , { "text": "krivaPa", "index": 3, "pages": [1] }
              , { "text": "SkrivaP", "index": 3, "pages": [1] }
              , { "text": "document", "index": 3, "pages": [1] }

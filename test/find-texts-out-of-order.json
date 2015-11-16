@@ -2,6 +2,7 @@
 , "yamlOutput": true
 , "stampedOutput": "test/results/texts-out-of-order-stamped.pdf"
 , "matches": [ { "text": "1 av 1", "index": 1, "pages": [1,2,3,4] },
-               { "text": "1 av 1", "index": 1, "pages": [-1,-2,-3,-4] }
+               { "text": "1 av 1", "index": 1, "pages": [-1,-2,-3,-4] },
+               { "text": "1 av 1", "index": -1 }
              ]
 }
