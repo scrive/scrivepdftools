@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -99,13 +100,16 @@ class FindTextSpec extends YamlSpec
 
 public class FindTexts extends TextEngine
 {
-    public ArrayList<CharPos> find(PageText text, String needle, int index) {
+    public ArrayList<CharPos> find(PageText text, String needle) {
+
         ArrayList<CharPos> foundText = new ArrayList<CharPos>();
-        if ((needle == null) || (needle.isEmpty()))
+
+        if ( needle == null || needle.isEmpty())
             return foundText;
-        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet())
+
+        for (Map.Entry<Integer, ArrayList<ArrayList<CharPos>>> lines: text.getChars().entrySet()) {
             for (ArrayList<CharPos> line: lines.getValue()) {
-                // 1. match the needle against the current line 
+                // 1. match the needle against the current line
                 String str = "";
                 for (CharPos c: line)
                     str += c.c;
@@ -131,15 +135,12 @@ public class FindTexts extends TextEngine
                         jj += line.get(kk).c.length();
                     }
                     foundText.add(new CharPos(needle, base, bbox));
-                    if( index == 1 )
-                        return foundText;
-                    else
-                        --index;
                     // 4. check for the next match
                     i = str.indexOf(needle, i + 1);
                 }
             }
-         return foundText;
+        }
+        return foundText;
      }
 
     // mark all glyphs
@@ -172,10 +173,10 @@ public class FindTexts extends TextEngine
     }
 
     FindTextSpec spec = null;
-    
+
     @Override
     public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
-        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
+        // TODO: it would be nice if FindTextSpec added type descritpors itself, because we can forget to set them implicitly :-/
         YamlSpec.setTypeDescriptors(FindTextSpec.class, FindTextSpec.getTypeDescriptors());
         spec = FindTextSpec.loadFromStream(specFile, FindTextSpec.class);
         if( inputOverride!=null ) {
@@ -183,7 +184,7 @@ public class FindTexts extends TextEngine
         }
         if( outputOverride!=null ) {
             spec.stampedOutput = outputOverride;
-        }       
+        }
     }
 
     @Override
@@ -243,16 +244,36 @@ public class FindTexts extends TextEngine
             if ((needle == null) || (needle.isEmpty()))
                 continue;
             ArrayList<Integer> pages = (match.pages != null) ? match.pages : pages0;
-            for (Integer ip : pages) {
-                final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last
-                if( i>=1 && i<=pageCount && (index>0)) {
-                    ArrayList<CharPos> found = find(text.text[i-1], needle, index);
-                    if (index <= found.size()) {
-                        match.page = i;
-                        onTextFound(match, found.get(index - 1));
-                        break;
-                    } else if (found != null)
-                        index = index - found.size();
+            if (index>0 ) {
+                for (Integer ip : pages) {
+                    final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last
+                    if (i>=1 && i<=pageCount) {
+                        ArrayList<CharPos> found = find(text.text[i-1], needle);
+                        if (index <= found.size()) {
+                            match.page = i;
+                            onTextFound(match, found.get(index - 1));
+                            break;
+                        } else if (found != null)
+                            index = index - found.size();
+                    }
+                }
+            }
+            else if (index<0) {
+                index = -index;
+                pages = (ArrayList<Integer>)pages.clone();
+                Collections.reverse(pages);
+                for (Integer ip : pages) {
+                    final int i = (ip < 0) ? pageCount + ip + 1 : ip; // -1 is last page, -2 is second to the last
+                    if (i>=1 && i<=pageCount) {
+                        ArrayList<CharPos> found = find(text.text[i-1], needle);
+                        Collections.reverse(found);
+                        if (index <= found.size()) {
+                            match.page = i;
+                            onTextFound(match, found.get(index - 1));
+                            break;
+                        } else if (found != null)
+                            index = index - found.size();
+                    }
                 }
             }
         }
