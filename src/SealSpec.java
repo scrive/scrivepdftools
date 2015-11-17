@@ -184,7 +184,7 @@ class SealSpec {
     public Person initiator;
     public ArrayList<HistEntry> history;
     public String initialsText;
-    public String hostpart;
+    // public String hostpart;
     public SealingTexts staticTexts;
     public ArrayList<SealAttachment> attachments;
     public ArrayList<FileDesc> filesList;
@@ -205,15 +205,17 @@ class SealSpec {
         spec.preseal = obj.optBoolean("preseal", false);
         spec.input = obj.getString("input");
         spec.output = obj.getString("output");
-        spec.documentNumberText = obj.getString("documentNumberText");
-        spec.initialsText = obj.getString("initialsText");
-        spec.hostpart = obj.getString("hostpart");
+        spec.documentNumberText = obj.optString("documentNumberText");
+        spec.initialsText = obj.optString("initialsText");
+        // spec.hostpart = obj.getString("hostpart");
         spec.background = obj.optString("background", null);
 
-        JSONArray arr = obj.getJSONArray("filesList");
+        JSONArray arr = obj.optJSONArray("filesList");
         spec.filesList = new ArrayList<FileDesc>();
-        for (int i = 0; i < arr.length(); i++) {
-            spec.filesList.add(FileDesc.FromJSON(arr.getJSONObject(i)));
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                spec.filesList.add(FileDesc.FromJSON(arr.getJSONObject(i)));
+            }
         }
 
         arr = obj.optJSONArray("fields");
@@ -224,31 +226,44 @@ class SealSpec {
             }
         }
 
-        arr = obj.getJSONArray("persons");
+        arr = obj.optJSONArray("persons");
         spec.persons = new ArrayList<Person>();
-        for (int i = 0; i < arr.length(); i++) {
-            spec.persons.add(Person.FromJSON(arr.getJSONObject(i)));
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                spec.persons.add(Person.FromJSON(arr.getJSONObject(i)));
+            }
         }
 
-        arr = obj.getJSONArray("secretaries");
+        arr = obj.optJSONArray("secretaries");
         spec.secretaries = new ArrayList<Person>();
-        for (int i = 0; i < arr.length(); i++) {
-            spec.secretaries.add(Person.FromJSON(arr.getJSONObject(i)));
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                spec.secretaries.add(Person.FromJSON(arr.getJSONObject(i)));
+            }
         }
 
-        arr = obj.getJSONArray("history");
+        arr = obj.optJSONArray("history");
         spec.history = new ArrayList<HistEntry>();
-        for (int i = 0; i < arr.length(); i++) {
-            spec.history.add(HistEntry.FromJSON(arr.getJSONObject(i)));
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                spec.history.add(HistEntry.FromJSON(arr.getJSONObject(i)));
+            }
         }
 
-        arr = obj.getJSONArray("attachments");
+        arr = obj.optJSONArray("attachments");
         spec.attachments = new ArrayList<SealAttachment>();
-        for (int i = 0; i < arr.length(); i++) {
-            spec.attachments.add(SealAttachment.FromJSON(arr.getJSONObject(i)));
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                spec.attachments.add(SealAttachment.FromJSON(arr.getJSONObject(i)));
+            }
         }
 
-        spec.staticTexts = SealingTexts.FromJSON(obj.getJSONObject("staticTexts"));
+        JSONObject staticTextsJson = obj.optJSONObject("staticTexts");
+        if (staticTextsJson != null) {
+            spec.staticTexts = SealingTexts.FromJSON(staticTextsJson);
+        } else {
+            spec.staticTexts = null;
+        }
         JSONObject initiator = obj.optJSONObject("initiator");
         if (initiator != null) {
             spec.initiator = Person.FromJSON(initiator);
