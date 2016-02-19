@@ -59,6 +59,7 @@ scrivepdftools.jar : classes/Main.class								\
                      classes/ExtractTexts.class							\
                      classes/Normalize.class							\
                      classes/SelectAndClip.class						\
+                     classes/RemoveJavaScript.class						\
                      classes/WebServer.class							\
                      classes/PageText.class							\
                      classes/Engine.class							\
@@ -78,6 +79,7 @@ scrivepdftools.jar : classes/Main.class								\
 test : test-add-verification-pages								\
        test-find-texts										\
        test-extract-texts									\
+       test-remove-javascript									\
        test-normalize										\
        test-remove-elements									\
        test-select-and-clip
@@ -465,6 +467,9 @@ test-normalize : scrivepdftools.jar								\
     test/results/unrotated-text.pdf								\
     test/results/unrotated3.pdf
 
+test-remove-javascript : scrivepdftools.jar							\
+    test/results/document-with-removed-javascript.pdf
+
 
 test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json test/document-with-text-in-forms.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
@@ -474,6 +479,7 @@ test/results/document-with-text-in-forms-flattened.pdf : test/normalize.json tes
 ifdef OPEN
 	$(OPEN) $@
 endif
+
 
 test/results/unrotated-text.pdf : test/normalize-rotated.json test/rotated-text.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
@@ -489,6 +495,12 @@ test/results/unrotated3.pdf : test/normalize-rotated3.json test/fuck3.pdf scrive
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/normalize -o $@
 	#java -jar scrivepdftools.jar normalize $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/results/document-with-removed-javascript.pdf : test/remove-javascript.json test/document-with-javascript.pdf scrivepdftools.jar
+	java -jar scrivepdftools.jar remove-javascript $<
 ifdef OPEN
 	$(OPEN) $@
 endif
