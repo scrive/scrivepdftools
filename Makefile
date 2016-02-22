@@ -20,6 +20,8 @@ endif
 jar : scrivepdftools.jar
 
 server : scrivepdftools.jar
+	mkdir -p test/results;                                                          \
+	rm -f test/results/*.*;                                                         \
 	if [ -f server.pid ]; then							\
 	   kill $$(cat server.pid);							\
 	   echo "HTTP server pid $$(cat server.pid) instakilled";			\
