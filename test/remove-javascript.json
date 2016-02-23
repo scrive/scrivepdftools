@@ -1,0 +1,3 @@
+{"input":"test/document-with-javascript.pdf",
+ "output":"test/results/document-with-javascript-removed.pdf"
+}
