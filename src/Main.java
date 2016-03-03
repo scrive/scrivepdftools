@@ -113,6 +113,7 @@ public class Main
                     engine.execute(args[1], (args.length == 3) ? args[2] : null, null);
             } catch (Exception e) {
                 e.printStackTrace(System.err);
+                System.exit(1);
             }
         }
     }
