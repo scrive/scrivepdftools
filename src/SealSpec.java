@@ -161,6 +161,7 @@ class FileDesc {
     public String role;
     public String pagesText;
     public String attachedBy;
+    public String attachedToSealedFileText;
     public String input;
 
     static public FileDesc FromJSON(JSONObject obj) throws JSONException {
@@ -169,6 +170,7 @@ class FileDesc {
         fileDesc.role = obj.getString("role");
         fileDesc.pagesText = obj.getString("pagesText");
         fileDesc.attachedBy = obj.getString("attachedBy");
+        fileDesc.attachedToSealedFileText = obj.optString("attachedToSealedFileText", null);
         fileDesc.input = obj.optString("input", null);
         return fileDesc;
     }

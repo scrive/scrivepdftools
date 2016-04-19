@@ -868,6 +868,13 @@ public class AddVerificationPages extends Engine {
             para = createParagraph(file.pagesText, 10, Font.NORMAL, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
+
+            if (file.attachedToSealedFileText != null) {
+              para = createParagraph(file.attachedToSealedFileText, 10, Font.NORMAL, lightTextColor);
+              para.setLeading(0f, 1.2f);
+              cell.addElement(para);
+            }
+
             para = createParagraph(file.attachedBy, 10, Font.ITALIC, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
