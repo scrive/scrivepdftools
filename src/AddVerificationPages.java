@@ -55,8 +55,10 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.ColumnText;
+import com.itextpdf.text.pdf.PdfAction;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfCopy;
+import com.itextpdf.text.pdf.PdfDestination;
 import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -176,7 +178,11 @@ public class AddVerificationPages extends Engine {
         PdfCopy writer = new PdfCopy(document, os);
         document.open();
 
+        Float height = null;
         for(PdfReader reader: sources) {
+            if (height == null) {
+                height = reader.getPageSize(1).getHeight();
+            }
             int count = reader.getNumberOfPages();
             for( int i=1; i<=count; i++ ) {
                 PdfImportedPage page = writer.getImportedPage(reader, i);
@@ -185,6 +191,10 @@ public class AddVerificationPages extends Engine {
             writer.freeReader(reader);
             reader.close();
         }
+
+        PdfDestination pdfDest = new PdfDestination(PdfDestination.XYZ, 0, height, 1f);
+        PdfAction action = PdfAction.gotoLocalPage(1, pdfDest, writer);
+        writer.setOpenAction(action);
 
         document.close();
         writer.close();
