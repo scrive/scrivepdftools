@@ -193,6 +193,7 @@ class SealSpec {
     public ArrayList<Field> fields;
     public ArrayList<String> fonts;
     public String background;
+    public Boolean disableFooter;
 
     static public SealSpec FromJSON(InputStream specFile) throws IOException, JSONException {
         StringWriter writer = new StringWriter();
@@ -211,6 +212,7 @@ class SealSpec {
         spec.initialsText = obj.optString("initialsText");
         // spec.hostpart = obj.getString("hostpart");
         spec.background = obj.optString("background", null);
+        spec.disableFooter = obj.optBoolean("disableFooter", false);
 
         JSONArray arr = obj.optJSONArray("filesList");
         spec.filesList = new ArrayList<FileDesc>();
