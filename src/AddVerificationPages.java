@@ -442,7 +442,7 @@ public class AddVerificationPages extends Engine {
                     }
                 }
             }
-            if(!spec.preseal) {
+            if(!spec.preseal && !spec.disableFooter) {
                 addPaginationFooter(spec, stamper, canvas, cropBox,
                         spec.documentNumberText, spec.initialsText);
             }

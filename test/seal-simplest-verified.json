@@ -2,6 +2,7 @@
  "output": "test/results/seal-simplest-verified.pdf",
  "preseal": false,
  "documentNumberText": "Transaction 0000001234",
+ "disableFooter": true,
  "persons": [{"fullname": "Full Name X",
               "company": "Company Name",
               "personalnumber": "Personal Number",
