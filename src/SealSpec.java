@@ -36,6 +36,8 @@ class Person {
     public Boolean emailverified;
     public Boolean phoneverified;
     public ArrayList<Field> fields;
+    public ArrayList<HighlightedImage> highlightedImages;
+
     public String signtime;
     public String signedAtText;
     public String personalNumberText;
@@ -60,10 +62,16 @@ class Person {
         p.personalNumberText = obj.getString("personalNumberText");
         p.companyNumberText = obj.getString("companyNumberText");
 
-        JSONArray arr = obj.getJSONArray("fields");
+        JSONArray arr1 = obj.getJSONArray("fields");
         p.fields = new ArrayList<Field>();
-        for (int i = 0; i < arr.length(); i++) {
-            p.fields.add(Field.FromJSON(arr.getJSONObject(i)));
+        for (int i = 0; i < arr1.length(); i++) {
+            p.fields.add(Field.FromJSON(arr1.getJSONObject(i)));
+        }
+
+        JSONArray arr2 = obj.getJSONArray("highlightedImages");
+        p.highlightedImages = new ArrayList<HighlightedImage>();
+        for (int i = 0; i < arr2.length(); i++) {
+            p.highlightedImages.add(HighlightedImage.FromJSON(arr2.getJSONObject(i)));
         }
 
         return p;
@@ -110,6 +118,21 @@ class Field {
         return field;
     }
 }
+
+class HighlightedImage {
+    public int page;
+    public String imageBase64;
+
+    static public HighlightedImage FromJSON(JSONObject obj) throws JSONException {
+        HighlightedImage hi = new HighlightedImage();
+
+        hi.page = obj.getInt("page");
+        hi.imageBase64 = obj.getString("imageBase64");
+
+        return hi;
+    }
+}
+
 
 class SealingTexts {
     public String verificationTitle;

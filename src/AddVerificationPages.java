@@ -344,7 +344,7 @@ public class AddVerificationPages extends Engine {
      * Process each page of a source document and put all fields on
      * top of it.  If sealing add also paginatin markers.
      */
-    public static void stampFieldsAndPaginationOverPdf(SealSpec spec, PdfReader reader, ArrayList<Field> fields, OutputStream os)
+    public static void stampFieldsAndPaginationOverPdf(SealSpec spec, PdfReader reader, ArrayList<Field> fields, ArrayList<HighlightedImage> highlightedImages, OutputStream os)
         throws DocumentException, IOException, Base64DecodeException
     {
         PdfStamper stamper = new PdfStamper(reader, os);
@@ -422,7 +422,7 @@ public class AddVerificationPages extends Engine {
                         float realx = field.x * cropBox.getWidth() + cropBox.getLeft();
                         float realy = (1 - field.y - field.image_h) * cropBox.getHeight() + cropBox.getBottom();
 
-                        Image image = createImageWithKeyColor(field);
+                        Image image = createImageWithKeyColor(field.valueBase64);
 
                         float initialRotation = image.getInitialRotation();
                         boolean flip_xy = false;
@@ -442,6 +442,36 @@ public class AddVerificationPages extends Engine {
                     }
                 }
             }
+
+            for( HighlightedImage hp : highlightedImages ) {
+                if(hp.page==i && hp.imageBase64 != null) {
+
+                    float realx = cropBox.getLeft();
+                    float realy = cropBox.getBottom();
+
+                    Image image = createImageWithKeyColor(hp.imageBase64);
+
+                    float initialRotation = image.getInitialRotation();
+                    boolean flip_xy = false;
+                    if( Math.abs(initialRotation - Math.PI/2)<0.01 ||
+                        Math.abs(initialRotation - 3*Math.PI/2)<0.01 ) {
+                        flip_xy = true;
+                    }
+
+
+                    float absoluteWidth = cropBox.getWidth();
+                    float absoluteHeight = cropBox.getHeight();
+                    image.setAbsolutePosition(realx,realy);
+                    image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
+                                        flip_xy ? absoluteWidth : absoluteHeight);
+
+                    canvas.addImage(image);
+                }
+            }
+
+
+
+
             if(!spec.preseal && !spec.disableFooter) {
                 addPaginationFooter(spec, stamper, canvas, cropBox,
                         spec.documentNumberText, spec.initialsText);
@@ -529,9 +559,21 @@ public class AddVerificationPages extends Engine {
         return result;
     }
 
-    static Image createImageWithKeyColor(Field field) throws Base64DecodeException, BadElementException, MalformedURLException, IOException, DocumentException
+    /*
+     * Gather all highlightImages from all signatories
+     */
+    public static ArrayList<HighlightedImage> getAllHighlightedImage(SealSpec spec)
     {
-        byte rawdata[] = Base64.decode(field.valueBase64);
+        ArrayList<HighlightedImage> result = new ArrayList<HighlightedImage>();
+        for(Person person : spec.persons) {
+            result.addAll(person.highlightedImages);
+        }
+        return result;
+    }
+
+    static Image createImageWithKeyColor(String valueBase64) throws Base64DecodeException, BadElementException, MalformedURLException, IOException, DocumentException
+    {
+        byte rawdata[] = Base64.decode(valueBase64);
         if( rawdata==null ) {
             throw new Base64DecodeException();
         }
@@ -744,7 +786,7 @@ public class AddVerificationPages extends Engine {
                     field.valueBase64!="" &&
                     field.includeInSummary ) {
 
-                        Image image = createImageWithKeyColor(field);
+                        Image image = createImageWithKeyColor(field.valueBase64);
 
                         /*
                          * The magic below is to add a bottom line to
@@ -1086,7 +1128,7 @@ public class AddVerificationPages extends Engine {
 
             stampFooterOverSealPages(spec, new PdfReader(sealPagesRaw.toByteArray()), sealPages);
 
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), sourceWithFields);
+            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), getAllHighlightedImage(spec), sourceWithFields);
 
 
             pdfsToConcatenate.add(0,new PdfReader(sourceWithFields.toByteArray()));
@@ -1101,7 +1143,7 @@ public class AddVerificationPages extends Engine {
                                out);
         }
         else {
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), out);
+            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), getAllHighlightedImage(spec), out);
         }
     }
 
