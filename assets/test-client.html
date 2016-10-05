@@ -3,11 +3,11 @@
 	<script language="JavaScript">
 		function onSubmit(form) {
 			if (form.config.value == "") {
-				alert("Please select JSON config for upload");	
+				alert("Please select JSON config for upload");
 				return false;
 			}
 			if (form.pdf.value == "") {
-				alert("Please select PDF document for upload");	
+				alert("Please select PDF document for upload");
 				return false;
 			}
 			form.action = form.command.value;
@@ -35,13 +35,14 @@
 					<td><b>Action:</b></td>
 					<td>
 						<select name="command">
-							<option name="normalize" value="normalize" checked>Normalize</option>
+						<option name="add-verification-pages" value="add-verification-pages">Add verification pages</option>
 							<option name="extract-texts" value="extract-texts">Extract texts</option>
 							<option name="find-texts" value="find-texts">Find texts</option>
+							<option name="normalize" value="normalize" checked>Normalize</option>
+              <option name="remove-javascript" value="remove-javascript">Remove JavaScript</option>
+              <option name="remove-scrive-elements" value="remove-scrive-elements">Remove Scrive elements</option>
 							<option name="select-and-clip" value="select-and-clip">Select and clip</option>
-                            <option name="remove-scrive-elements" value="remove-scrive-elements">Remove Scrive elements</option>
-							<option name="add-verification-pages" value="add-verification-pages">Add verification pages</option>
-						</select>					
+						</select>
 					</td>
 				</tr>
 				<tr><td><b>JSON config:</b></td><td><input type="file" name="config" accept="*.json"/></td></tr>

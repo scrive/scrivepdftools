@@ -19,12 +19,12 @@ public class WebServer {
     public static void start(String specFile, String ip, int port)
             throws IOException
     {
-        InetSocketAddress address = ((ip != null) && !ip.isEmpty()) ? new InetSocketAddress(ip, port) : new InetSocketAddress(port);  
+        InetSocketAddress address = ((ip != null) && !ip.isEmpty()) ? new InetSocketAddress(ip, port) : new InetSocketAddress(port);
         HttpServer server = HttpServer.create(address, 0);
         server.setExecutor(null); // use default
 
         // Init test client contexts
-        TestHandler main = new TestHandler(); 
+        TestHandler main = new TestHandler();
         server.createContext("/", main);
         server.createContext("/main.html", main);
         server.createContext("/main.htm", main);
@@ -32,17 +32,16 @@ public class WebServer {
         server.createContext("/index.htm", main);
 
         // Init PDF processing context for each command
-        final String[] commands = {"add-verification-pages", "find-texts", "extract-texts", "normalize", "remove-scrive-elements", "select-and-clip"};
+        final String[] commands = {"add-verification-pages", "extract-texts", "find-texts", "normalize", "remove-javascript", "remove-scrive-elements", "select-and-clip"};
         for (String cmd: commands)
             server.createContext("/" + cmd, new ExecHandler(cmd));
-
         System.out.println("HTTP server starting on " + address.getHostName() + ":" + address.getPort());
         server.start();
     }
 
     /**
      * This handler provides convenient web browser based client
-     * that can be used to upload files and test HTTP communication 
+     * that can be used to upload files and test HTTP communication
      *
      */
     static class TestHandler implements HttpHandler
@@ -54,7 +53,7 @@ public class WebServer {
             System.out.println("\n->[" + (new Date()).toString() + "] Request " + t.getProtocol().toString() + "/" + t.getRequestMethod() + " from " + t.getRemoteAddress().toString());
             // load test HTML page
             try {
-               BufferedReader reader = new BufferedReader(new FileReader(Main.getResource("assets/test-client.html"))); // use JAR resources if possible
+               BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("assets/test-client.html"))); // use JAR resources if possible
                String line = reader.readLine();
                while (null != line) {
                    response += line + "\r\n";
@@ -65,7 +64,7 @@ public class WebServer {
                 code = 500;
                 response = "Error: Failed to load test page..";
             }
-            // send response            
+            // send response
             t.sendResponseHeaders(code, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes("UTF-8"));
@@ -104,7 +103,7 @@ public class WebServer {
             }
             if (disp.startsWith("config")) {
                 config = data;
-                configName = fname;                    
+                configName = fname;
             } else if (disp.startsWith("pdf")) {
                 pdf = data;
                 pdfName = fname;
@@ -117,15 +116,15 @@ public class WebServer {
         private boolean parseRequest(InputStream body, String boundary) throws IOException
         {
             try {
-                MultipartStream multipartStream = new MultipartStream(body, boundary.getBytes(), 16384, null); // 16 kB buffer 
+                MultipartStream multipartStream = new MultipartStream(body, boundary.getBytes(), 16384, null); // 16 kB buffer
                 boolean nextPart = multipartStream.skipPreamble();
                 while (nextPart) {
                     String header = multipartStream.readHeaders();
-                    ByteArrayOutputStream buf = new ByteArrayOutputStream();  
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
                     multipartStream.readBodyData(buf);
                     onFormField(getVal(header, "Content-Disposition: "), getVal(header, "Content-Type: "), buf.toByteArray());
                     nextPart = multipartStream.readBoundary();
-                }            
+                }
             } catch (IOException e) {
                 e.printStackTrace(System.err);
                 throw e;
@@ -135,23 +134,23 @@ public class WebServer {
             System.out.println("Uploaded \"" + pdfName + "\" (" + pdf.length + " bytes) and \"" + configName + "\" for: " + command);
             return true;
         }
-        
+
         public void handle(HttpExchange t) throws IOException
         {
             String response = "200 OK";
             int code = 200;
-            
+
             // Parse the request
-            try { 
+            try {
                 System.out.println("\n->[" + (new Date()).toString() + "] Request " + t.getProtocol().toString() + "/" + t.getRequestMethod() + " from " + t.getRemoteAddress().toString());
                 final String mpart = "multipart/form-data; boundary=";
                 String ctype = t.getRequestHeaders().getFirst("Content-type");
                 if ((null == ctype) || !ctype.startsWith(mpart)) {
-                    response = "Error 400: Content-type not recognized: " + ctype; 
+                    response = "Error 400: Content-type not recognized: " + ctype;
                     code = 400;
                 } else if (!parseRequest(t.getRequestBody(), getVal(ctype, mpart))) {
                     code = 400;
-                    response = "Error 400: Failed to parse request body"; 
+                    response = "Error 400: Failed to parse request body";
                 } else {
                     // Dispatch processing
                     String outFileName = pdfName + ".result.pdf", mime = "application/pdf";
