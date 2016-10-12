@@ -9,6 +9,7 @@
               "email": "example@example.com",
               "phone": "123412341234",
               "signtime":"2015-10-27 17:47:00 CET (+0100)",
+              "highlightedImages": [],
               "signedAtText":"Signed 2015-10-27 17:47:00 CET (+0100)",
               "personalNumberText":"",
               "companyNumberText":"",
