@@ -419,8 +419,15 @@ public class AddVerificationPages extends Engine {
                     }
                     else if( field.valueBase64 !=null ) {
 
+                        float absoluteWidth = field.image_w * cropBox.getWidth();
+                        float absoluteHeight = absoluteWidth; // Square - same width and height
+
+                        if( field.image_h != 0.0) { // Unless height is provided
+                          absoluteHeight = field.image_h * cropBox.getHeight();
+                        }
+
                         float realx = field.x * cropBox.getWidth() + cropBox.getLeft();
-                        float realy = (1 - field.y - field.image_h) * cropBox.getHeight() + cropBox.getBottom();
+                        float realy = (1 - field.y) * cropBox.getHeight() + cropBox.getBottom() - absoluteHeight;
 
                         Image image = createImageWithKeyColor(field.valueBase64);
 
@@ -431,9 +438,6 @@ public class AddVerificationPages extends Engine {
                             flip_xy = true;
                         }
 
-
-                        float absoluteWidth = field.image_w * cropBox.getWidth();
-                        float absoluteHeight = field.image_h * cropBox.getHeight();
                         image.setAbsolutePosition(realx,realy);
                         image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
                                             flip_xy ? absoluteWidth : absoluteHeight);
