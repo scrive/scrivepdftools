@@ -9,12 +9,7 @@ CLASSPATH=itextpdf-5.5.5.jar:itext-asian.jar:snakeyaml-1.12.jar:bcpkix-jdk15on-1
 ifeq ($(OS),Windows_NT)
 else
     UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Linux)
-        BASE64=base64 -w 0 -i
-    endif
-    ifeq ($(UNAME_S),Darwin)
-        BASE64=base64 -b 0 -i
-    endif
+    BASE64=base64 -w 0 -i
 endif
 
 jar : scrivepdftools.jar

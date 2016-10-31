@@ -34,18 +34,18 @@ public class Main
     public static Engine getEngine(String command) {
         if( command.equals("add-verification-pages"))
             return new AddVerificationPages();
-        else if( command.equals("find-texts"))
-            return new FindTexts();
         else if( command.equals("extract-texts"))
             return new ExtractTexts();
+				else if( command.equals("find-texts"))
+		        return new FindTexts();
         else if( command.equals("normalize"))
             return new Normalize();
         else if( command.equals("remove-javascript"))
             return new RemoveJavaScript();
+				else if( command.equals("remove-scrive-elements"))
+		        return new RemoveScriveElements();
         else if( command.equals("select-and-clip"))
             return new SelectAndClip();
-        else if( command.equals("remove-scrive-elements"))
-            return new RemoveScriveElements();
         System.err.println("Error: Uknown command: " + command);
         return null;
     }
@@ -73,12 +73,12 @@ public class Main
             System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
             System.err.println("");
             System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar find-texts config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar extract-texts config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar find-texts config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar normalize config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
@@ -101,9 +101,9 @@ public class Main
                     System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
                 } catch (SocketException e) {
                     System.err.println("Error: Invalid IP address: " + ip);
-                    e.printStackTrace(System.err);                    
+                    e.printStackTrace(System.err);
                 } catch (IOException e) {
-                    e.printStackTrace(System.err);                    
+                    e.printStackTrace(System.err);
                 }
             }
         } else {
