@@ -378,7 +378,8 @@ public class AddVerificationPages extends Engine {
                 }
             }
 
-            PdfContentByte canvas = stamper.getOverContent(i);
+            PdfContentByte overCanvas = stamper.getOverContent(i);
+            PdfContentByte underCanvas = stamper.getUnderContent(i);
             for( Field field : fields ) {
                 if(field.page==i && !field.onlyForSummary) {
 
@@ -412,7 +413,7 @@ public class AddVerificationPages extends Engine {
                         float realx = field.x * cropBox.getWidth() + cropBox.getLeft() - fontOffset;
                         float realy = (1 - field.y) * cropBox.getHeight() + cropBox.getBottom() - fontBaseline;
 
-                        ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
+                        ColumnText.showTextAligned(overCanvas, Element.ALIGN_LEFT,
                                                    para,
                                                    realx, realy,
                                                    0);
@@ -442,7 +443,7 @@ public class AddVerificationPages extends Engine {
                         image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
                                             flip_xy ? absoluteWidth : absoluteHeight);
 
-                        canvas.addImage(image);
+                        overCanvas.addImage(image);
                     }
                 }
             }
@@ -469,7 +470,7 @@ public class AddVerificationPages extends Engine {
                     image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
                                         flip_xy ? absoluteWidth : absoluteHeight);
 
-                    canvas.addImage(image);
+                    underCanvas.addImage(image);
                 }
             }
 
@@ -477,7 +478,7 @@ public class AddVerificationPages extends Engine {
 
 
             if(!spec.preseal && !spec.disableFooter) {
-                addPaginationFooter(spec, stamper, canvas, cropBox,
+                addPaginationFooter(spec, stamper, overCanvas, cropBox,
                         spec.documentNumberText, spec.initialsText);
             }
         }
