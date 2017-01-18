@@ -378,8 +378,7 @@ public class AddVerificationPages extends Engine {
                 }
             }
 
-            PdfContentByte overCanvas = stamper.getOverContent(i);
-            PdfContentByte underCanvas = stamper.getUnderContent(i);
+            PdfContentByte overCanvas = stamper.getOverContent(i); // There's also getUnderContent() if we need to stamp behind text
             for( Field field : fields ) {
                 if(field.page==i && !field.onlyForSummary) {
 
@@ -470,7 +469,7 @@ public class AddVerificationPages extends Engine {
                     image.scaleAbsolute(flip_xy ? absoluteHeight : absoluteWidth,
                                         flip_xy ? absoluteWidth : absoluteHeight);
 
-                    underCanvas.addImage(image);
+                    overCanvas.addImage(image);
                 }
             }
 
