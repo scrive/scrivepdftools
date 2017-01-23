@@ -46,6 +46,8 @@ public class Main
             return new SelectAndClip();
         else if( command.equals("remove-scrive-elements"))
             return new RemoveScriveElements();
+        else if( command.equals("extract-pdf-attachments"))
+            return new ExtractPdfAttachments();
         System.err.println("Error: Uknown command: " + command);
         return null;
     }
@@ -79,6 +81,7 @@ public class Main
             System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json optional-input.pdf");
             System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar extract-pdf-attachments config.json input.pdf");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
