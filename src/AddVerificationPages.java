@@ -353,9 +353,6 @@ public class AddVerificationPages extends Engine {
             background = new PdfReader(spec.background);
         }
 
-        stamper.setFormFlattening(true);
-        stamper.setFreeTextFlattening(true);
-
         PdfReader sealMarker = getSealMarker();
         PdfImportedPage sealMarkerImported = stamper.getImportedPage(sealMarker, 1);
 
@@ -1132,7 +1129,7 @@ public class AddVerificationPages extends Engine {
 
             stampFooterOverSealPages(spec, new PdfReader(sealPagesRaw.toByteArray()), sealPages);
 
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), getAllHighlightedImage(spec), sourceWithFields);
+            stampFieldsAndPaginationOverPdf(spec, TextDump.createFlattened(new PdfReader(pdf)), getAllFields(spec), getAllHighlightedImage(spec), sourceWithFields);
 
 
             pdfsToConcatenate.add(0,new PdfReader(sourceWithFields.toByteArray()));
@@ -1147,7 +1144,7 @@ public class AddVerificationPages extends Engine {
                                out);
         }
         else {
-            stampFieldsAndPaginationOverPdf(spec, new PdfReader(pdf), getAllFields(spec), getAllHighlightedImage(spec), out);
+            stampFieldsAndPaginationOverPdf(spec, TextDump.createFlattened(new PdfReader(pdf)), getAllFields(spec), getAllHighlightedImage(spec), out);
         }
     }
 
