@@ -64,6 +64,7 @@ import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
+import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -861,12 +862,77 @@ public class AddVerificationPages extends Engine {
      * document.  Interestingly just appending pages in place did not
      * work with stamping.  itext seems limited here.
      */
-    public static void prepareSealPages(SealSpec spec, OutputStream os)
+    public static void prepareSealPages(final SealSpec spec, OutputStream os)
         throws IOException, DocumentException, Base64DecodeException
     {
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document, os);
+        PdfPageEvent pageEvent = new PdfPageEvent() {
 
+			@Override
+			public void onStartPage(PdfWriter arg0, Document arg1) {
+				try {
+			        PdfPTable table = new PdfPTable(1);
+			        table.setWidthPercentage(100f);
+			        PdfPCell cell = new PdfPCell();
+			        cell.setBorder(PdfPCell.NO_BORDER);
+			        cell.addElement(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
+			        cell.addElement(createParagraph(spec.documentNumberText, 12, Font.NORMAL, lightTextColor));
+			        cell.setPaddingBottom(12);
+			        table.addCell(cell);
+			        arg1.add(table);
+				} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onSectionEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onSection(PdfWriter arg0, Document arg1, float arg2, int arg3,
+					Paragraph arg4) {
+			}
+
+			@Override
+			public void onParagraphEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onParagraph(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onOpenDocument(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onGenericTag(PdfWriter arg0, Document arg1, Rectangle arg2,
+					String arg3) {
+			}
+
+			@Override
+			public void onEndPage(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onCloseDocument(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onChapterEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onChapter(PdfWriter arg0, Document arg1, float arg2,
+					Paragraph arg3) {
+			}
+		};
+
+		writer.setPageEvent(pageEvent);
         document.open();
 
         PdfPTableDrawFrameAroundTable drawFrame = new PdfPTableDrawFrameAroundTable();
@@ -876,14 +942,9 @@ public class AddVerificationPages extends Engine {
                             document.topMargin(),
                             document.bottomMargin() + 130);
 
-        document.newPage();
         writer.getPageDictEntries().put(scriveTag, scriveTagVerPage);
 
-        document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
-
-        Paragraph para = createParagraph(spec.documentNumberText, 12, Font.NORMAL, lightTextColor);
-        para.setSpacingAfter(50);
-        document.add(para);
+        Paragraph para = createParagraph("", 12, Font.NORMAL, lightTextColor);
 
         /*
          * Warning for future generations:
@@ -954,7 +1015,7 @@ public class AddVerificationPages extends Engine {
          */
         addSubtitle(document, spec.staticTexts.partnerText);
         addPersonsTable(spec.persons, document, spec);
-
+        document.newPage();
         /*
          * History log part
          */
