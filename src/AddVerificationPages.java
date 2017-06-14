@@ -50,6 +50,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
@@ -722,6 +723,7 @@ public class AddVerificationPages extends Engine {
         Paragraph para;
 
         PdfPTable table = new PdfPTable(2);
+        table.setSplitRows(false);
         table.setWidthPercentage(100f);
         table.setWidths(new int[]{1, 1});
 
@@ -865,7 +867,7 @@ public class AddVerificationPages extends Engine {
     public static void prepareSealPages(final SealSpec spec, OutputStream os)
         throws IOException, DocumentException, Base64DecodeException
     {
-        Document document = new Document();
+        Document document = new Document(PageSize.A4, 36, 36, 36, 130);
         PdfWriter writer = PdfWriter.getInstance(document, os);
         PdfPageEvent pageEvent = new PdfPageEvent() {
 
@@ -936,11 +938,6 @@ public class AddVerificationPages extends Engine {
         document.open();
 
         PdfPTableDrawFrameAroundTable drawFrame = new PdfPTableDrawFrameAroundTable();
-
-        document.setMargins(document.leftMargin(),
-                            document.rightMargin(),
-                            document.topMargin(),
-                            document.bottomMargin() + 130);
 
         writer.getPageDictEntries().put(scriveTag, scriveTagVerPage);
 
