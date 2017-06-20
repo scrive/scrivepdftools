@@ -1010,6 +1010,11 @@ public class AddVerificationPages extends Engine {
         /*
          * Partners part
          */
+        if (writer.getVerticalPosition(true) < 250) {
+            // we want the header to always be on the same page as first row of the table
+            // 250 units seems like a good guess as required space to put header and first row of table
+            document.newPage();
+        }
         addSubtitle(document, spec.staticTexts.partnerText);
         addPersonsTable(spec.persons, document, spec);
         document.newPage();
