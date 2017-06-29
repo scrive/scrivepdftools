@@ -1017,7 +1017,7 @@ public class AddVerificationPages extends Engine {
         }
         addSubtitle(document, spec.staticTexts.partnerText);
         addPersonsTable(spec.persons, document, spec);
-        document.newPage();
+
         /*
          * History log part
          */
