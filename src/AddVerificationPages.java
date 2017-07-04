@@ -941,8 +941,6 @@ public class AddVerificationPages extends Engine {
 
         writer.getPageDictEntries().put(scriveTag, scriveTagVerPage);
 
-        Paragraph para = createParagraph("", 12, Font.NORMAL, lightTextColor);
-
         /*
          * Warning for future generations:
          *
@@ -970,6 +968,7 @@ public class AddVerificationPages extends Engine {
             cell.setPaddingBottom(12);
             cell.setBorderWidth(1f);
 
+            Paragraph para;
             para = createParagraph(file.title, 10, Font.BOLD, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
@@ -1036,6 +1035,7 @@ public class AddVerificationPages extends Engine {
             cell.setBorder(0);
             cell.setPaddingLeft(15);
 
+            Paragraph para;
             para = createParagraph(entry.date, 10, Font.ITALIC, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
