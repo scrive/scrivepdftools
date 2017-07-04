@@ -50,6 +50,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
@@ -64,6 +65,7 @@ import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
+import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -721,6 +723,7 @@ public class AddVerificationPages extends Engine {
         Paragraph para;
 
         PdfPTable table = new PdfPTable(2);
+        table.setSplitRows(false);
         table.setWidthPercentage(100f);
         table.setWidths(new int[]{1, 1});
 
@@ -861,29 +864,82 @@ public class AddVerificationPages extends Engine {
      * document.  Interestingly just appending pages in place did not
      * work with stamping.  itext seems limited here.
      */
-    public static void prepareSealPages(SealSpec spec, OutputStream os)
+    public static void prepareSealPages(final SealSpec spec, OutputStream os)
         throws IOException, DocumentException, Base64DecodeException
     {
-        Document document = new Document();
+        Document document = new Document(PageSize.A4, 36, 36, 36, 130);
         PdfWriter writer = PdfWriter.getInstance(document, os);
+        PdfPageEvent pageEvent = new PdfPageEvent() {
 
+			@Override
+			public void onStartPage(PdfWriter arg0, Document arg1) {
+				try {
+			        PdfPTable table = new PdfPTable(1);
+			        table.setWidthPercentage(100f);
+			        PdfPCell cell = new PdfPCell();
+			        cell.setBorder(PdfPCell.NO_BORDER);
+			        cell.addElement(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
+			        cell.addElement(createParagraph(spec.documentNumberText, 12, Font.NORMAL, lightTextColor));
+			        cell.setPaddingBottom(12);
+			        table.addCell(cell);
+			        arg1.add(table);
+				} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onSectionEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onSection(PdfWriter arg0, Document arg1, float arg2, int arg3,
+					Paragraph arg4) {
+			}
+
+			@Override
+			public void onParagraphEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onParagraph(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onOpenDocument(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onGenericTag(PdfWriter arg0, Document arg1, Rectangle arg2,
+					String arg3) {
+			}
+
+			@Override
+			public void onEndPage(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onCloseDocument(PdfWriter arg0, Document arg1) {
+			}
+
+			@Override
+			public void onChapterEnd(PdfWriter arg0, Document arg1, float arg2) {
+			}
+
+			@Override
+			public void onChapter(PdfWriter arg0, Document arg1, float arg2,
+					Paragraph arg3) {
+			}
+		};
+
+		writer.setPageEvent(pageEvent);
         document.open();
 
         PdfPTableDrawFrameAroundTable drawFrame = new PdfPTableDrawFrameAroundTable();
 
-        document.setMargins(document.leftMargin(),
-                            document.rightMargin(),
-                            document.topMargin(),
-                            document.bottomMargin() + 130);
-
-        document.newPage();
         writer.getPageDictEntries().put(scriveTag, scriveTagVerPage);
-
-        document.add(createParagraph(spec.staticTexts.verificationTitle, 21, Font.NORMAL, darkTextColor));
-
-        Paragraph para = createParagraph(spec.documentNumberText, 12, Font.NORMAL, lightTextColor);
-        para.setSpacingAfter(50);
-        document.add(para);
 
         /*
          * Warning for future generations:
@@ -912,6 +968,7 @@ public class AddVerificationPages extends Engine {
             cell.setPaddingBottom(12);
             cell.setBorderWidth(1f);
 
+            Paragraph para;
             para = createParagraph(file.title, 10, Font.BOLD, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
@@ -952,6 +1009,11 @@ public class AddVerificationPages extends Engine {
         /*
          * Partners part
          */
+        if (writer.getVerticalPosition(true) < 250) {
+            // we want the header to always be on the same page as first row of the table
+            // 250 units seems like a good guess as required space to put header and first row of table
+            document.newPage();
+        }
         addSubtitle(document, spec.staticTexts.partnerText);
         addPersonsTable(spec.persons, document, spec);
 
@@ -973,6 +1035,7 @@ public class AddVerificationPages extends Engine {
             cell.setBorder(0);
             cell.setPaddingLeft(15);
 
+            Paragraph para;
             para = createParagraph(entry.date, 10, Font.ITALIC, lightTextColor);
             para.setLeading(0f, 1.2f);
             cell.addElement(para);
