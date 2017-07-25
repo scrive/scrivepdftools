@@ -52,7 +52,8 @@ classes/%.class : src/%.java
 
 FONTS=assets/SourceSansPro-Light.ttf								\
       assets/NotoSans-Regular.ttf								\
-      assets/NotoSansThai-Regular.ttf
+      assets/NotoSansThai-Regular.ttf                                                           \
+      assets/NotoSansHebrew-Regular.ttf
 
 
 scrivepdftools.jar : classes/Main.class								\

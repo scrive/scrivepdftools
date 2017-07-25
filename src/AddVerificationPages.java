@@ -1234,7 +1234,7 @@ public class AddVerificationPages extends Engine {
                 // be removed as soon as font list is propagated where
                 // it should be
 
-            	String [] res = new String[] {"assets/SourceSansPro-Light.ttf", "assets/NotoSans-Regular.ttf", "assets/NotoSansThai-Regular.ttf"};
+            	String [] res = new String[] {"assets/SourceSansPro-Light.ttf", "assets/NotoSans-Regular.ttf", "assets/NotoSansThai-Regular.ttf", "assets/NotoSansHebrew-Regular.ttf"};
                 baseFonts = new BaseFont[res.length];
                 for (int i = 0; i < res.length; ++i)
                 	baseFonts[i] = BaseFont.createFont(Main.getResource(res[i]), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
