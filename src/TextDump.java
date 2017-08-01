@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 
@@ -42,6 +45,15 @@ public class TextDump implements Serializable
         // This is here to flatten forms so that texts in them can be read
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         PdfStamper stamper = new PdfStamper(reader, buf);
+        AcroFields fields = stamper.getAcroFields();
+        Set<String> fieldNames = new TreeSet<String>(fields.getFields().keySet());
+        // copy collection of keys, because we will modify while traversing
+        for (String key : fieldNames) {
+            if (key.contains("\\") || key.contains("#")) {
+                // such keys break xml parser anyway
+                fields.removeField(key);
+            }
+        }
         stamper.setFormFlattening(true);
         stamper.setFreeTextFlattening(true);
         stamper.close();
