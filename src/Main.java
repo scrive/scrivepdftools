@@ -72,13 +72,13 @@ public class Main
             System.err.println("Usage:");
             System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
             System.err.println("");
-            System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json");
-            System.err.println("    java -jar scrivepdftools.jar find-texts config.json");
-            System.err.println("    java -jar scrivepdftools.jar extract-texts config.json");
-            System.err.println("    java -jar scrivepdftools.jar normalize config.json");
-            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json");
-            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json");
-            System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json");
+            System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar find-texts config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar extract-texts config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar normalize config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json [config2.json] [config3.json] ...");
+            System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json [config2.json] [config3.json] ...");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
@@ -110,7 +110,9 @@ public class Main
             try {
                 Engine engine = getEngine(args[0]);
                 if (null != engine) {
-                    engine.execute(args[1]);
+                    for (int i = 1; i < args.length; i++) {
+                        engine.execute(args[i]);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace(System.err);
