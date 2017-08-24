@@ -153,17 +153,11 @@ public class AddVerificationPages extends Engine {
 
     SealSpec spec = null;
     
-    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+    public void Init(InputStream specFile) throws IOException {
         try {
             spec = SealSpec.FromJSON(specFile);
         } catch (JSONException e) {
             throw new IOException(e);
-        }
-        if( inputOverride!=null ) {
-            spec.input = inputOverride;
-        }
-        if( outputOverride!=null ) {
-            spec.output = outputOverride;
         }
     }
 

@@ -57,7 +57,7 @@ public class Main
         if (null == engine)
             return null;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        engine.Init(new ByteArrayInputStream(spec), null, null);
+        engine.Init(new ByteArrayInputStream(spec));
         engine.execute(new ByteArrayInputStream(pdf), out);
         return out.toByteArray();
     }
@@ -68,17 +68,17 @@ public class Main
         System.setProperty("java.awt.headless", "true");
 
         com.itextpdf.text.pdf.PdfReader.unethicalreading = true;
-        if( args.length!=2 && args.length!=3) {
+        if( args.length < 2) {
             System.err.println("Usage:");
             System.err.println("    java -jar scrivepdftools.jar httpserver -p [IP:]port");
             System.err.println("");
-            System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar find-texts config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar extract-texts config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar normalize config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json optional-input.pdf");
-            System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json optional-input.pdf");
+            System.err.println("    java -jar scrivepdftools.jar add-verification-pages config.json");
+            System.err.println("    java -jar scrivepdftools.jar find-texts config.json");
+            System.err.println("    java -jar scrivepdftools.jar extract-texts config.json");
+            System.err.println("    java -jar scrivepdftools.jar normalize config.json");
+            System.err.println("    java -jar scrivepdftools.jar select-and-clip config.json");
+            System.err.println("    java -jar scrivepdftools.jar remove-scrive-elements config.json");
+            System.err.println("    java -jar scrivepdftools.jar remove-javascript config.json");
             System.err.println("");
             System.err.println("scrivepdftools uses the following products:");
             System.err.println("   iText by Bruno Lowagie, iText Group NV ");
@@ -109,8 +109,9 @@ public class Main
         } else {
             try {
                 Engine engine = getEngine(args[0]);
-                if (null != engine)
-                    engine.execute(args[1], (args.length == 3) ? args[2] : null, null);
+                if (null != engine) {
+                    engine.execute(args[1]);
+                }
             } catch (Exception e) {
                 e.printStackTrace(System.err);
                 System.exit(1);

@@ -58,15 +58,9 @@ public class RemoveScriveElements extends Engine {
 
     RemoveScriveElementsSpec spec = null;
 
-    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+    public void Init(InputStream specFile) throws IOException {
         YamlSpec.setTypeDescriptors(RemoveScriveElementsSpec.class, RemoveScriveElementsSpec.getTypeDescriptors());
         spec = YamlSpec.loadFromStream(specFile, RemoveScriveElementsSpec.class);
-        if (inputOverride != null) {
-            spec.input = inputOverride;
-        }
-        if (outputOverride != null) {
-            spec.output = outputOverride;
-        }
     }
 
     public void execute(InputStream pdf, OutputStream os) throws IOException, DocumentException {

@@ -29,23 +29,19 @@ public abstract class Engine {
     /**
      * Initializes engine specification.
      * @param spec
-     * @param inputOverride
-     * @param outputOverride
      * @throws IOException
      */
-    public abstract void Init(InputStream spec, String inputOverride, String outputOverride) throws IOException;
+    public abstract void Init(InputStream spec) throws IOException;
 
     /**
      * This version works on external disk files. 
      * @param specFile      
-     * @param inputOverride
-     * @param outputOverride
      * @throws IOException
      * @throws DocumentException
      */
-    public void execute(String specFile, String inputOverride, String outputOverride) throws IOException, DocumentException {
+    public void execute(String specFile) throws IOException, DocumentException {
         FileInputStream spec = new FileInputStream(specFile);  
-        Init(spec, inputOverride, outputOverride);
+        Init(spec);
         execute((InputStream)null, (OutputStream)null);
         spec.close();
     }
@@ -53,7 +49,6 @@ public abstract class Engine {
     
     /**
      * This version works on raw data.
-     * @param config
      * @param pdf
      * @return
      * @throws IOException

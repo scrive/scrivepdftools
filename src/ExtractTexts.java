@@ -136,16 +136,10 @@ public class ExtractTexts extends TextEngine {
     ExtractTextSpec spec = null;
     
     @Override
-    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+    public void Init(InputStream specFile) throws IOException {
         // TODO: it would be nice if ExtractTextSpec added type descritpors itself, because we can forget to set them implicitly :-/   
         YamlSpec.setTypeDescriptors(ExtractTextSpec.class, ExtractTextSpec.getTypeDescriptors());
         spec = ExtractTextSpec.loadFromStream(specFile, ExtractTextSpec.class);
-        if( inputOverride!=null ) {
-            spec.input = inputOverride;
-        }
-        if( outputOverride!=null ) {
-            spec.stampedOutput = outputOverride;
-        }       
     }
 
     static BaseColor colorFromArrayListFloat(ArrayList<Float> color) {
