@@ -91,14 +91,8 @@ public class Normalize extends Engine {
     
     YamlSpec spec = null;
 
-    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+    public void Init(InputStream specFile) throws IOException {
         spec = YamlSpec.loadFromStream(specFile, YamlSpec.class);
-        if (inputOverride != null) {
-            spec.input = inputOverride;
-        }
-        if (outputOverride != null) {
-            spec.output = outputOverride;
-        }
     }
 
     /**

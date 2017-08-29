@@ -42,14 +42,8 @@ public class SelectAndClip extends Engine {
 
     SelectAndClipSpec spec = null;
     
-    public void Init(InputStream specFile, String inputOverride, String outputOverride) throws IOException {
+    public void Init(InputStream specFile) throws IOException {
         spec = SelectAndClipSpec.loadFromStream(specFile, SelectAndClipSpec.class);
-        if( inputOverride!=null ) {
-            spec.input = inputOverride;
-        }
-        if( outputOverride!=null ) {
-            spec.output = outputOverride;
-        }
     }
 
     public void execute(InputStream is, OutputStream os)
