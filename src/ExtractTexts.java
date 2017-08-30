@@ -62,6 +62,7 @@ class MatchedTemplate
 
 class ExtractTextSpec extends YamlSpec
 {
+    public String input;
     public Boolean yamlOutput;
     public ArrayList<Rect> rects;
     public String stampedOutput;
