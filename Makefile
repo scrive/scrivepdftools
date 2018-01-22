@@ -90,6 +90,7 @@ test : test-add-verification-pages								\
 test-add-verification-pages : 									\
        test/results/seal-simplest.pdf								\
        test/results/seal-simplest-verified.pdf							\
+       test/results/seal-bankidlogotest.pdf							\
        test/results/seal-filetypes.pdf								\
        test/results/seal-filetypes-preseal.pdf							\
        test/results/seal-filetypes-us-letter.pdf						\
@@ -106,6 +107,15 @@ test-add-verification-pages : 									\
 # command line option.
 
 test/results/seal-simplest.pdf : test/seal-simplest.json test/three-page-a4.pdf scrivepdftools.jar | server
+	curl -s -F config=@$<                                      \
+                -F pdf=@$(word 2,$^)                               \
+                http://127.0.0.1:12344/add-verification-pages -o $@
+	#java -jar scrivepdftools.jar add-verification-pages $<
+ifdef OPEN
+	$(OPEN) $@
+endif
+
+test/results/seal-bankidlogotest.pdf : test/seal-bankidlogotest.json test/three-page-a4.pdf scrivepdftools.jar | server
 	curl -s -F config=@$<                                      \
                 -F pdf=@$(word 2,$^)                               \
                 http://127.0.0.1:12344/add-verification-pages -o $@
