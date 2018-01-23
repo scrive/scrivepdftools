@@ -1,4 +1,7 @@
 *.class
+*.ext
+Manifest.txt
+/test/results
 
 # Package Files #
 *.jar
